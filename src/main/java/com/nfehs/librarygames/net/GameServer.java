@@ -18,10 +18,11 @@ import com.nfehs.librarygames.net.packets.Packet.PacketTypes;
 public class GameServer extends Thread {
 
 	private DatagramSocket socket;
+	private static final int PORT = 19602;
 	
 	public GameServer() {
 		try {
-			this.socket = new DatagramSocket();
+			this.socket = new DatagramSocket(PORT);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -67,11 +68,15 @@ public class GameServer extends Thread {
 	private void parsePacket(byte[] data, InetAddress address, int port) {
 		String message = new String(data).trim();
 		PacketTypes type = Packet.lookupPacket(message.substring(0, 2));
+		Packet packet;
+		
 		switch (type) {
-			case INVALID:		break;
-			case LOGIN:			Packet00Login packet = new Packet00Login(data);
-								break;
-			default:			break;
+			case INVALID:				break;
+			case LOGIN:					packet = new Packet00Login(data);
+										break;
+			case CREATEACCOUNT:			packet = new Packet01CreateAcc(data);
+										break;
+			default:					break;
 		}
 	}
 }

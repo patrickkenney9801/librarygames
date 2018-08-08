@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.net.packets.Packet;
 
 /**
  * This class handles receiving packets from and sending to the server
@@ -22,11 +23,11 @@ public class GameClient extends Thread {
 	private Game game;
 	public static final int PORT = 19602;
 	
-	public GameClient(Game game, String ipAddress) {
+	public GameClient(Game game, byte[] ipAddress) {
 		this.game = game;
 		try {
 			this.socket = new DatagramSocket();
-			this.ipAddress = InetAddress.getByName(ipAddress);
+			this.ipAddress = InetAddress.getByAddress(ipAddress);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -47,9 +48,27 @@ public class GameClient extends Thread {
 				e.printStackTrace();
 			}
 			System.out.println("SERVER > " + new String(packet.getData()));
+			handle(packet);
 		}
 	}
 	
+	/**
+	 * Determines what to do with incoming packets
+	 * @param packet
+	 */
+	private void handle(DatagramPacket packet) {
+		switch (Packet.lookupPacket(new String(packet.getData()).trim().substring(0, 2))) {
+		case INVALID:
+			break;
+		case LOGIN:
+			break;
+		case CREATEACCOUNT:
+			break;
+		default:
+			break;
+		}
+	}
+
 	/**
 	 * Sends data to server
 	 * @param data

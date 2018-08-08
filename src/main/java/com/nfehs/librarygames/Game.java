@@ -2,6 +2,8 @@ package com.nfehs.librarygames;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 
@@ -21,7 +23,9 @@ public class Game {
 	public static Dimension screenSize;
 	public static LoginScreen login;
 	
-	private static GameClient client;
+	public static GameClient client;
+	
+	public static final byte[] ipAddress = {(byte) 172, 16, 0, 24};
 	
 	public static final int LOGIN = 0;
 	public static final int OVER = 10;
@@ -29,8 +33,8 @@ public class Game {
 	public static int gameState = Game.LOGIN;
 	public static boolean gamePlaying = true;
 
-	public Game() {
-		client = new GameClient(this, "localhost");
+	public Game() throws UnknownHostException {
+		client = new GameClient(this, ipAddress);
 		client.start();
 	}
 

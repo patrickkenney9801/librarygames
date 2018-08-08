@@ -3,11 +3,15 @@ package com.nfehs.librarygames;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import com.nfehs.librarygames.net.packets.Packet00Login;
 
 /**
  * This class handles the user's login and creating accounts
@@ -34,6 +38,7 @@ public class LoginScreen {
 		username = new JTextField();
 		Game.mainWindow.add(username);
 		username.setBackground(GameFrame.textBackground);
+		username.setForeground(Color.WHITE);
 		username.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
 
 		pass = new JLabel("Password:");
@@ -45,6 +50,7 @@ public class LoginScreen {
 		password = new JPasswordField();
 		Game.mainWindow.add(password);
 		password.setBackground(GameFrame.textBackground);
+		password.setForeground(Color.WHITE);
 		password.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
 		
 		login = new JButton("LOGIN");
@@ -53,6 +59,8 @@ public class LoginScreen {
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Login clicked");
+				System.out.println(Security.encrypt(password.getText()).length());
+				new Packet00Login("user", "pass").writeData(Game.client);
 			}
 		});
 		
@@ -62,6 +70,7 @@ public class LoginScreen {
 		createAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create account clicked");
+				// TODO passwords must be 20 chars or less
 			}
 		});
 
