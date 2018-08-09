@@ -1,4 +1,4 @@
-package com.nfehs.librarygames;
+package com.nfehs.librarygames.net;
 
 import java.util.Base64;
 

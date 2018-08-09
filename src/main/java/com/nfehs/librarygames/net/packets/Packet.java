@@ -35,8 +35,8 @@ public abstract class Packet {
 	}
 	
 	// these will be implemented to send data
-	public abstract void writeData(GameClient client);
-	public abstract void writeData(GameServer server);
+	public abstract void writeData(GameClient client);	// sends to server
+	public abstract void writeData(GameServer server);	// sends to client
 	
 	public abstract byte[] getData();
 	

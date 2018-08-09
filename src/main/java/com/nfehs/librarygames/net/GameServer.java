@@ -5,6 +5,12 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
 
 import com.nfehs.librarygames.net.packets.*;
 import com.nfehs.librarygames.net.packets.Packet.PacketTypes;
@@ -18,16 +24,40 @@ import com.nfehs.librarygames.net.packets.Packet.PacketTypes;
 public class GameServer extends Thread {
 
 	private DatagramSocket socket;
+	private Connection database;
 	private static final int PORT = 19602;
+	private final String DATABASE_USER = "root";
+	private final String DATABASE_PASS = "98011089";
 	
 	public GameServer() {
 		try {
+			this.database = getConnection();
+			System.out.println("Connected to database");
 			this.socket = new DatagramSocket(PORT);
 		} catch (SocketException e) {
+			e.printStackTrace();
+	} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Returns a database connection to library games server
+	 * @return
+	 * @throws SQLException
+	 */
+	private Connection getConnection() throws SQLException {
+		try {
+			String driver = "com.mysql.cj.jdbc.Driver";
+			Class.forName(driver);
+			
+			return DriverManager.getConnection("jdbc:mysql://localhost:3306/library_games", DATABASE_USER, DATABASE_PASS);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	/**
 	 * Receives incoming packets from clients
 	 */
@@ -68,15 +98,57 @@ public class GameServer extends Thread {
 	private void parsePacket(byte[] data, InetAddress address, int port) {
 		String message = new String(data).trim();
 		PacketTypes type = Packet.lookupPacket(message.substring(0, 2));
-		Packet packet;
 		
 		switch (type) {
 			case INVALID:				break;
-			case LOGIN:					packet = new Packet00Login(data);
+			case LOGIN:					loginUser(data, address, port);
 										break;
-			case CREATEACCOUNT:			packet = new Packet01CreateAcc(data);
+			case CREATEACCOUNT:			createAccount(data, address, port);
 										break;
 			default:					break;
 		}
+	}
+	
+	/**
+	 * Logs the user into the database and returns the user's UUID or error message
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void loginUser(byte[] data, InetAddress address, int port) {
+		Packet00Login packet = new Packet00Login(data);
+	}
+	
+	/**
+	 * Creates a new account for the user on the database and returns UUID or error message
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void createAccount(byte[] data, InetAddress address, int port) {
+		try {
+			Packet01CreateAcc packet = new Packet01CreateAcc(data);
+			
+			// verify that the username is not already in use
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM users WHERE username = '" + packet.getUsername() + "';");
+			ResultSet result = statement.executeQuery();
+			
+			// if the username is already in use, do not create new account and send back error package
+			if (result.next()) {
+				// TODO error username already in use
+				System.out.println("user: " + result.getString("username") + " already in use");
+				return;
+			}
+			
+			// if it is not, create the account
+			PreparedStatement createUser = database.prepareStatement("INSERT INTO users VALUES ("
+										+ "'" + packet.getUsername() + "', " + "'" +  packet.getPassword() 	+ "', " 
+										+ "'" + packet.getEmail()	 + "', " + "'" +  UUID.randomUUID() 	+ "');");
+			createUser.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println("ACCOUNT CREATED");
 	}
 }

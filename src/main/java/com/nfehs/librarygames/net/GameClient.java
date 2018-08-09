@@ -9,6 +9,8 @@ import java.net.UnknownHostException;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.net.packets.Packet;
+import com.nfehs.librarygames.net.packets.Packet00Login;
+import com.nfehs.librarygames.net.packets.Packet01CreateAcc;
 
 /**
  * This class handles receiving packets from and sending to the server
@@ -80,5 +82,24 @@ public class GameClient extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Handles a user logging into the game
+	 * @param username
+	 * @param password
+	 */
+	public void login(String username, String password) {
+		new Packet00Login(username, password).writeData(this);
+	}
+
+	/**
+	 * Handles a user creating a new account
+	 * @param email
+	 * @param username
+	 * @param password
+	 */
+	public void createAccount(String email, String username, String password) {
+		new Packet01CreateAcc(email, username, password).writeData(this);
 	}
 }

@@ -1,20 +1,19 @@
-package com.nfehs.librarygames;
+package com.nfehs.librarygames.startup;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import com.nfehs.librarygames.net.packets.Packet00Login;
+import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.GameFrame;
 
 /**
- * This class handles the user's login and creating accounts
+ * This class handles the user's login creating accounts
  * 
  * @author Patrick Kenney, Syed Quadri
  * @date 6/13/2018
@@ -33,44 +32,45 @@ public class LoginScreen {
 		Game.mainWindow.add(user);
 		user.setBackground(GameFrame.background);
 		user.setForeground(Color.WHITE);
-		user.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
+		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
 		
 		username = new JTextField();
 		Game.mainWindow.add(username);
 		username.setBackground(GameFrame.textBackground);
 		username.setForeground(Color.WHITE);
-		username.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
+		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
 
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
 		pass.setBackground(GameFrame.background);
 		pass.setForeground(Color.WHITE);
-		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
+		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
 		
 		password = new JPasswordField();
 		Game.mainWindow.add(password);
 		password.setBackground(GameFrame.textBackground);
 		password.setForeground(Color.WHITE);
-		password.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
+		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
 		
 		login = new JButton("LOGIN");
 		Game.mainWindow.add(login);
-		login.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
+		login.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				// logs the user into the server
 				System.out.println("Login clicked");
-				System.out.println(Security.encrypt(password.getText()).length());
-				new Packet00Login("user", "pass").writeData(Game.client);
+				Game.login(username.getText(), password.getPassword());
 			}
 		});
 		
 		createAccount = new JButton("CREATE ACCOUNT");
 		Game.mainWindow.add(createAccount);
-		createAccount.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2, 150, 30);
+		createAccount.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2, 150, 30);
 		createAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create account clicked");
-				// TODO passwords must be 20 chars or less
+				exitLoginScreen();
+				Game.openCreateAccountScreen();
 			}
 		});
 
