@@ -58,7 +58,7 @@ public class Packet00Login extends Packet {
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet00Login(byte[] data, boolean serverUse) {
-		super(01);
+		super(00);
 		String[] userdata = readData(data).split(":");
 		setUuidKey(userdata[0]);
 		setUsername(userdata[1]);
@@ -72,7 +72,7 @@ public class Packet00Login extends Packet {
 
 	@Override
 	public byte[] getDataServer() {
-		return ("01" + getUuidKey() + ":" + getUsername() + ":" + getUserKey()).getBytes();
+		return ("00" + getUuidKey() + ":" + getUsername() + ":" + getUserKey()).getBytes();
 	}
 
 	/**

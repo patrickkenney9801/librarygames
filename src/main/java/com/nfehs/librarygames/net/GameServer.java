@@ -132,16 +132,17 @@ public class GameServer extends Thread {
 			ResultSet result = statement.executeQuery();
 			
 			// if there is not a result, send error incorrect credentials
-			if (result.next()) {
+			if (!result.next()) {
 				// TODO error wrong account credentials
-				System.out.println("Incorrect credentials with username: " + result.getString("username"));
+				System.out.println("Incorrect credentials with username: " + Security.decrypt(packet.getUsername()));
+				return;
 			}
 
 			// add player to online players list
 			onlinePlayers.add(new Player(packet.getUsername(), result.getString("user_key"), address, port));
 			
 			// send login packet back to client (include username and key)
-			Packet01CreateAcc returnPacket = new Packet01CreateAcc(	packet.getUuidKey(), packet.getUsername(), 
+			Packet00Login returnPacket = new Packet00Login(	packet.getUuidKey(), packet.getUsername(), 
 																	result.getString("user_key"), true);
 			returnPacket.writeData(this, address, port);
 			System.out.println("RETURN LOGIN PACKET SENT");

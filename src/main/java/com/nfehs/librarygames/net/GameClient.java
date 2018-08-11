@@ -93,10 +93,10 @@ public class GameClient extends Thread {
 	 * @param data
 	 */
 	private void loginUser(byte[] data) {
+		System.out.println("REA" + Game.gameState);
 		// verify that user is still on the login screen, if not exit
 		if (Game.gameState != Game.LOGIN)
 			return;
-		
 		Packet00Login packet = new Packet00Login(data, true);
 		
 		// create player from packet
