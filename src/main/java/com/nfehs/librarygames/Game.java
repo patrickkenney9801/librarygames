@@ -155,6 +155,17 @@ public class Game {
 		screen = new ActiveGamesScreen();
 		gameState = ACTIVE_GAMES;
 	}
+	
+	/**
+	 * This method updates the active games list on the ActiveGamesScreen
+	 */
+	public static void updateActiveGamesList() {
+		if (!(screen instanceof ActiveGamesScreen)) {
+			System.out.println("GAMESTATE ERROR update active games list called on wrong screen");
+			return;
+		}
+		((ActiveGamesScreen) screen).loadActiveGames();
+	}
 
 	/**
 	 * @return the player

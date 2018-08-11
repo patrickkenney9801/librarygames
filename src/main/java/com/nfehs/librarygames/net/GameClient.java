@@ -86,12 +86,27 @@ public class GameClient extends Thread {
 		}
 	}
 
+	// TODO use uuid keys for packages to keep things organized
+	
 	/**
 	 * Handles a user successfully logging to server
 	 * @param data
 	 */
 	private void loginUser(byte[] data) {
-		//Packet00Login packet = new Packet00Login(data, true);
+		// verify that user is still on the login screen, if not exit
+		if (Game.gameState != Game.LOGIN)
+			return;
+		
+		Packet00Login packet = new Packet00Login(data, true);
+		
+		// create player from packet
+		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey()));
+		
+		// update GameFrame data
+		GameFrame.loggedUser.setText("Logged in as: " + Security.decrypt(packet.getUsername()));
+		
+		// open active games screen
+		Game.openActiveGamesScreen();
 	}
 
 	/**
@@ -106,7 +121,7 @@ public class GameClient extends Thread {
 		Packet01CreateAcc packet = new Packet01CreateAcc(data, true);
 		
 		// create player from packet
-		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey(), ""));
+		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey()));
 		
 		// update GameFrame data
 		GameFrame.loggedUser.setText("Logged in as: " + Security.decrypt(packet.getUsername()));

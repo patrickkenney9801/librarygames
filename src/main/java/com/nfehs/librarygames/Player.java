@@ -17,7 +17,7 @@ public class Player {
 	private String user_key;
 	private InetAddress ipAddress;
 	private int port;
-	private ArrayList<BoardGame> boardGames;
+	public ArrayList<BoardGame> boardGames;
 	
 	/**
 	 * For use by client
@@ -26,7 +26,7 @@ public class Player {
 	 * @param games
 	 * TODO
 	 */
-	public Player(String user, String key, String games) {
+	public Player(String user, String key) {
 		setUsername(user);
 		setUser_key(key);
 		boardGames = new ArrayList<BoardGame>();
@@ -44,6 +44,13 @@ public class Player {
 		setUser_key(key);
 		setIpAddress(ip);
 		setPort(p);
+	}
+	
+	public void updateGamesList(String games) {
+		// TODO add code to add games to list
+		
+		if (Game.gameState == Game.ACTIVE_GAMES)
+			Game.updateActiveGamesList();
 	}
 	
 	/**

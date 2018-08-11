@@ -122,7 +122,32 @@ public class GameServer extends Thread {
 	 * @param port
 	 */
 	private void loginUser(byte[] data, InetAddress address, int port) {
-		Packet00Login packet = new Packet00Login(data);
+		try {
+			Packet00Login packet = new Packet00Login(data);
+			
+			// search for account with the given username and password
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM users WHERE username = '"
+																	+ packet.getUsername() + "' AND password = '"
+																	+ packet.getPassword() + "';");
+			ResultSet result = statement.executeQuery();
+			
+			// if there is not a result, send error incorrect credentials
+			if (result.next()) {
+				// TODO error wrong account credentials
+				System.out.println("Incorrect credentials with username: " + result.getString("username"));
+			}
+
+			// add player to online players list
+			onlinePlayers.add(new Player(packet.getUsername(), result.getString("user_key"), address, port));
+			
+			// send login packet back to client (include username and key)
+			Packet01CreateAcc returnPacket = new Packet01CreateAcc(	packet.getUuidKey(), packet.getUsername(), 
+																	result.getString("user_key"), true);
+			returnPacket.writeData(this, address, port);
+			System.out.println("RETURN LOGIN PACKET SENT");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -161,7 +186,7 @@ public class GameServer extends Thread {
 			// send login packet back to client (include username and key)
 			Packet01CreateAcc returnPacket = new Packet01CreateAcc(packet.getUuidKey(), packet.getUsername(), userKey, true);
 			returnPacket.writeData(this, address, port);
-			System.out.println("RETURN PACKET SENT");
+			System.out.println("RETURN CREATE ACCOUNT PACKET SENT");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();

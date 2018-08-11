@@ -11,6 +11,25 @@ public class Packet00Login extends Packet {
 	private String username;
 	private String password;
 	
+	// data to send to client
+	// username
+	private String userKey;
+
+	/**
+	 * Used by client to send data to server
+	 * @param username
+	 * @param password
+	 */
+	public Packet00Login(String username, String password) {
+		super(00);
+		setUsername(username);
+		setPassword(password);
+	}
+	
+	/**
+	 * Used by server to retrieve data from client's packet
+	 * @param data
+	 */
 	public Packet00Login(byte[] data) {
 		super(00);
 		String[] userpass = readData(data).split(":");
@@ -19,10 +38,31 @@ public class Packet00Login extends Packet {
 		setPassword(userpass[2]);
 	}
 	
-	public Packet00Login(String username, String password) {
+	/**
+	 * Used by server to send data to client
+	 * @param packetKey
+	 * @param username
+	 * @param userKey
+	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
+	 */
+	public Packet00Login(String packetKey, String username, String userKey, boolean serverUse) {
 		super(00);
+		setUuidKey(packetKey);
 		setUsername(username);
-		setPassword(password);
+		setUserKey(userKey);
+	}
+	
+	/**
+	 * Used by server to retrieve data from client's data packet
+	 * @param data
+	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
+	 */
+	public Packet00Login(byte[] data, boolean serverUse) {
+		super(01);
+		String[] userdata = readData(data).split(":");
+		setUuidKey(userdata[0]);
+		setUsername(userdata[1]);
+		setUserKey(userdata[2]);
 	}
 
 	@Override
@@ -32,8 +72,7 @@ public class Packet00Login extends Packet {
 
 	@Override
 	public byte[] getDataServer() {
-		// TODO Auto-generated method stub
-		return null;
+		return ("01" + getUuidKey() + ":" + getUsername() + ":" + getUserKey()).getBytes();
 	}
 
 	/**
@@ -62,5 +101,13 @@ public class Packet00Login extends Packet {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getUserKey() {
+		return userKey;
+	}
+
+	public void setUserKey(String userKey) {
+		this.userKey = userKey;
 	}
 }
