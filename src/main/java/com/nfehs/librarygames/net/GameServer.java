@@ -10,8 +10,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.UUID;
 
+import com.nfehs.librarygames.Player;
 import com.nfehs.librarygames.net.packets.*;
 import com.nfehs.librarygames.net.packets.Packet.PacketTypes;
 
@@ -29,11 +31,15 @@ public class GameServer extends Thread {
 	private final String DATABASE_USER = "root";
 	private final String DATABASE_PASS = "98011089";
 	
+	private ArrayList<Player> onlinePlayers;
+	
 	public GameServer() {
 		try {
 			this.database = getConnection();
 			System.out.println("Connected to database");
 			this.socket = new DatagramSocket(PORT);
+			System.out.println("Connected to UDP");
+			this.onlinePlayers = new ArrayList<Player>();
 		} catch (SocketException e) {
 			e.printStackTrace();
 	} catch (SQLException e) {
@@ -141,14 +147,24 @@ public class GameServer extends Thread {
 			}
 			
 			// if it is not, create the account
+			String userKey = "" + UUID.randomUUID();
 			PreparedStatement createUser = database.prepareStatement("INSERT INTO users VALUES ("
 										+ "'" + packet.getUsername() + "', " + "'" +  packet.getPassword() 	+ "', " 
-										+ "'" + packet.getEmail()	 + "', " + "'" +  UUID.randomUUID() 	+ "');");
+										+ "'" + packet.getEmail()	 + "', " + "'" +  userKey			 	+ "');");
 			createUser.executeUpdate();
+			
+			System.out.println("ACCOUNT CREATED");
+			
+			// add player to online players list
+			onlinePlayers.add(new Player(packet.getUsername(), userKey, address, port));
+			
+			// send login packet back to client (include username and key)
+			Packet01CreateAcc returnPacket = new Packet01CreateAcc(packet.getUuidKey(), packet.getUsername(), userKey, true);
+			returnPacket.writeData(this, address, port);
+			System.out.println("RETURN PACKET SENT");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("ACCOUNT CREATED");
 	}
 }

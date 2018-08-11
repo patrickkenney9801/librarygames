@@ -1,4 +1,4 @@
-package com.nfehs.librarygames.startup;
+package com.nfehs.librarygames.screens;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -19,7 +19,7 @@ import com.nfehs.librarygames.GameFrame;
  * @date 6/13/2018
  */
 
-public class LoginScreen {
+public class LoginScreen extends Screen{
 	private JLabel			user;
 	private JLabel			pass;
 	private JTextField		username;
@@ -69,7 +69,6 @@ public class LoginScreen {
 		createAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create account clicked");
-				exitLoginScreen();
 				Game.openCreateAccountScreen();
 			}
 		});
@@ -80,7 +79,7 @@ public class LoginScreen {
 	/**
 	 * Removes all traces of the login screen (to be used before opening a new screen)
 	 */
-	private void exitLoginScreen() {
+	public void exit() {
 		Game.mainWindow.remove(user);
 		Game.mainWindow.remove(pass);
 		Game.mainWindow.remove(username);

@@ -8,8 +8,8 @@ import javax.swing.JFrame;
 
 import com.nfehs.librarygames.net.GameClient;
 import com.nfehs.librarygames.net.Security;
-import com.nfehs.librarygames.startup.CreateAccountScreen;
-import com.nfehs.librarygames.startup.LoginScreen;
+import com.nfehs.librarygames.net.packets.*;
+import com.nfehs.librarygames.screens.*;
 
 /**
  * This class hosts the game flow
@@ -23,14 +23,17 @@ public class Game {
 	public static JFrame window;
 	public static Container mainWindow;
 	public static Dimension screenSize;
-	private static LoginScreen login;
-	private static CreateAccountScreen createAccount;
+	
+	private static Screen screen;
 	
 	private static GameClient client;
+	private static Player player;
 	
 	public static final byte[] SERVER_IP_ADDRESS = {108, (byte) 205, (byte) 143, 97};
 	
 	public static final int LOGIN = 0;
+	public static final int CREATE_ACCOUNT = 1;
+	public static final int ACTIVE_GAMES = 2;
 	public static final int OVER = 10;
 	
 	public static int gameState = Game.LOGIN;
@@ -40,20 +43,6 @@ public class Game {
 		client = new GameClient(this, SERVER_IP_ADDRESS);
 		client.start();
 	}
-
-	/**
-	 * This method opens up the login screen for the user
-	 */
-	public static void openLoginScreen() {
-		login = new LoginScreen();
-	}
-
-	/**
-	 * This method opens up the login screen for the user
-	 */
-	public static void openCreateAccountScreen() {
-		createAccount = new CreateAccountScreen();
-	}
 	
 	/**
 	 * This method logs in the user online
@@ -61,6 +50,7 @@ public class Game {
 	 * @param password
 	 */
 	public static void login(String user, char[] pass) {
+		// verify that valid data is given
 		if (user == null || user.length() < 1) {
 			// TODO error user empty
 			return;
@@ -75,13 +65,15 @@ public class Game {
 			return;
 		}
 		
+		// encrypt username and password
 		String username = Security.encrypt(user);
 		String password = "";
 		for (char c : pass)
 			password += (c + 15);
 		password = Security.encrypt(password);
 		
-		client.login(username, password);
+		// send login info to server
+		new Packet00Login(username, password).writeData(client);
 	}
 
 	/**
@@ -92,6 +84,7 @@ public class Game {
 	 * @param password2
 	 */
 	public static void createAccount(String user, String email, char[] pass, char[] pass2) {
+		// verify that data given is valid
 		if (user == null || user.length() < 1) {
 			// TODO error user empty
 			return;
@@ -112,6 +105,7 @@ public class Game {
 			return;
 		}
 		
+		// encrypt username and password
 		String username = Security.encrypt(user);
 		String password = "";
 		for (int i = 0; i < pass.length; i++) {
@@ -123,6 +117,56 @@ public class Game {
 		}
 		password = Security.encrypt(password);
 		
-		client.createAccount(email, username, password);
+		// send create account data to server
+		new Packet01CreateAcc(email, username, password).writeData(client);
+	}
+
+	/**
+	 * This method closes the screen for the user
+	 */
+	public static void exitCurrentScreen() {
+		if (screen != null)
+			screen.exit();
+	}
+
+	/**
+	 * This method opens up the login screen for the user
+	 */
+	public static void openLoginScreen() {
+		exitCurrentScreen();
+		screen = new LoginScreen();
+		gameState = LOGIN;
+	}
+
+	/**
+	 * This method opens up the create account screen for the user
+	 */
+	public static void openCreateAccountScreen() {
+		exitCurrentScreen();
+		screen = new CreateAccountScreen();
+		gameState = CREATE_ACCOUNT;
+	}
+
+	/**
+	 * This method opens up the create account screen for the user
+	 */
+	public static void openActiveGamesScreen() {
+		exitCurrentScreen();
+		screen = new ActiveGamesScreen();
+		gameState = ACTIVE_GAMES;
+	}
+
+	/**
+	 * @return the player
+	 */
+	public static Player getPlayer() {
+		return player;
+	}
+
+	/**
+	 * @param player the player to set
+	 */
+	public static void setPlayer(Player player) {
+		Game.player = player;
 	}
 }

@@ -8,9 +8,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.GameFrame;
+import com.nfehs.librarygames.Player;
 import com.nfehs.librarygames.net.packets.Packet;
 import com.nfehs.librarygames.net.packets.Packet00Login;
 import com.nfehs.librarygames.net.packets.Packet01CreateAcc;
+import com.nfehs.librarygames.screens.CreateAccountScreen;
 
 /**
  * This class handles receiving packets from and sending to the server
@@ -44,6 +47,7 @@ public class GameClient extends Thread {
 		while (true) {
 			byte[] data = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(data, data.length);
+			
 			try {
 				socket.receive(packet);
 			} catch (IOException e) {
@@ -60,14 +64,12 @@ public class GameClient extends Thread {
 	 */
 	private void handle(DatagramPacket packet) {
 		switch (Packet.lookupPacket(new String(packet.getData()).trim().substring(0, 2))) {
-		case INVALID:
-			break;
-		case LOGIN:
-			break;
-		case CREATEACCOUNT:
-			break;
-		default:
-			break;
+			case INVALID:				break;
+			case LOGIN:					loginUser(packet.getData());
+										break;
+			case CREATEACCOUNT:			createAccountLogin(packet.getData());
+										break;
+			default:					break;
 		}
 	}
 
@@ -83,23 +85,33 @@ public class GameClient extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * Handles a user logging into the game
-	 * @param username
-	 * @param password
+	 * Handles a user successfully logging to server
+	 * @param data
 	 */
-	public void login(String username, String password) {
-		new Packet00Login(username, password).writeData(this);
+	private void loginUser(byte[] data) {
+		//Packet00Login packet = new Packet00Login(data, true);
 	}
 
 	/**
-	 * Handles a user creating a new account
-	 * @param email
-	 * @param username
-	 * @param password
+	 * Handles a user successfully creating an account and then logging into server
+	 * @param data
 	 */
-	public void createAccount(String email, String username, String password) {
-		new Packet01CreateAcc(email, username, password).writeData(this);
+	private void createAccountLogin(byte[] data) {
+		// verify that user is still on the create account screen, if not exit
+		if (Game.gameState != Game.CREATE_ACCOUNT)
+			return;
+		
+		Packet01CreateAcc packet = new Packet01CreateAcc(data, true);
+		
+		// create player from packet
+		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey(), ""));
+		
+		// update GameFrame data
+		GameFrame.loggedUser.setText("Logged in as: " + Security.decrypt(packet.getUsername()));
+		
+		// open active games screen
+		Game.openActiveGamesScreen();
 	}
 }

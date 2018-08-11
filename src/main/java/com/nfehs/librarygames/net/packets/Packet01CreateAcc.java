@@ -1,42 +1,76 @@
 package com.nfehs.librarygames.net.packets;
 
-import com.nfehs.librarygames.net.GameClient;
-import com.nfehs.librarygames.net.GameServer;
-
 public class Packet01CreateAcc extends Packet {
-
+	// data to send to server
 	private String email;
 	private String username;
 	private String password;
 	
-	public Packet01CreateAcc(byte[] data) {
-		super(01);
-		String[] userpass = readData(data).split(":");
-		setEmail(userpass[0]);
-		setUsername(userpass[1]);
-		setPassword(userpass[2]);
-	}
+	// data to send to client
+	// username
+	private String userKey;
 
+	/**
+	 * Used by client to send data to server
+	 * @param email
+	 * @param username
+	 * @param password
+	 */
 	public Packet01CreateAcc(String email, String username, String password) {
 		super(01);
 		setEmail(email);
 		setUsername(username);
 		setPassword(password);
 	}
-
-	@Override
-	public void writeData(GameClient client) {
-		client.sendData(getData());
+	
+	/**
+	 * Used by server to retrieve data from client's data packet
+	 * @param data
+	 */
+	public Packet01CreateAcc(byte[] data) {
+		super(01);
+		String[] userpass = readData(data).split(":");
+		setUuidKey(userpass[0]);
+		setEmail(userpass[1]);
+		setUsername(userpass[2]);
+		setPassword(userpass[3]);
 	}
-
-	@Override
-	public void writeData(GameServer server) {
-		// TODO Auto-generated method stub
+	
+	/**
+	 * Used by server to send data to client
+	 * @param packetKey
+	 * @param username
+	 * @param userKey
+	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
+	 */
+	public Packet01CreateAcc(String packetKey, String username, String userKey, boolean serverUse) {
+		super(01);
+		setUuidKey(packetKey);
+		setUsername(username);
+		setUserKey(userKey);
+	}
+	
+	/**
+	 * Used by server to retrieve data from client's data packet
+	 * @param data
+	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
+	 */
+	public Packet01CreateAcc(byte[] data, boolean serverUse) {
+		super(01);
+		String[] userdata = readData(data).split(":");
+		setUuidKey(userdata[0]);
+		setUsername(userdata[1]);
+		setUserKey(userdata[2]);
 	}
 
 	@Override
 	public byte[] getData() {
-		return ("01" + this.email + ":" + this.username + ":" + this.password).getBytes();
+		return ("01" + getUuidKey() + ":" + getEmail() + ":" + getUsername() + ":" + getPassword()).getBytes();
+	}
+
+	@Override
+	public byte[] getDataServer() {
+		return ("01" + getUuidKey() + ":" + getUsername() + ":" + getUserKey()).getBytes();
 	}
 
 	/**
@@ -79,5 +113,19 @@ public class Packet01CreateAcc extends Packet {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * @return the userKey
+	 */
+	public String getUserKey() {
+		return userKey;
+	}
+
+	/**
+	 * @param userKey the userKey to set
+	 */
+	public void setUserKey(String userKey) {
+		this.userKey = userKey;
 	}
 }

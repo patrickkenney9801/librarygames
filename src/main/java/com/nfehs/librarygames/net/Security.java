@@ -18,4 +18,13 @@ public abstract class Security {
 	public static String encrypt(String text) {
 		return Base64.getEncoder().encodeToString(text.getBytes());
 	}
+	
+	/**
+	 * Decrypts text so it can be read
+	 * @param text
+	 * @return
+	 */
+	public static String decrypt(String text) {
+		return new String(Base64.getDecoder().decode(text));
+	}
 }
