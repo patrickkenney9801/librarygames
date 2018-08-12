@@ -15,7 +15,6 @@ import com.nfehs.librarygames.screens.*;
  * This class hosts the game flow
  * @author Patrick Kenney, Syed Quadri
  * @date 6/13/2018
- *
  */
 
 public class Game {
@@ -34,6 +33,7 @@ public class Game {
 	public static final int LOGIN = 0;
 	public static final int CREATE_ACCOUNT = 1;
 	public static final int ACTIVE_GAMES = 2;
+	public static final int CREATE_GAME = 3;
 	public static final int OVER = 10;
 	
 	public static int gameState = Game.LOGIN;
@@ -120,6 +120,14 @@ public class Game {
 		// send create account data to server
 		new Packet01CreateAcc(email, username, password).writeData(client);
 	}
+	
+	/**
+	 * This method attempts to log the user out of the server
+	 */
+	public static void logout() {
+		// send logout package to client
+		new Packet03Logout().writeData(client);
+	}
 
 	/**
 	 * This method closes the screen for the user
@@ -148,12 +156,21 @@ public class Game {
 	}
 
 	/**
-	 * This method opens up the create account screen for the user
+	 * This method opens up the active games screen for the user
 	 */
 	public static void openActiveGamesScreen() {
 		exitCurrentScreen();
 		screen = new ActiveGamesScreen();
 		gameState = ACTIVE_GAMES;
+	}
+
+	/**
+	 * This method opens up the create game screen for the user
+	 */
+	public static void openCreateGameScreen() {
+		exitCurrentScreen();
+		screen = new CreateGameScreen();
+		gameState = CREATE_GAME;
 	}
 	
 	/**

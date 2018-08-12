@@ -3,6 +3,8 @@ package com.nfehs.librarygames.screens;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -32,6 +34,8 @@ public class CreateAccountScreen extends Screen {
 	private JButton			back;
 	
 	public CreateAccountScreen() {
+		super(true);
+		
 		user = new JLabel("Username:");
 		Game.mainWindow.add(user);
 		user.setBackground(GameFrame.background);
@@ -43,6 +47,15 @@ public class CreateAccountScreen extends Screen {
 		username.setBackground(GameFrame.textBackground);
 		username.setForeground(Color.WHITE);
 		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
+		username.requestFocusInWindow();
+		username.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					email.requestFocus();
+			}
+		});
 
 		em = new JLabel("Email (optional):");
 		Game.mainWindow.add(em);
@@ -55,7 +68,15 @@ public class CreateAccountScreen extends Screen {
 		email.setBackground(GameFrame.textBackground);
 		email.setForeground(Color.WHITE);
 		email.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 160, 150, 30);
-
+		email.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					password.requestFocus();
+			}
+		});
+		
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
 		pass.setBackground(GameFrame.background);
@@ -67,7 +88,15 @@ public class CreateAccountScreen extends Screen {
 		password.setBackground(GameFrame.textBackground);
 		password.setForeground(Color.WHITE);
 		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 100, 150, 30);
-
+		password.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					passwordConfirm.requestFocus();
+			}
+		});
+		
 		passConfirm = new JLabel("Password (confirm):");
 		Game.mainWindow.add(passConfirm);
 		passConfirm.setBackground(GameFrame.background);
@@ -79,6 +108,14 @@ public class CreateAccountScreen extends Screen {
 		passwordConfirm.setBackground(GameFrame.textBackground);
 		passwordConfirm.setForeground(Color.WHITE);
 		passwordConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 40, 150, 30);
+		passwordConfirm.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					createAccount();
+			}
+		});
 		
 		createAccount = new JButton("CREATE ACCOUNT");
 		Game.mainWindow.add(createAccount);
@@ -86,7 +123,7 @@ public class CreateAccountScreen extends Screen {
 		createAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create account clicked");
-				Game.createAccount(username.getText(), email.getText(), password.getPassword(), passwordConfirm.getPassword());
+				createAccount();
 			}
 		});
 		
@@ -102,6 +139,13 @@ public class CreateAccountScreen extends Screen {
 		});
 
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Creates account for user
+	 */
+	private void createAccount() {
+		Game.createAccount(username.getText(), email.getText(), password.getPassword(), passwordConfirm.getPassword());
 	}
 	
 	/**

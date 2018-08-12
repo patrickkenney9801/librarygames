@@ -8,12 +8,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import com.nfehs.librarygames.Game;
-import com.nfehs.librarygames.GameFrame;
 import com.nfehs.librarygames.Player;
 import com.nfehs.librarygames.net.packets.Packet;
 import com.nfehs.librarygames.net.packets.Packet00Login;
 import com.nfehs.librarygames.net.packets.Packet01CreateAcc;
-import com.nfehs.librarygames.screens.CreateAccountScreen;
 
 /**
  * This class handles receiving packets from and sending to the server
@@ -102,9 +100,6 @@ public class GameClient extends Thread {
 		// create player from packet
 		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey()));
 		
-		// update GameFrame data
-		GameFrame.loggedUser.setText("Logged in as: " + Security.decrypt(packet.getUsername()));
-		
 		// open active games screen
 		Game.openActiveGamesScreen();
 	}
@@ -122,9 +117,6 @@ public class GameClient extends Thread {
 		
 		// create player from packet
 		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey()));
-		
-		// update GameFrame data
-		GameFrame.loggedUser.setText("Logged in as: " + Security.decrypt(packet.getUsername()));
 		
 		// open active games screen
 		Game.openActiveGamesScreen();

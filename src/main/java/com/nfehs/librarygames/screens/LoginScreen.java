@@ -3,6 +3,8 @@ package com.nfehs.librarygames.screens;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -19,7 +21,7 @@ import com.nfehs.librarygames.GameFrame;
  * @date 6/13/2018
  */
 
-public class LoginScreen extends Screen{
+public class LoginScreen extends Screen {
 	private JLabel			user;
 	private JLabel			pass;
 	private JTextField		username;
@@ -28,6 +30,8 @@ public class LoginScreen extends Screen{
 	private JButton			createAccount;
 	
 	public LoginScreen() {
+		super(true);
+		
 		user = new JLabel("Username:");
 		Game.mainWindow.add(user);
 		user.setBackground(GameFrame.background);
@@ -39,6 +43,15 @@ public class LoginScreen extends Screen{
 		username.setBackground(GameFrame.textBackground);
 		username.setForeground(Color.WHITE);
 		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
+		username.requestFocusInWindow();
+		username.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					password.requestFocus();
+			}
+		});
 
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
@@ -51,6 +64,14 @@ public class LoginScreen extends Screen{
 		password.setBackground(GameFrame.textBackground);
 		password.setForeground(Color.WHITE);
 		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
+		password.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					login();
+			}
+		});
 		
 		login = new JButton("LOGIN");
 		Game.mainWindow.add(login);
@@ -59,7 +80,7 @@ public class LoginScreen extends Screen{
 			public void actionPerformed(ActionEvent e) {
 				// logs the user into the server
 				System.out.println("Login clicked");
-				Game.login(username.getText(), password.getPassword());
+				login();
 			}
 		});
 		
@@ -74,6 +95,13 @@ public class LoginScreen extends Screen{
 		});
 
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Attempts to log the user into server
+	 */
+	private void login() {
+		Game.login(username.getText(), password.getPassword());
 	}
 	
 	/**

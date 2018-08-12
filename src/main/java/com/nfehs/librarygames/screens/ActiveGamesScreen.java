@@ -21,13 +21,15 @@ public class ActiveGamesScreen extends Screen {
 	private JButton[]	activeGames;
 	
 	public ActiveGamesScreen() {
+		super(false);
+		
 		createGame = new JButton("NEW GAME");
 		Game.mainWindow.add(createGame);
 		createGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10, 150, 30);
 		createGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create game clicked");
-				// TODO
+				Game.openCreateGameScreen();
 			}
 		});
 		
@@ -50,7 +52,6 @@ public class ActiveGamesScreen extends Screen {
 				// TODO
 			}
 		});
-		
 		activeGames = new JButton[0];
 	}
 	
@@ -87,11 +88,15 @@ public class ActiveGamesScreen extends Screen {
 	}
 
 	public void exit() {
+		exitParentGUI();
+		
 		Game.mainWindow.remove(createGame);
 		Game.mainWindow.remove(spectatorGames);
+		Game.mainWindow.remove(refresh);
 		
 		createGame = null;
 		spectatorGames = null;
+		refresh = null;
 		
 		removeAndNullActiveGames();
 		activeGames = null;

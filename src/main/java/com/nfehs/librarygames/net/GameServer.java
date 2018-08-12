@@ -111,10 +111,14 @@ public class GameServer extends Thread {
 										break;
 			case CREATEACCOUNT:			createAccount(data, address, port);
 										break;
+			case ERROR:					// TODO, probably will not be used by server
+										break;
+			case LOGOUT:				logout(data, address, port);
+										break;
 			default:					break;
 		}
 	}
-	
+
 	/**
 	 * Logs the user into the database and returns the user's UUID or error message
 	 * @param data
@@ -192,5 +196,17 @@ public class GameServer extends Thread {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Logs the user out of the server
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void logout(byte[] data, InetAddress address, int port) {
+		for (int i = 0; i < onlinePlayers.size(); i++)
+			if (onlinePlayers.get(i).getIpAddress().equals(address))
+				onlinePlayers.remove(i);
 	}
 }

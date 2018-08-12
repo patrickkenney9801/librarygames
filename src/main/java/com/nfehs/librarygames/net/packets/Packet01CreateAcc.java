@@ -1,5 +1,11 @@
 package com.nfehs.librarygames.net.packets;
 
+/**
+ * Packets pertaining to creating accounts
+ * @author Patrick Kenney and Syed Quadri
+ * @date 8/11/2018
+ */
+
 public class Packet01CreateAcc extends Packet {
 	// data to send to server
 	private String email;

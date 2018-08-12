@@ -18,6 +18,8 @@ public class Player {
 	private InetAddress ipAddress;
 	private int port;
 	public ArrayList<BoardGame> boardGames;
+	public ArrayList<String> friends;
+	public ArrayList<String> otherPlayers;
 	
 	/**
 	 * For use by client

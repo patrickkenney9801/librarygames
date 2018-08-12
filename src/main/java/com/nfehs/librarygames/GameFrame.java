@@ -2,9 +2,10 @@ package com.nfehs.librarygames;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 /**
  * This handles the setup and maintenance of the game window
@@ -15,8 +16,6 @@ import javax.swing.JLabel;
 public class GameFrame extends JFrame {
 	public static final Color background = new Color(25, 25, 25);
 	public static final Color textBackground = new Color(50, 50, 50);
-	
-	public static JLabel loggedUser;
 
 	public GameFrame() {
 		Game.screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -28,15 +27,15 @@ public class GameFrame extends JFrame {
 		Game.window.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		Game.window.setResizable(false);
 		Game.window.setLocationRelativeTo(null);
+		Game.window.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.out.println("Closing window");
+				Game.logout();
+			}
+		});
 		
 		Game.mainWindow = Game.window.getContentPane();
 		Game.mainWindow.setLayout(null);
 		Game.mainWindow.setBackground(background);
-		
-		loggedUser = new JLabel();
-		loggedUser.setBounds(0, 0, 300, 30);
-		loggedUser.setForeground(Color.WHITE);
-		loggedUser.setBackground(background);
-		Game.mainWindow.add(loggedUser);
 	}
 }
