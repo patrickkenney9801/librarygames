@@ -121,6 +121,8 @@ public class CreateGameScreen extends Screen {
 			friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i]);
 			friends[i].setBounds((int) Game.screenSize.getWidth() / 2 - 275, 
 								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 150, 30);
+			friends[i].setForeground(Color.WHITE);
+			friends[i].setBackground(GameFrame.background);
 			players.add(friends[i]);
 		}
 		
@@ -130,6 +132,8 @@ public class CreateGameScreen extends Screen {
 			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i]);
 			randomPlayers[i].setBounds((int) Game.screenSize.getWidth() / 2 + 10, 
 								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 150, 30);
+			randomPlayers[i].setForeground(Color.WHITE);
+			randomPlayers[i].setBackground(GameFrame.background);
 			players.add(randomPlayers[i]);
 		}
 		

@@ -32,7 +32,7 @@ public class Packet05AddFriend extends Packet {
 		String[] userdata = readData(data).split(":");
 		setUuidKey(userdata[0]);
 		setUserKey(userdata[1]);
-		setFriendName(userdata[1]);
+		setFriendName(userdata[2]);
 	}
 
 	@Override

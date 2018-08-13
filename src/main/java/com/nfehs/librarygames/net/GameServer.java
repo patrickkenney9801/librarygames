@@ -224,8 +224,8 @@ public class GameServer extends Thread {
 			Packet04GetPlayers packet = new Packet04GetPlayers(data);
 			
 			// find friends list
-			PreparedStatement statement = database.prepareStatement("SELECT username FROM users WHERE userkey = (SELECT userkey2 FROM" 
-																+ "friends WHERE userkey1 = '" + packet.getUserKey() + "');");
+			PreparedStatement statement = database.prepareStatement("SELECT username FROM users WHERE user_key = (SELECT userkey2 FROM" 
+																+ " friends WHERE userkey1 = '" + packet.getUserKey() + "');");
 			ResultSet result = statement.executeQuery();
 			
 			// get friends usernames and put into array
@@ -234,7 +234,7 @@ public class GameServer extends Thread {
 				friendsList.add(Security.decrypt(result.getString("username")));
 			
 			// find all other users
-			statement = database.prepareStatement("SELECT username FROM users WHERE userkey != '" + packet.getUserKey() + "';");
+			statement = database.prepareStatement("SELECT username FROM users WHERE user_key != '" + packet.getUserKey() + "';");
 			result = statement.executeQuery();
 			
 			// get other usernames and put into array
@@ -279,11 +279,22 @@ public class GameServer extends Thread {
 		try {
 			Packet05AddFriend packet = new Packet05AddFriend(data);
 			
+			// get other user's key
+			PreparedStatement getKey = database.prepareStatement("SELECT * FROM users WHERE username = '"
+																+ Security.encrypt(packet.getFriendName()) + "';");
+			ResultSet result = getKey.executeQuery();
+
+			// verify that other user exists
+			if (!result.next()) {
+				// TODO error other user does not exist
+				return;
+			}
+			String otherKey = result.getString("user_key");
+			
 			// verify that player is not already friends with other
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM friends WHERE userkey1 = '" + packet.getUserKey()
-																	+ "' AND userkey2 = (SELECT user_key FROM users WHERE username = '"
-																	+ Security.encrypt(packet.getFriendName()) + "'));");
-			ResultSet result = statement.executeQuery();
+																	+ "' AND userkey2 = '" + otherKey + "';");
+			result = statement.executeQuery();
 			
 			// if friend set already exists, send error and exit
 			if (result.next()) {
@@ -291,11 +302,10 @@ public class GameServer extends Thread {
 				System.out.println("DUPLICATE FRIEND REQUEST ERROR");
 				return;
 			}
-			
+
 			// add friend set to database
-			PreparedStatement add = database.prepareStatement("INSERT INTO friends VALUES ('" + packet.getUserKey() + "', '" 
-															+ "SELECT user_key FROM users WHERE username = '"
-															+ Security.encrypt(packet.getFriendName()) + "');");
+			PreparedStatement add = database.prepareStatement("INSERT INTO friends VALUES ('" + packet.getUserKey() 
+															+ "', '" + otherKey + "' , null);");
 			add.executeUpdate();
 			
 			System.out.println("FRIEND CONNECTION CREATED");
