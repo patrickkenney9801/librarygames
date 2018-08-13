@@ -18,8 +18,8 @@ public class Player {
 	private InetAddress ipAddress;
 	private int port;
 	public ArrayList<BoardGame> boardGames;
-	public ArrayList<String> friends;
-	public ArrayList<String> otherPlayers;
+	private String[] friends;
+	private String[] otherPlayers;
 	
 	/**
 	 * For use by client
@@ -102,5 +102,21 @@ public class Player {
 	 */
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	public String[] getFriends() {
+		return friends;
+	}
+
+	public void setFriends(String friends) {
+		this.friends = friends.split(",");
+	}
+
+	public String[] getOtherPlayers() {
+		return otherPlayers;
+	}
+
+	public void setOtherPlayers(String otherPlayers) {
+		this.otherPlayers = otherPlayers.split(",");
 	}
 }

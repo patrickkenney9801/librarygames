@@ -9,9 +9,7 @@ import java.net.UnknownHostException;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.Player;
-import com.nfehs.librarygames.net.packets.Packet;
-import com.nfehs.librarygames.net.packets.Packet00Login;
-import com.nfehs.librarygames.net.packets.Packet01CreateAcc;
+import com.nfehs.librarygames.net.packets.*;
 
 /**
  * This class handles receiving packets from and sending to the server
@@ -67,6 +65,12 @@ public class GameClient extends Thread {
 										break;
 			case CREATEACCOUNT:			createAccountLogin(packet.getData());
 										break;
+			case ERROR:					// TODO will handle all errors
+										break;
+			case LOGOUT:				// TODO probably will not be used
+										break;
+			case GETPLAYERS:			getPlayers(packet.getData());
+										break;
 			default:					break;
 		}
 	}
@@ -120,5 +124,24 @@ public class GameClient extends Thread {
 		
 		// open active games screen
 		Game.openActiveGamesScreen();
+	}
+
+	/**
+	 * Handles a successfull request for players
+	 * @param data
+	 */
+	private void getPlayers(byte[] data) {
+		// verify that user is still on the create game screen, if not exit
+		if (Game.gameState != Game.CREATE_GAME)
+			return;
+		
+		Packet04GetPlayers packet = new Packet04GetPlayers(data, true);
+		
+		// set friends and other players lists in Player
+		Game.getPlayer().setFriends(packet.getFriends());
+		Game.getPlayer().setOtherPlayers(packet.getOtherPlayers());
+		
+		// refresh friends and players on create game screen
+		Game.updatePlayersList();
 	}
 }

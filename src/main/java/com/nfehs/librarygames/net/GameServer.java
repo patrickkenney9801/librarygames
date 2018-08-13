@@ -115,6 +115,9 @@ public class GameServer extends Thread {
 										break;
 			case LOGOUT:				logout(data, address, port);
 										break;
+			case GETPLAYERS:			getPlayers(data, address, port);
+										break;
+			case ADDFRIEND:				addFriend(data, address, port);
 			default:					break;
 		}
 	}
@@ -208,5 +211,98 @@ public class GameServer extends Thread {
 		for (int i = 0; i < onlinePlayers.size(); i++)
 			if (onlinePlayers.get(i).getIpAddress().equals(address))
 				onlinePlayers.remove(i);
+	}
+
+	/**
+	 * Retrieves list of friends and other players
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void getPlayers(byte[] data, InetAddress address, int port) {
+		try {
+			Packet04GetPlayers packet = new Packet04GetPlayers(data);
+			
+			// find friends list
+			PreparedStatement statement = database.prepareStatement("SELECT username FROM users WHERE userkey = (SELECT userkey2 FROM" 
+																+ "friends WHERE userkey1 = '" + packet.getUserKey() + "');");
+			ResultSet result = statement.executeQuery();
+			
+			// get friends usernames and put into array
+			ArrayList<String> friendsList = new ArrayList<String>();
+			while (result.next())
+				friendsList.add(Security.decrypt(result.getString("username")));
+			
+			// find all other users
+			statement = database.prepareStatement("SELECT username FROM users WHERE userkey != '" + packet.getUserKey() + "';");
+			result = statement.executeQuery();
+			
+			// get other usernames and put into array
+			ArrayList<String> othersList = new ArrayList<String>();
+			while (result.next())
+				if (!friendsList.contains(Security.decrypt(result.getString("username"))))
+					othersList.add(Security.decrypt(result.getString("username")));
+			
+			// build Strings for friends and other users
+			String friends = "";
+			for (int i = 0; i < friendsList.size(); i++) {
+				friends += friendsList.get(i);
+				if (i != friendsList.size()-1)
+					friends += ",";
+			}
+			String others = "";
+			for (int i = 0; i < othersList.size(); i++) {
+				others += othersList.get(i);
+				if (i != othersList.size()-1)
+					others += ",";
+			}
+			System.out.println("Friends List: " + friends);
+			System.out.println("Others  List: " + others);
+			
+			// send users to client
+			Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), friends, others, true);
+			returnPacket.writeData(this, address, port);
+			System.out.println("RETURN GET PLAYERS SENT");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Attempts to add a user as a friend to the client
+	 * Refreshes the CreateAccountScreen by returning a 04 packet
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void addFriend(byte[] data, InetAddress address, int port) {
+		try {
+			Packet05AddFriend packet = new Packet05AddFriend(data);
+			
+			// verify that player is not already friends with other
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM friends WHERE userkey1 = '" + packet.getUserKey()
+																	+ "' AND userkey2 = (SELECT user_key FROM users WHERE username = '"
+																	+ Security.encrypt(packet.getFriendName()) + "'));");
+			ResultSet result = statement.executeQuery();
+			
+			// if friend set already exists, send error and exit
+			if (result.next()) {
+				// TODO handles duplicate
+				System.out.println("DUPLICATE FRIEND REQUEST ERROR");
+				return;
+			}
+			
+			// add friend set to database
+			PreparedStatement add = database.prepareStatement("INSERT INTO friends VALUES ('" + packet.getUserKey() + "', '" 
+															+ "SELECT user_key FROM users WHERE username = '"
+															+ Security.encrypt(packet.getFriendName()) + "');");
+			add.executeUpdate();
+			
+			System.out.println("FRIEND CONNECTION CREATED");
+			// refresh players by sending a 04 packet
+			getPlayers((packet.getUuidKey() + ":" + packet.getUserKey()).getBytes(), address, port);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

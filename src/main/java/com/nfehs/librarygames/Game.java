@@ -125,8 +125,17 @@ public class Game {
 	 * This method attempts to log the user out of the server
 	 */
 	public static void logout() {
-		// send logout package to client
+		// send logout package to server
 		new Packet03Logout().writeData(client);
+	}
+
+	/**
+	 * This method sends a friend request to server
+	 * @param friend
+	 */
+	public static void addFriend(String friend) {
+		// send addFriend package to server
+		new Packet05AddFriend(getPlayer().getUser_key(), friend).writeData(client);
 	}
 
 	/**
@@ -159,6 +168,7 @@ public class Game {
 	 * This method opens up the active games screen for the user
 	 */
 	public static void openActiveGamesScreen() {
+		// TODO send packet requesting games list
 		exitCurrentScreen();
 		screen = new ActiveGamesScreen();
 		gameState = ACTIVE_GAMES;
@@ -168,6 +178,8 @@ public class Game {
 	 * This method opens up the create game screen for the user
 	 */
 	public static void openCreateGameScreen() {
+		// send packet to server requesting list of players
+		new Packet04GetPlayers(getPlayer().getUser_key()).writeData(client);
 		exitCurrentScreen();
 		screen = new CreateGameScreen();
 		gameState = CREATE_GAME;
@@ -182,6 +194,17 @@ public class Game {
 			return;
 		}
 		((ActiveGamesScreen) screen).loadActiveGames();
+	}
+	
+	/**
+	 * This method updates the players list on the CreateGameScreen
+	 */
+	public static void updatePlayersList() {
+		if (!(screen instanceof CreateGameScreen)) {
+			System.out.println("GAMESTATE ERROR update players list called on wrong screen");
+			return;
+		}
+		((CreateGameScreen) screen).loadPlayers();
 	}
 
 	/**

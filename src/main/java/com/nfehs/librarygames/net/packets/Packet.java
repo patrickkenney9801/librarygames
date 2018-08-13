@@ -19,7 +19,8 @@ public abstract class Packet {
 	 * @author Patrick
 	 */
 	public static enum PacketTypes {
-		INVALID(-1), LOGIN(00), CREATEACCOUNT(01), ERROR(02), LOGOUT(03);
+		INVALID(-1), LOGIN(00), CREATEACCOUNT(01), ERROR(02), LOGOUT(03),
+		GETPLAYERS(04), ADDFRIEND(05);
 		
 		private int packetId;
 		private PacketTypes(int packetId) {

@@ -116,18 +116,18 @@ public class CreateGameScreen extends Screen {
 		removeAndNullPlayers();
 		
 		// add friends
-		friends = new JRadioButton[Game.getPlayer().friends.size()];
+		friends = new JRadioButton[Game.getPlayer().getFriends().length];
 		for (int i = 0; i < friends.length; i++) {
-			friends[i] = new JRadioButton(Game.getPlayer().friends.get(i));
+			friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i]);
 			friends[i].setBounds((int) Game.screenSize.getWidth() / 2 - 275, 
 								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 150, 30);
 			players.add(friends[i]);
 		}
 		
 		// add other players
-		randomPlayers = new JRadioButton[Game.getPlayer().otherPlayers.size()];
+		randomPlayers = new JRadioButton[Game.getPlayer().getOtherPlayers().length];
 		for (int i = 0; i < randomPlayers.length; i++) {
-			randomPlayers[i] = new JRadioButton(Game.getPlayer().otherPlayers.get(i));
+			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i]);
 			randomPlayers[i].setBounds((int) Game.screenSize.getWidth() / 2 + 10, 
 								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 150, 30);
 			players.add(randomPlayers[i]);
@@ -142,11 +142,16 @@ public class CreateGameScreen extends Screen {
 					 (int) Game.screenSize.getHeight() / 10 + 200 + i*50, 150, 30);
 			addFriends[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					System.out.println("Add friend button clicked: " + 
-										randomPlayers[(((int) ((JButton) e.getSource()).getAlignmentY()))
-										- ((int) Game.screenSize.getHeight() / 10 + 155) / 30].getText());
+					// get the element number for the username
+					int elemNumber = -1;
+					for (int i = 0; i < addFriends.length; i++)
+						if (addFriends[i].equals(e.getSource()))
+							elemNumber = i;
+					System.out.println("Add friend button clicked: " + randomPlayers[elemNumber].getText());
 					((JButton) e.getSource()).setEnabled(false);
-					// TODO
+					
+					// send friend request to server
+					Game.addFriend(randomPlayers[elemNumber].getText());
 				}
 			});
 		}
