@@ -75,6 +75,7 @@ public class ActiveGamesScreen extends Screen {
 				}
 			});
 		}
+		Game.mainWindow.repaint();
 	}
 	
 	/**

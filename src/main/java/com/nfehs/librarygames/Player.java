@@ -109,6 +109,10 @@ public class Player {
 	}
 
 	public void setFriends(String friends) {
+		if (friends == null || friends.length() < 1) {
+			this.friends = new String[0];
+			return;
+		}
 		this.friends = friends.split(",");
 	}
 

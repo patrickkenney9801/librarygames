@@ -114,7 +114,7 @@ public class CreateGameScreen extends Screen {
 	public void loadPlayers() {
 		// remove current players
 		removeAndNullPlayers();
-		
+		System.out.println(Game.getPlayer().getFriends().length);
 		// add friends
 		friends = new JRadioButton[Game.getPlayer().getFriends().length];
 		for (int i = 0; i < friends.length; i++) {
@@ -124,6 +124,7 @@ public class CreateGameScreen extends Screen {
 			friends[i].setForeground(Color.WHITE);
 			friends[i].setBackground(GameFrame.background);
 			players.add(friends[i]);
+			Game.mainWindow.add(friends[i]);
 		}
 		
 		// add other players
@@ -131,10 +132,11 @@ public class CreateGameScreen extends Screen {
 		for (int i = 0; i < randomPlayers.length; i++) {
 			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i]);
 			randomPlayers[i].setBounds((int) Game.screenSize.getWidth() / 2 + 10, 
-								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 150, 30);
+								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 200, 30);
 			randomPlayers[i].setForeground(Color.WHITE);
 			randomPlayers[i].setBackground(GameFrame.background);
 			players.add(randomPlayers[i]);
+			Game.mainWindow.add(randomPlayers[i]);
 		}
 		
 		// add 'add friend' buttons
@@ -142,8 +144,8 @@ public class CreateGameScreen extends Screen {
 		for (int i = 0; i < addFriends.length; i++) {
 			addFriends[i] = new JButton("ADD");
 			Game.mainWindow.add(addFriends[i]);
-			addFriends[i].setBounds((int) Game.screenSize.getWidth() / 2 + 160, 
-					 (int) Game.screenSize.getHeight() / 10 + 200 + i*50, 150, 30);
+			addFriends[i].setBounds((int) Game.screenSize.getWidth() / 2 + 210, 
+					 (int) Game.screenSize.getHeight() / 10 + 155 + i*30, 75, 30);
 			addFriends[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					// get the element number for the username
@@ -159,6 +161,7 @@ public class CreateGameScreen extends Screen {
 				}
 			});
 		}
+		Game.mainWindow.repaint();
 	}
 	
 	/**

@@ -224,7 +224,7 @@ public class GameServer extends Thread {
 			Packet04GetPlayers packet = new Packet04GetPlayers(data);
 			
 			// find friends list
-			PreparedStatement statement = database.prepareStatement("SELECT username FROM users WHERE user_key = (SELECT userkey2 FROM" 
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM users WHERE user_key = (SELECT userkey2 FROM" 
 																+ " friends WHERE userkey1 = '" + packet.getUserKey() + "');");
 			ResultSet result = statement.executeQuery();
 			
@@ -234,7 +234,7 @@ public class GameServer extends Thread {
 				friendsList.add(Security.decrypt(result.getString("username")));
 			
 			// find all other users
-			statement = database.prepareStatement("SELECT username FROM users WHERE user_key != '" + packet.getUserKey() + "';");
+			statement = database.prepareStatement("SELECT * FROM users WHERE user_key != '" + packet.getUserKey() + "';");
 			result = statement.executeQuery();
 			
 			// get other usernames and put into array
