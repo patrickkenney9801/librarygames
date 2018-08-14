@@ -179,10 +179,10 @@ public class Game {
 	 */
 	public static void openCreateGameScreen() {
 		// send packet to server requesting list of players
-		new Packet04GetPlayers(getPlayer().getUser_key()).writeData(client);
 		exitCurrentScreen();
 		screen = new CreateGameScreen();
 		gameState = CREATE_GAME;
+		new Packet04GetPlayers(getPlayer().getUser_key()).writeData(client);
 	}
 	
 	/**

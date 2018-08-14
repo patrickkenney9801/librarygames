@@ -134,6 +134,7 @@ public class GameClient extends Thread {
 		// verify that user is still on the create game screen, if not exit
 		if (Game.gameState != Game.CREATE_GAME)
 			return;
+		System.out.println("REACH");
 		
 		Packet04GetPlayers packet = new Packet04GetPlayers(data, true);
 		

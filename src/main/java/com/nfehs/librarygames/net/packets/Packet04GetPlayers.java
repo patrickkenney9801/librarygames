@@ -59,7 +59,8 @@ public class Packet04GetPlayers extends Packet {
 		String[] userdata = readData(data).split(":");
 		setUuidKey(userdata[0]);
 		setFriends(userdata[1]);
-		setOtherPlayers(userdata[2]);
+		if (userdata.length == 3)
+			setOtherPlayers(userdata[2]);
 	}
 
 	@Override

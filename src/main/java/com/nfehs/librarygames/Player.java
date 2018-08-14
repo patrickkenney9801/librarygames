@@ -121,6 +121,10 @@ public class Player {
 	}
 
 	public void setOtherPlayers(String otherPlayers) {
+		if (otherPlayers == null || otherPlayers.length() < 1) {
+			this.otherPlayers = new String[0];
+			return;
+		}
 		this.otherPlayers = otherPlayers.split(",");
 	}
 }
