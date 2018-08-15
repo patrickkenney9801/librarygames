@@ -158,7 +158,7 @@ public class Game {
 	 */
 	public static void createGame(String otherUser, boolean creatorGoesFirst, int gameType) {
 		// send create game packet to server
-		new Packet06CreateGame(getPlayer().getUser_key(), otherUser, creatorGoesFirst, gameType).writeData(client);
+		new Packet06CreateGame(getPlayer().getUser_key(), getPlayer().getUsername(), otherUser, creatorGoesFirst, gameType).writeData(client);
 	}
 	
 	/**
@@ -167,6 +167,16 @@ public class Game {
 	public static void getActiveGames() {
 		// sends get games packet to server
 		new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername()).writeData(client);
+	}
+	
+	/**
+	 * This method attempts to retrieve a game from the server
+	 * Ultimately leads to opening GameScreen
+	 * @param gameKey
+	 */
+	public static void getBoard(String gameKey) {
+		// sends get board packet to server
+		new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey).writeData(client);
 	}
 
 	/**
@@ -209,7 +219,6 @@ public class Game {
 	 * This method opens up the create game screen for the user
 	 */
 	public static void openCreateGameScreen() {
-		// send packet to server requesting list of players
 		exitCurrentScreen();
 		screen = new CreateGameScreen();
 		gameState = CREATE_GAME;
@@ -218,14 +227,11 @@ public class Game {
 
 	/**
 	 * This method opens up the game screen for the user
-	 * @param gameKey
 	 */
-	public static void openGameScreen(String gameKey) {
-		// send packet to server requesting list of players
+	public static void openGameScreen() {
 		exitCurrentScreen();
 		screen = new GameScreen();
 		gameState = PLAYING_GAME;
-		// TODO getGame(gameKey);
 	}
 	
 	/**

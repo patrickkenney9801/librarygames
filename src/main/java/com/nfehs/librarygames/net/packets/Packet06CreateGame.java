@@ -9,6 +9,7 @@ package com.nfehs.librarygames.net.packets;
 public class Packet06CreateGame extends Packet {
 	// data to send to server
 	private String userKey;
+	private String username;
 	private String otherUser;
 	private boolean creatorGoesFirst;
 	private int gameType;
@@ -19,13 +20,15 @@ public class Packet06CreateGame extends Packet {
 	/**
 	 * Used by client to send data to server
 	 * @param userKey
+	 * @param username
 	 * @param otherUser
 	 * @param creatorGoesFirst
 	 * @param gameType
 	 */
-	public Packet06CreateGame(String userKey, String otherUser, boolean creatorGoesFirst, int gameType) {
+	public Packet06CreateGame(String userKey, String username, String otherUser, boolean creatorGoesFirst, int gameType) {
 		super(06);
 		setUserKey(userKey);
+		setUsername(username);
 		setOtherUser(otherUser);
 		setCreatorGoesFirst(creatorGoesFirst);
 		setGameType(gameType);
@@ -39,11 +42,12 @@ public class Packet06CreateGame extends Packet {
 		super(06);
 		String[] userpass = readData(data).split(":");
 		setUuidKey(userpass[0]);
-		setUserKey(userpass[1]);
-		setOtherUser(userpass[2]);
-		setCreatorGoesFirst(Boolean.parseBoolean(userpass[3]));
+		setUsername(userpass[1]);
+		setUserKey(userpass[2]);
+		setOtherUser(userpass[3]);
+		setCreatorGoesFirst(Boolean.parseBoolean(userpass[4]));
 		try {
-			setGameType(Integer.parseInt(userpass[4]));
+			setGameType(Integer.parseInt(userpass[5]));
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -77,7 +81,8 @@ public class Packet06CreateGame extends Packet {
 
 	@Override
 	public byte[] getData() {
-		return ("06" + getUuidKey() + ":" + getUserKey() + ":" + getOtherUser() + ":" + getCreatorGoesFirst() + ":" + getGameType()).getBytes();
+		return ("06" + getUuidKey() + ":" + getUserKey() + ":" + getUsername() + ":" + getOtherUser()
+				+ ":" + getCreatorGoesFirst() + ":" + getGameType()).getBytes();
 	}
 
 	@Override
@@ -153,5 +158,19 @@ public class Packet06CreateGame extends Packet {
 	 */
 	public void setGameKey(String gameKey) {
 		this.gameKey = gameKey;
+	}
+
+	/**
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

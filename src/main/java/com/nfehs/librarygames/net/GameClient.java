@@ -73,9 +73,11 @@ public class GameClient extends Thread {
 										break;
 			case GETPLAYERS:			getPlayers(packet.getData());
 										break;
-			case CREATEGAME:			getNewGame(packet.getData());
+			case CREATEGAME:			//getNewGame(packet.getData());
 										break;
 			case GETGAMES:				getGames(packet.getData());
+										break;
+			case GETBOARD:				getBoard(packet.getData());
 										break;
 			default:					break;
 		}
@@ -153,7 +155,7 @@ public class GameClient extends Thread {
 	/**
 	 * Handles a successful create game and opens the new game
 	 * @param data
-	 */
+	 * TODO decide whether or not to keep
 	private void getNewGame(byte[] data) {
 		// verify that user is still on the create game screen, if not exit
 		if (Game.gameState != Game.CREATE_GAME)
@@ -164,7 +166,7 @@ public class GameClient extends Thread {
 		// open game screen if the user created the game
 		if (packet.getUserKey().equals(Game.getPlayer().getUser_key()))
 			Game.openGameScreen(packet.getGameKey());
-	}
+	}*/
 
 	/**
 	 * Handles a successful request for games
@@ -197,5 +199,34 @@ public class GameClient extends Thread {
 		
 		// refresh games list on ActiveGamesScreen
 		Game.updateActiveGamesList();
+	}
+
+	/**
+	 * Handles a successful request for a game
+	 * Also handles server sent games when an action is made
+	 * Also handles server sent new games
+	 * @param data
+	 */
+	private void getBoard(byte[] data) {
+		Packet08GetBoard packet = new Packet08GetBoard(data, true);
+		
+		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen
+		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME) 
+					&& packet.getUserKey().equals(Game.getPlayer().getUser_key())) {
+			// if so, set GameBoard and open GameScreen
+			
+			/*
+			 *  determine type of GameBoard to make
+			 */
+			
+			// if Go create Go board
+			if (packet.getGameType() < 3 && packet.getGameType() > -1) {
+				// TODO create game board
+			}
+			
+			// open GameScreen and exit
+			Game.openGameScreen();
+			return;
+		}
 	}
 }

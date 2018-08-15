@@ -87,7 +87,15 @@ public class ActiveGamesScreen extends Screen {
 			activeGamesUserTurn[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("An active game clicked: " + ((JButton) e.getSource()).getText());
-					// TODO
+					
+					// get the element number of button to find game key
+					int elemNumber = -1;
+					for (int i = 0; i < activeGamesUserTurn.length; i++)
+						if (activeGamesUserTurn[i].equals(e.getSource()))
+							elemNumber = i;
+					
+					// send get board request to server
+					Game.getBoard(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[0]);
 				}
 			});
 		}

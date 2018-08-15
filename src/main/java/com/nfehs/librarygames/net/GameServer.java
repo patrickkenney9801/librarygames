@@ -123,6 +123,8 @@ public class GameServer extends Thread {
 										break;
 			case GETGAMES:				getGames(data, address, port);
 										break;
+			case GETBOARD:				getBoard(data, address, port);
+										break;
 			default:					break;
 		}
 	}
@@ -392,14 +394,17 @@ public class GameServer extends Thread {
 			
 			System.out.println("GAME CREATED");
 			
-			// Send new game data to creator via 06 packet so opens game screen
-			Packet06CreateGame returnPacket = new Packet06CreateGame(packet.getUuidKey(), packet.getUserKey(), gameKey, true);
-			returnPacket.writeData(this, address, port);
+			// Send new game data to creator via 06 packet so opens game screen TODO consider revising and sending packet 8
+			//Packet06CreateGame returnPacket = new Packet06CreateGame(packet.getUuidKey(), packet.getUserKey(), gameKey, true);
+			//returnPacket.writeData(this, address, port);
+			getBoard((packet.getUuidKey() + ":" + packet.getUserKey() + ":" + packet.getUsername() + ":" + gameKey).getBytes(),
+					address, port);
 			
-			// attempt to send data to opponent via 08 packet so sends notification TODO
-			//for (Player p : onlinePlayers)
-			//	if (p.getUser_key().equals(opponentKey))
-			//		getGame();
+			// attempt to send data to opponent via 8 packet so sends notification TODO
+			for (Player p : onlinePlayers)
+				if (p.getUser_key().equals(opponentKey))
+					getBoard((packet.getUuidKey() + ":" + packet.getUserKey() + ":" + packet.getUsername() + ":" + gameKey).getBytes(),
+								p.getIpAddress(), p.getPort());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -457,6 +462,70 @@ public class GameServer extends Thread {
 			returnPacket.writeData(this, address, port);
 			
 			System.out.println("ACTIVE GAMES SENT");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Retrieves a specific game
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void getBoard(byte[] data, InetAddress address, int port) {
+		try {
+			Packet08GetBoard packet = new Packet08GetBoard(data);
+			
+			// find game
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM games WHERE game_key = '" + packet.getGameKey() + "';");
+			ResultSet result = statement.executeQuery();
+			
+			/*
+			 *  get game info
+			 */
+			// if there are no results, exit print error and send error wrong game key
+			if (!result.next()) {
+				// TODO send error to user
+				System.out.println("ERROR IMPROPER GAME KEY SENT");
+				return;
+			}
+			int gameType;
+			int lastMove;
+			
+			gameType = result.getInt("game_type");
+			boolean player1Turn = result.getBoolean("player1_turn");
+			lastMove = result.getInt("last_move");
+			String board = result.getString("board");
+			
+			// get player usernames in proper order
+			String player1 = null;
+			String player2 = null;
+			
+			if (packet.getUserKey().equals(result.getString("player1_key"))) {
+				player1 = Security.encrypt(packet.getUsername());
+				
+				// get opponent's username
+				PreparedStatement findUsername = database.prepareStatement("SELECT * FROM users WHERE user_key = '" 
+																			+ result.getString("player2_key") + "';");
+				ResultSet opponentUser = findUsername.executeQuery();
+				player2 = opponentUser.getString("username");
+			} else  {
+				player2 = Security.encrypt(packet.getUsername());
+				
+				// get opponent's username
+				PreparedStatement findUsername = database.prepareStatement("SELECT * FROM users WHERE user_key = '" 
+																			+ result.getString("player1_key") + "';");
+				ResultSet opponentUser = findUsername.executeQuery();
+				player1 = opponentUser.getString("username");
+			}
+			
+			// send requested game to client
+			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), gameType, 
+																 player1, player2, player1Turn, lastMove, board, true);
+			returnPacket.writeData(this, address, port);
+			
+			System.out.println("GAME SENT");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
