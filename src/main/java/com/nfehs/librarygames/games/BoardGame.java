@@ -34,28 +34,47 @@ public abstract class BoardGame {
 	
 	// For use only when on GameScreen
 	private char[][] board;
+	protected Tile[][] tiles;
+	protected Piece[][] pieces;
 	private int lastMove;
 	
 	/**
-	 * For use with ActiveGamesScreen, does not hold all data for game
-	 * @param gameInfo
-	 * TODO re-look at later
-	public BoardGame(String[] gameInfo) {
-		setGameKey(gameInfo[0]);
-		this.gameType = Byte.parseByte(gameInfo[1]);
-		setGameName(lookupGameName(gameType));
-		setPlayer1(Security.decrypt(gameInfo[2]));
-		setPlayer2(Security.decrypt(gameInfo[3]));
-		
-		setGameTitle(getGameName() + ": " + getPlayer1() + " VS. " + getPlayer2());
+	 * Sets basic board game information
+	 * @param gameKey
+	 * @param gameType
+	 * @param player1
+	 * @param player2
+	 * @param player1Turn
+	 * @param lastMove
+	 * @param board
+	 */
+	public BoardGame(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
+			int lastMove, String board) {
+		setGameKey(gameKey);
+		this.gameType = (byte) gameType;
+		setGameName(lookupGameName(this.gameType));
+		setPlayer1(Security.decrypt(player1));
+		setPlayer2(Security.decrypt(player2));
+		setGameTitle(getGameName() + ":        " + getPlayer1() + "  vs.  " + getPlayer2());
+		setLastMove(lastMove);
+		setBoard(board);
+		setTiles();
+		setPieces();
 		
 		// determine whether it is the logged players turn or not
 		setPlayerTurn(false);
-		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) == '1') 
-				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) != '1'))
+		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && player1Turn) 
+				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !player1Turn))
 			setPlayerTurn(true);
-	}*/
+	}
+
+	// implement in child classes, for use on GameScreen
+	protected abstract void setTiles();
+	protected abstract void setPieces();
 	
+	// implement in child classes, for use in logic TODO add more logic methods
+	//protected abstract boolean validMove(int[] move);
+
 	/**
 	 * Returns a String with 3 parts delimited by ~
 	 * Part 1 is the game key, 2 is game title, 3 is bool for user goes first
@@ -222,8 +241,15 @@ public abstract class BoardGame {
 	/**
 	 * @param board the board to set
 	 */
-	public void setBoard(char[][] board) {
-		this.board = board;
+	public void setBoard(String board) {
+		// get length of sides
+		int arrayLength = (int) Math.sqrt(board.length());
+		
+		// build 2D board
+		char[][] board2D = new char[arrayLength][arrayLength];
+		for (int i = 0; i < board2D.length; i++)
+			board2D[i] = board.substring(i*arrayLength, (i+1)*arrayLength).toCharArray();
+		this.board = board2D;
 	}
 
 	/**
@@ -238,5 +264,13 @@ public abstract class BoardGame {
 	 */
 	public void setLastMove(int lastMove) {
 		this.lastMove = lastMove;
+	}
+
+	public Tile[][] getTiles() {
+		return tiles;
+	}
+
+	public Piece[][] getPieces() {
+		return pieces;
 	}
 }

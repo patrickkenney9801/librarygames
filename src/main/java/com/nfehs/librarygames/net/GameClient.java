@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.Player;
 import com.nfehs.librarygames.games.BoardGame;
+import com.nfehs.librarygames.games.go.Go;
 import com.nfehs.librarygames.net.packets.*;
 
 /**
@@ -220,9 +221,9 @@ public class GameClient extends Thread {
 			 */
 			
 			// if Go create Go board
-			if (packet.getGameType() < 3 && packet.getGameType() > -1) {
-				// TODO create game board
-			}
+			if (packet.getGameType() < 3 && packet.getGameType() > -1)
+				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(),
+						packet.isPlayer1Turn(), packet.getLastMove(), packet.getBoard()));
 			
 			// open GameScreen and exit
 			Game.openGameScreen();
