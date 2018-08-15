@@ -42,7 +42,7 @@ public class CreateGameScreen extends Screen {
 		gameChoices = new JComboBox<String>(choices);
 		Game.mainWindow.add(gameChoices);
 		gameChoices.setBounds((int) Game.screenSize.getWidth() / 2 - 225, (int) Game.screenSize.getHeight() / 10, 150, 30);
-		gameChoices.setBackground(GameFrame.background);
+		gameChoices.setBackground(GameFrame.textBackground);
 		gameChoices.setForeground(Color.WHITE);
 		gameChoices.setSelectedIndex(0);
 		

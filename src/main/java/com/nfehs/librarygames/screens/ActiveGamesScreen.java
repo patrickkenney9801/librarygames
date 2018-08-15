@@ -55,10 +55,12 @@ public class ActiveGamesScreen extends Screen {
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Refresh clicked");
-				// TODO
+				// TODO determine whether or not to keep refresh button
+				Game.getActiveGames();
 			}
 		});
 		activeGames = new JButton[0];
+		activeGamesUserTurn = new JButton[0];
 		userTurn = new JLabel();
 		opponentTurn = new JLabel();
 	}
@@ -119,7 +121,15 @@ public class ActiveGamesScreen extends Screen {
 			activeGames[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("An active game clicked: " + ((JButton) e.getSource()).getText());
-					// TODO
+					
+					// get the element number of button to find game key
+					int elemNumber = -1;
+					for (int i = 0; i < activeGames.length; i++)
+						if (activeGames[i].equals(e.getSource()))
+							elemNumber = i;
+					
+					// send get board request to server
+					Game.getBoard(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[0]);
 				}
 			});
 		}
@@ -130,6 +140,10 @@ public class ActiveGamesScreen extends Screen {
 	 * Removes all active games from main window and sets the null
 	 */
 	private void removeAndNullActiveGames() {
+		for (JButton activeGame : activeGamesUserTurn) {
+			Game.mainWindow.remove(activeGame);
+			activeGame = null;
+		}
 		for (JButton activeGame : activeGames) {
 			Game.mainWindow.remove(activeGame);
 			activeGame = null;
@@ -155,6 +169,7 @@ public class ActiveGamesScreen extends Screen {
 		
 		removeAndNullActiveGames();
 		activeGames = null;
+		activeGamesUserTurn = null;
 		
 		Game.mainWindow.repaint();
 	}
