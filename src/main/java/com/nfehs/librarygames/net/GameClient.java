@@ -6,9 +6,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.Player;
+import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.net.packets.*;
 
 /**
@@ -71,6 +73,10 @@ public class GameClient extends Thread {
 										break;
 			case GETPLAYERS:			getPlayers(packet.getData());
 										break;
+			case CREATEGAME:			getNewGame(packet.getData());
+										break;
+			case GETGAMES:				getGames(packet.getData());
+										break;
 			default:					break;
 		}
 	}
@@ -95,7 +101,6 @@ public class GameClient extends Thread {
 	 * @param data
 	 */
 	private void loginUser(byte[] data) {
-		System.out.println("REA" + Game.gameState);
 		// verify that user is still on the login screen, if not exit
 		if (Game.gameState != Game.LOGIN)
 			return;
@@ -127,14 +132,13 @@ public class GameClient extends Thread {
 	}
 
 	/**
-	 * Handles a successfull request for players
+	 * Handles a successful request for players
 	 * @param data
 	 */
 	private void getPlayers(byte[] data) {
 		// verify that user is still on the create game screen, if not exit
 		if (Game.gameState != Game.CREATE_GAME)
 			return;
-		System.out.println("REACH");
 		
 		Packet04GetPlayers packet = new Packet04GetPlayers(data, true);
 		
@@ -144,5 +148,54 @@ public class GameClient extends Thread {
 		
 		// refresh friends and players on create game screen
 		Game.updatePlayersList();
+	}
+
+	/**
+	 * Handles a successful create game and opens the new game
+	 * @param data
+	 */
+	private void getNewGame(byte[] data) {
+		// verify that user is still on the create game screen, if not exit
+		if (Game.gameState != Game.CREATE_GAME)
+			return;
+		
+		Packet06CreateGame packet = new Packet06CreateGame(data, true);
+		
+		// open game screen if the user created the game
+		if (packet.getUserKey().equals(Game.getPlayer().getUser_key()))
+			Game.openGameScreen(packet.getGameKey());
+	}
+
+	/**
+	 * Handles a successful request for games
+	 * @param data
+	 */
+	private void getGames(byte[] data) {
+		// verify that user is still on the active games screen, if not exit
+		if (Game.gameState != Game.ACTIVE_GAMES)
+			return;
+		
+		Packet07GetGames packet = new Packet07GetGames(data, true);
+		
+		// set your and opponent turn board games
+		String[] gameInfo = packet.getGameInfo();
+		ArrayList<String> userTurn = new ArrayList<String>();
+		ArrayList<String> opponentTurn = new ArrayList<String>();
+		
+		for (String info : gameInfo) {
+			String gameData = BoardGame.getGameInfo(info.split(","));
+			
+			if (Boolean.parseBoolean(gameData.split("~")[2]))
+				userTurn.add(gameData);
+			else
+				opponentTurn.add(gameData);
+		}
+		
+		// set board game Strings in Player
+		Game.getPlayer().setYourTurnBoardGames(userTurn);
+		Game.getPlayer().setOpponentTurnBoardGames(opponentTurn);
+		
+		// refresh games list on ActiveGamesScreen
+		Game.updateActiveGamesList();
 	}
 }

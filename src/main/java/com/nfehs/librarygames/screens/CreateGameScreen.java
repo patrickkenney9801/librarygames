@@ -91,8 +91,40 @@ public class CreateGameScreen extends Screen {
 		createGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4, 150, 30);
 		createGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// creates game
+				// attempts to create a new game
 				System.out.println("Create game clicked");
+				
+				// get other user from selected JRadioButton
+				String otherUser = null;
+				for (JRadioButton button : friends)
+					if (button.isSelected())
+						otherUser = button.getText();
+				for (JRadioButton button : randomPlayers)
+					if (button.isSelected())
+						otherUser = button.getText();
+				
+				// if no opponent is selected to play against, exit and send error to screen
+				if (otherUser == null) {
+					// TODO put error message
+					System.out.println("No opponent selected");
+					return;
+				}
+				
+				// get creator goes first from startingPlayer
+				boolean creatorGoesFirst = false;
+				if (userGoesFirst.isSelected())
+					creatorGoesFirst = true;
+				
+				// get gameType from selected index of gameChoices
+				int gameType = gameChoices.getSelectedIndex();
+				
+				// if the no gameType is selected or there is some other error, exit and send message to screen
+				if (gameType < 0) {
+					// TODO put error message
+					System.out.println("No game type selected");
+					return;
+				}
+				Game.createGame(otherUser, creatorGoesFirst, gameType);
 			}
 		});
 
@@ -114,7 +146,7 @@ public class CreateGameScreen extends Screen {
 	public void loadPlayers() {
 		// remove current players
 		removeAndNullPlayers();
-		System.out.println(Game.getPlayer().getFriends().length);
+		
 		// add friends
 		friends = new JRadioButton[Game.getPlayer().getFriends().length];
 		for (int i = 0; i < friends.length; i++) {

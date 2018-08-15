@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 
+import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.net.GameClient;
 import com.nfehs.librarygames.net.Security;
 import com.nfehs.librarygames.net.packets.*;
@@ -27,6 +28,7 @@ public class Game {
 	
 	private static GameClient client;
 	private static Player player;
+	private static BoardGame boardGame;
 	
 	public static final byte[] SERVER_IP_ADDRESS = {108, (byte) 205, (byte) 143, 97};
 	
@@ -34,6 +36,7 @@ public class Game {
 	public static final int CREATE_ACCOUNT = 1;
 	public static final int ACTIVE_GAMES = 2;
 	public static final int CREATE_GAME = 3;
+	public static final int PLAYING_GAME = 4;
 	public static final int OVER = 10;
 	
 	public static int gameState = Game.LOGIN;
@@ -72,7 +75,7 @@ public class Game {
 			password += (c + 15);
 		password = Security.encrypt(password);
 		
-		// send login info to server
+		// send login packet to server
 		new Packet00Login(username, password).writeData(client);
 	}
 
@@ -82,6 +85,7 @@ public class Game {
 	 * @param email
 	 * @param password
 	 * @param password2
+	 * TODO ban special characters like :,~
 	 */
 	public static void createAccount(String user, String email, char[] pass, char[] pass2) {
 		// verify that data given is valid
@@ -117,7 +121,7 @@ public class Game {
 		}
 		password = Security.encrypt(password);
 		
-		// send create account data to server
+		// send create account packet to server
 		new Packet01CreateAcc(email, username, password).writeData(client);
 	}
 	
@@ -125,8 +129,16 @@ public class Game {
 	 * This method attempts to log the user out of the server
 	 */
 	public static void logout() {
-		// send logout package to server
+		// send logout packet to server
 		new Packet03Logout().writeData(client);
+	}
+	
+	/**
+	 * This method attempts to retrieve friends and other players for CreateGameScreen
+	 */
+	public static void getOtherPlayers() {
+		// send get players packet to server
+		new Packet04GetPlayers(getPlayer().getUser_key()).writeData(client);
 	}
 
 	/**
@@ -134,8 +146,27 @@ public class Game {
 	 * @param friend
 	 */
 	public static void addFriend(String friend) {
-		// send addFriend package to server
+		// send addFriend packet to server
 		new Packet05AddFriend(getPlayer().getUser_key(), friend).writeData(client);
+	}
+	
+	/**
+	 * This method sends a create game request to server
+	 * @param otherUser
+	 * @param creatorGoesFirst
+	 * @param gameType
+	 */
+	public static void createGame(String otherUser, boolean creatorGoesFirst, int gameType) {
+		// send create game packet to server
+		new Packet06CreateGame(getPlayer().getUser_key(), otherUser, creatorGoesFirst, gameType).writeData(client);
+	}
+	
+	/**
+	 * This method attempts to retrieve games for ActiveGamesScreen
+	 */
+	public static void getActiveGames() {
+		// sends get games packet to server
+		new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername()).writeData(client);
 	}
 
 	/**
@@ -168,10 +199,10 @@ public class Game {
 	 * This method opens up the active games screen for the user
 	 */
 	public static void openActiveGamesScreen() {
-		// TODO send packet requesting games list
 		exitCurrentScreen();
 		screen = new ActiveGamesScreen();
 		gameState = ACTIVE_GAMES;
+		getActiveGames();
 	}
 
 	/**
@@ -182,7 +213,19 @@ public class Game {
 		exitCurrentScreen();
 		screen = new CreateGameScreen();
 		gameState = CREATE_GAME;
-		new Packet04GetPlayers(getPlayer().getUser_key()).writeData(client);
+		getOtherPlayers();
+	}
+
+	/**
+	 * This method opens up the game screen for the user
+	 * @param gameKey
+	 */
+	public static void openGameScreen(String gameKey) {
+		// send packet to server requesting list of players
+		exitCurrentScreen();
+		screen = new GameScreen();
+		gameState = PLAYING_GAME;
+		// TODO getGame(gameKey);
 	}
 	
 	/**
@@ -219,5 +262,19 @@ public class Game {
 	 */
 	public static void setPlayer(Player player) {
 		Game.player = player;
+	}
+
+	/**
+	 * @return the boardGame
+	 */
+	public static BoardGame getBoardGame() {
+		return boardGame;
+	}
+
+	/**
+	 * @param boardGame the boardGame to set
+	 */
+	public static void setBoardGame(BoardGame boardGame) {
+		Game.boardGame = boardGame;
 	}
 }

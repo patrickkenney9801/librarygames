@@ -118,6 +118,11 @@ public class GameServer extends Thread {
 			case GETPLAYERS:			getPlayers(data, address, port);
 										break;
 			case ADDFRIEND:				addFriend(data, address, port);
+										break;
+			case CREATEGAME:			createGame(data, address, port);
+										break;
+			case GETGAMES:				getGames(data, address, port);
+										break;
 			default:					break;
 		}
 	}
@@ -188,14 +193,17 @@ public class GameServer extends Thread {
 			
 			System.out.println("ACCOUNT CREATED");
 			
-			// add player to online players list
-			onlinePlayers.add(new Player(packet.getUsername(), userKey, address, port));
-			
 			// send login packet back to client (include username and key)
 			Packet01CreateAcc returnPacket = new Packet01CreateAcc(packet.getUuidKey(), packet.getUsername(), userKey, true);
 			returnPacket.writeData(this, address, port);
 			System.out.println("RETURN CREATE ACCOUNT PACKET SENT");
 			
+			// send getPlayers packets to all logged users in case they are on CreateGameScreen
+			for (Player p : onlinePlayers)
+				getPlayers((packet.getUuidKey() + ":" + p.getUser_key()).getBytes(), p.getIpAddress(), p.getPort());
+			
+			// add player to online players list
+			onlinePlayers.add(new Player(packet.getUsername(), userKey, address, port));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -311,6 +319,144 @@ public class GameServer extends Thread {
 			System.out.println("FRIEND CONNECTION CREATED");
 			// refresh players by sending a 04 packet
 			getPlayers((packet.getUuidKey() + ":" + packet.getUserKey()).getBytes(), address, port);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Attempts to create a new game
+	 * If successful returns a 06 packet with new game key
+	 * Also sends notification to opponent if online via 07 packet
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void createGame(byte[] data, InetAddress address, int port) {
+		try {
+			Packet06CreateGame packet = new Packet06CreateGame(data);
+			
+			/*
+			 *  build game board from game type
+			 */
+			String board = "";
+			switch (packet.getGameType()) {
+				case 0:							// handle game type Go 9x9
+												for (int i = 0; i < 9*9; i++)
+													board += "0";
+												break;
+				case 1:							// handle game type Go 13x13
+												for (int i = 0; i < 13*13; i++)
+													board += "0";
+												break;
+				case 2:							// handle game type Go 19x19
+												for (int i = 0; i < 19*19; i++)
+													board += "0";
+												break;
+				default:						// error no valid game type, warn and exit
+												System.out.println("ERROR gameType: " + packet.getGameType());
+												return;
+			}
+			
+			/*
+			 *  get other user's key
+			 */
+			PreparedStatement getKey = database.prepareStatement("SELECT * FROM users WHERE username = '"
+																+ Security.encrypt(packet.getOtherUser()) + "';");
+			ResultSet result = getKey.executeQuery();
+
+			// verify that other user exists
+			if (!result.next()) {
+				// TODO error other user does not exist
+				return;
+			}
+			String opponentKey = result.getString("user_key");
+			
+			// set player1Key and player2Key based on who goes first
+			String player1Key = packet.getUserKey();
+			String player2Key = opponentKey;
+			
+			if (!packet.getCreatorGoesFirst()) {
+				String temp = player1Key;
+				player1Key = player2Key;
+				player2Key = temp;
+			}
+			
+			// create the new game
+			String gameKey = "" + UUID.randomUUID();
+			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
+										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
+										+ "', " + packet.getGameType() + ", true, 0, '"
+										+ board + "');");
+			createGame.executeUpdate();
+			
+			System.out.println("GAME CREATED");
+			
+			// Send new game data to creator via 06 packet so opens game screen
+			Packet06CreateGame returnPacket = new Packet06CreateGame(packet.getUuidKey(), packet.getUserKey(), gameKey, true);
+			returnPacket.writeData(this, address, port);
+			
+			// attempt to send data to opponent via 08 packet so sends notification TODO
+			//for (Player p : onlinePlayers)
+			//	if (p.getUser_key().equals(opponentKey))
+			//		getGame();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Retrieves list of game data
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void getGames(byte[] data, InetAddress address, int port) {
+		try {
+			Packet07GetGames packet = new Packet07GetGames(data);
+			
+			// find games list
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
+																+ " WHERE games.player1_key = '" + packet.getUserKey() + "';");
+			ResultSet result = statement.executeQuery();
+			
+			// get game info and put into ArrayList
+			ArrayList<String> gameInfo = new ArrayList<String>();
+			while (result.next()) {
+				String info = "";
+				info += result.getString("game_key") + ",";
+				info += result.getString("game_type") + ",";
+				info += result.getString("username") + ",";
+				info += Security.encrypt(packet.getUsername()) + ",";
+				info += result.getString("player1_turn");
+				gameInfo.add(info);
+			}
+			
+			statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
+												+ " WHERE games.player2_key = '" + packet.getUserKey() + "';");
+			result = statement.executeQuery();
+
+			// get game info and put into ArrayList
+			while (result.next()) {
+				String info = "";
+				info += result.getString("game_key") + ",";
+				info += result.getString("game_type") + ",";
+				info += Security.encrypt(packet.getUsername()) + ",";
+				info += result.getString("username") + ",";
+				info += result.getString("player1_turn");
+				gameInfo.add(info);
+			}
+			
+			// convert ArrayList into array
+			String[] gameInformation = new String[gameInfo.size()];
+			for (int i = 0; i < gameInformation.length; i++)
+				gameInformation[i] = gameInfo.get(i);
+			
+			// send games to client
+			Packet07GetGames returnPacket = new Packet07GetGames(packet.getUuidKey(), packet.getUserKey(), gameInformation, true);
+			returnPacket.writeData(this, address, port);
+			
+			System.out.println("ACTIVE GAMES SENT");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

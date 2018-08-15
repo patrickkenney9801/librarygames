@@ -1,11 +1,14 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.GameFrame;
 
 /**
  * This class handles the user browsing their active games
@@ -18,6 +21,9 @@ public class ActiveGamesScreen extends Screen {
 	private JButton		createGame;
 	private JButton		spectatorGames;
 	private JButton		refresh;
+	private JLabel		userTurn;
+	private JButton[]	activeGamesUserTurn;
+	private JLabel		opponentTurn;
 	private JButton[]	activeGames;
 	
 	public ActiveGamesScreen() {
@@ -53,6 +59,8 @@ public class ActiveGamesScreen extends Screen {
 			}
 		});
 		activeGames = new JButton[0];
+		userTurn = new JLabel();
+		opponentTurn = new JLabel();
 	}
 	
 	/**
@@ -62,12 +70,44 @@ public class ActiveGamesScreen extends Screen {
 		// remove current active games
 		removeAndNullActiveGames();
 		
+		// add active games user turn
+		userTurn = new JLabel("Your turn:");
+		Game.mainWindow.add(userTurn);
+		userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
+							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
+		userTurn.setForeground(Color.WHITE);
+		userTurn.setBackground(GameFrame.background);
+		
+		activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().length];
+		for (int i = 0; i < activeGamesUserTurn.length; i++) {
+			activeGamesUserTurn[i] = new JButton(Game.getPlayer().getYourTurnBoardGames()[i].split("~")[1]);
+			Game.mainWindow.add(activeGamesUserTurn[i]);
+			activeGamesUserTurn[i].setBounds((int) Game.screenSize.getWidth() / 2 - 150, 
+									 (int) Game.screenSize.getHeight() / 10 + 230 + i*50, 300, 30);
+			activeGamesUserTurn[i].addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("An active game clicked: " + ((JButton) e.getSource()).getText());
+					// TODO
+				}
+			});
+		}
+		
 		// add new active games
-		activeGames = new JButton[Game.getPlayer().boardGames.size()];
+		int height = activeGamesUserTurn.length * 50;
+		
+		opponentTurn = new JLabel("Opponent turn:");
+		Game.mainWindow.add(opponentTurn);
+		opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
+							(int) Game.screenSize.getHeight() / 10 + 240 + height, 300, 30);
+		opponentTurn.setForeground(Color.WHITE);
+		opponentTurn.setBackground(GameFrame.background);
+		
+		activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().length];
 		for (int i = 0; i < activeGames.length; i++) {
-			activeGames[i] = new JButton(Game.getPlayer().boardGames.get(i).getGameTitle());
-			activeGames[i].setBounds((int) Game.screenSize.getWidth() / 2 - 75, 
-									 (int) Game.screenSize.getHeight() / 10 + 200 + i*50, 150, 30);
+			activeGames[i] = new JButton(Game.getPlayer().getOpponentTurnBoardGames()[i].split("~")[1]);
+			Game.mainWindow.add(activeGames[i]);
+			activeGames[i].setBounds((int) Game.screenSize.getWidth() / 2 - 150, 
+									 (int) Game.screenSize.getHeight() / 10 + 270 + height + i*50, 300, 30);
 			activeGames[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("An active game clicked: " + ((JButton) e.getSource()).getText());
@@ -86,6 +126,12 @@ public class ActiveGamesScreen extends Screen {
 			Game.mainWindow.remove(activeGame);
 			activeGame = null;
 		}
+		
+		Game.mainWindow.remove(userTurn);
+		Game.mainWindow.remove(opponentTurn);
+		
+		userTurn = null;
+		opponentTurn = null;
 	}
 
 	public void exit() {

@@ -3,8 +3,6 @@ package com.nfehs.librarygames;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-import com.nfehs.librarygames.games.BoardGame;
-
 /**
  * This class holds data for players
  * Used by both client player and by server to hold data
@@ -17,7 +15,9 @@ public class Player {
 	private String user_key;
 	private InetAddress ipAddress;
 	private int port;
-	public ArrayList<BoardGame> boardGames;
+	
+	private String[] yourTurnBoardGames;
+	private String[] opponentTurnBoardGames;
 	private String[] friends;
 	private String[] otherPlayers;
 	
@@ -25,13 +25,10 @@ public class Player {
 	 * For use by client
 	 * @param user
 	 * @param key
-	 * @param games
-	 * TODO
 	 */
 	public Player(String user, String key) {
 		setUsername(user);
 		setUser_key(key);
-		boardGames = new ArrayList<BoardGame>();
 	}
 	
 	/**
@@ -46,13 +43,6 @@ public class Player {
 		setUser_key(key);
 		setIpAddress(ip);
 		setPort(p);
-	}
-	
-	public void updateGamesList(String games) {
-		// TODO add code to add games to list
-		
-		if (Game.gameState == Game.ACTIVE_GAMES)
-			Game.updateActiveGamesList();
 	}
 	
 	/**
@@ -102,6 +92,40 @@ public class Player {
 	 */
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	/**
+	 * @return the yourTurnBoardGames
+	 */
+	public String[] getYourTurnBoardGames() {
+		return yourTurnBoardGames;
+	}
+
+	/**
+	 * @param yourTurnBoardGames the yourTurnBoardGames to set
+	 */
+	public void setYourTurnBoardGames(ArrayList<String> yourTurn) {
+		String[] yourTurnBoardGames = new String[yourTurn.size()];
+		for (int i = 0; i < yourTurn.size(); i++)
+			yourTurnBoardGames[i] = yourTurn.get(i);
+		this.yourTurnBoardGames = yourTurnBoardGames;
+	}
+
+	/**
+	 * @return the opponentTurnBoardGames
+	 */
+	public String[] getOpponentTurnBoardGames() {
+		return opponentTurnBoardGames;
+	}
+
+	/**
+	 * @param opponentTurnBoardGames the opponentTurnBoardGames to set
+	 */
+	public void setOpponentTurnBoardGames(ArrayList<String> opponentTurn) {
+		String[] opponentTurnBoardGames = new String[opponentTurn.size()];
+		for (int i = 0; i < opponentTurnBoardGames.length; i++)
+			opponentTurnBoardGames[i] = opponentTurn.get(i);
+		this.opponentTurnBoardGames = opponentTurnBoardGames;
 	}
 
 	public String[] getFriends() {

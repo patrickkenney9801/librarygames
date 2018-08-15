@@ -1,5 +1,6 @@
 package com.nfehs.librarygames.games;
 
+import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.net.Security;
 
 /**
@@ -10,7 +11,7 @@ import com.nfehs.librarygames.net.Security;
 
 public abstract class BoardGame {
 	public static enum GameTypes {
-		INVALID(-1), GO(00);
+		INVALID(-1), GO9x9(00), GO13x13(01), GO19x19(02);
 		
 		private int gameType;
 		private GameTypes(int gameType) {
@@ -22,30 +23,59 @@ public abstract class BoardGame {
 		}
 	}
 	
+	// Universal use
 	private byte gameType;
 	private String gameTitle;
 	private String gameName;
 	private String player1;
 	private String player2;
-	private int gameId;
-	
+	private boolean isPlayerTurn;
 	private String gameKey;
 	
+	// For use only when on GameScreen
+	private char[][] board;
+	private int lastMove;
+	
 	/**
-	 * @param gameType
-	 * @param player1
-	 * @param player2
-	 * @param gameId
-	 */
-	public BoardGame(int gameType, String gameKey, String player1, String player2, int gameId) {
-		this.gameType = (byte) gameType;
-		setGameKey(gameKey);
+	 * For use with ActiveGamesScreen, does not hold all data for game
+	 * @param gameInfo
+	 * TODO re-look at later
+	public BoardGame(String[] gameInfo) {
+		setGameKey(gameInfo[0]);
+		this.gameType = Byte.parseByte(gameInfo[1]);
 		setGameName(lookupGameName(gameType));
-		setPlayer1(Security.decrypt(player1));
-		setPlayer2(Security.decrypt(player2));
-		setGameId(gameId);
+		setPlayer1(Security.decrypt(gameInfo[2]));
+		setPlayer2(Security.decrypt(gameInfo[3]));
 		
-		setGameTitle(getGameId() + "\t" + getGameName() + ": " + getPlayer1() + " VS. " + getPlayer2());
+		setGameTitle(getGameName() + ": " + getPlayer1() + " VS. " + getPlayer2());
+		
+		// determine whether it is the logged players turn or not
+		setPlayerTurn(false);
+		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) == '1') 
+				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) != '1'))
+			setPlayerTurn(true);
+	}*/
+	
+	/**
+	 * Returns a String with 3 parts delimited by ~
+	 * Part 1 is the game key, 2 is game title, 3 is bool for user goes first
+	 * @param gameInfo
+	 * @return
+	 */
+	public static String getGameInfo(String[] gameInfo) {
+		String gameInformation = gameInfo[0] + "~";
+		byte gameType = Byte.parseByte(gameInfo[1]);
+		gameInformation += lookupGameName(gameType) + ":        ";
+		gameInformation += Security.decrypt(gameInfo[2]) + "  vs.  ";
+		gameInformation += Security.decrypt(gameInfo[3]) + "~";
+		
+		// determine whether it is the logged players turn or not
+		boolean playerTurn = false;
+		if ((Security.decrypt(gameInfo[2]).equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) == '1') 
+				|| (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) != '1'))
+			playerTurn = true;
+		gameInformation += playerTurn;
+		return gameInformation;
 	}
 	
 	/**
@@ -53,7 +83,7 @@ public abstract class BoardGame {
 	 * @param gameType
 	 * @return
 	 */
-	public String lookupGameName(int gameType) {
+	public static String lookupGameName(int gameType) {
 		return lookupGameName(lookupGame(gameType));
 	}
 	
@@ -62,10 +92,12 @@ public abstract class BoardGame {
 	 * @param lookupGame
 	 * @return
 	 */
-	private String lookupGameName(GameTypes type) {
+	private static String lookupGameName(GameTypes type) {
 		switch (type) {
 			case INVALID:				return "";
-			case GO:					return "Go";
+			case GO9x9:					return "Go 9x9";
+			case GO13x13:				return "Go 13x13";
+			case GO19x19:				return "Go 19x19";
 		}
 		return "";
 	}
@@ -139,20 +171,6 @@ public abstract class BoardGame {
 	}
 
 	/**
-	 * @return the gameId
-	 */
-	public int getGameId() {
-		return gameId;
-	}
-
-	/**
-	 * @param gameId the gameId to set
-	 */
-	public void setGameId(int gameId) {
-		this.gameId = gameId;
-	}
-
-	/**
 	 * @return the gameName
 	 */
 	public String getGameName() {
@@ -178,5 +196,47 @@ public abstract class BoardGame {
 	 */
 	public void setGameKey(String gameKey) {
 		this.gameKey = gameKey;
+	}
+
+	/**
+	 * @return the isPlayerTurn
+	 */
+	public boolean isPlayerTurn() {
+		return isPlayerTurn;
+	}
+
+	/**
+	 * @param isPlayerTurn the isPlayerTurn to set
+	 */
+	public void setPlayerTurn(boolean isPlayerTurn) {
+		this.isPlayerTurn = isPlayerTurn;
+	}
+
+	/**
+	 * @return the board
+	 */
+	public char[][] getBoard() {
+		return board;
+	}
+
+	/**
+	 * @param board the board to set
+	 */
+	public void setBoard(char[][] board) {
+		this.board = board;
+	}
+
+	/**
+	 * @return the lastMove
+	 */
+	public int getLastMove() {
+		return lastMove;
+	}
+
+	/**
+	 * @param lastMove the lastMove to set
+	 */
+	public void setLastMove(int lastMove) {
+		this.lastMove = lastMove;
 	}
 }
