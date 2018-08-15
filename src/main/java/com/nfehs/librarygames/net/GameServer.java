@@ -200,9 +200,13 @@ public class GameServer extends Thread {
 			returnPacket.writeData(this, address, port);
 			System.out.println("RETURN CREATE ACCOUNT PACKET SENT");
 			
-			// send getPlayers packets to all logged users in case they are on CreateGameScreen
-			for (Player p : onlinePlayers)
-				getPlayers((packet.getUuidKey() + ":" + p.getUser_key()).getBytes(), p.getIpAddress(), p.getPort());
+			// send 04 getPlayers packets to all logged users in case they are on CreateGameScreen
+			Packet04GetPlayers temp;
+			for (Player p : onlinePlayers) {
+				temp = new Packet04GetPlayers(p.getUser_key());
+				temp.setUuidKey(packet.getUuidKey());
+				getPlayers(temp.getData(), p.getIpAddress(), p.getPort());
+			}
 			
 			// add player to online players list
 			onlinePlayers.add(new Player(packet.getUsername(), userKey, address, port));
@@ -320,7 +324,9 @@ public class GameServer extends Thread {
 			
 			System.out.println("FRIEND CONNECTION CREATED");
 			// refresh players by sending a 04 packet
-			getPlayers((packet.getUuidKey() + ":" + packet.getUserKey()).getBytes(), address, port);
+			Packet04GetPlayers temp = new Packet04GetPlayers(packet.getUserKey());
+			temp.setUuidKey(packet.getUuidKey());
+			getPlayers(temp.getData(), address, port);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -397,14 +403,14 @@ public class GameServer extends Thread {
 			// Send new game data to creator via 06 packet so opens game screen TODO consider revising and sending packet 8
 			//Packet06CreateGame returnPacket = new Packet06CreateGame(packet.getUuidKey(), packet.getUserKey(), gameKey, true);
 			//returnPacket.writeData(this, address, port);
-			getBoard((packet.getUuidKey() + ":" + packet.getUserKey() + ":" + packet.getUsername() + ":" + gameKey).getBytes(),
-					address, port);
+			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), gameKey);
+			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
+			getBoard(temp.getData(), address, port);
 			
 			// attempt to send data to opponent via 8 packet so sends notification TODO
 			for (Player p : onlinePlayers)
 				if (p.getUser_key().equals(opponentKey))
-					getBoard((packet.getUuidKey() + ":" + packet.getUserKey() + ":" + packet.getUsername() + ":" + gameKey).getBytes(),
-								p.getIpAddress(), p.getPort());
+					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -509,6 +515,7 @@ public class GameServer extends Thread {
 				PreparedStatement findUsername = database.prepareStatement("SELECT * FROM users WHERE user_key = '" 
 																			+ result.getString("player2_key") + "';");
 				ResultSet opponentUser = findUsername.executeQuery();
+				opponentUser.next();
 				player2 = opponentUser.getString("username");
 			} else  {
 				player2 = Security.encrypt(packet.getUsername());
@@ -517,6 +524,7 @@ public class GameServer extends Thread {
 				PreparedStatement findUsername = database.prepareStatement("SELECT * FROM users WHERE user_key = '" 
 																			+ result.getString("player1_key") + "';");
 				ResultSet opponentUser = findUsername.executeQuery();
+				opponentUser.next();
 				player1 = opponentUser.getString("username");
 			}
 			
