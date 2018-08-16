@@ -165,7 +165,6 @@ public abstract class BoardGame {
 		setLastMove(lastMove);
 		setBoard(board);
 		setPieces();
-		setPlayer1(!isPlayer1());
 		setPlayerTurn(!isPlayerTurn());
 		
 		return true;

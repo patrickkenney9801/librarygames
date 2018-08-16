@@ -17,6 +17,7 @@ public class Stone extends GoPiece {
 	
 	/**
 	 * Constructor for a stone, a Go piece
+	 * @param gameType
 	 * @param isBlackPiece
 	 */
 	public Stone(byte gameType, boolean isBlackPiece) {
