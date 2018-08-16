@@ -19,12 +19,17 @@ public class CornerTile extends Tile {
 	 * @param cornerNumber topleft is 0, TR 1, bottomright 2, BL 3
 	 */
 	public CornerTile(int cornerNumber) {
-		super(getCornerTile(), cornerNumber);
+		super(getCornerTile(cornerNumber));
 	}
 	
-	private static BufferedImage getCornerTile() {
+	/**
+	 * Returns the appropriate corner image
+	 * @param cornerNumber
+	 * @return
+	 */
+	private static BufferedImage getCornerTile(int cornerNumber) {
 		try {
-			return ImageIO.read(CornerTile.class.getResource("/com/nfehs/librarygames/media/go/goCornerTile.png"));
+			return ImageIO.read(CornerTile.class.getResource("/com/nfehs/librarygames/media/go/goCornerTile" + cornerNumber + ".png"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

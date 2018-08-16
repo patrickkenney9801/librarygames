@@ -42,8 +42,8 @@ public class Packet06CreateGame extends Packet {
 		super(06);
 		String[] userpass = readData(data).split(":");
 		setUuidKey(userpass[0]);
-		setUsername(userpass[1]);
-		setUserKey(userpass[2]);
+		setUserKey(userpass[1]);
+		setUsername(userpass[2]);
 		setOtherUser(userpass[3]);
 		setCreatorGoesFirst(Boolean.parseBoolean(userpass[4]));
 		try {

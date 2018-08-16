@@ -19,12 +19,17 @@ public class EdgeTile extends Tile {
 	 * @param cornerNumber left is 0, top 1, right 2, bottom 3
 	 */
 	public EdgeTile(int edgeNumber) {
-		super(getEdgeTile(), edgeNumber);
+		super(getEdgeTile(edgeNumber));
 	}
 	
-	private static BufferedImage getEdgeTile() {
+	/**
+	 * Returns proper edge tile
+	 * @param edgeNumber
+	 * @return
+	 */
+	private static BufferedImage getEdgeTile(int edgeNumber) {
 		try {
-			return ImageIO.read(EdgeTile.class.getResource("/com/nfehs/librarygames/media/go/goEdgeTile.png"));
+			return ImageIO.read(EdgeTile.class.getResource("/com/nfehs/librarygames/media/go/goEdgeTile" + edgeNumber + ".png"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

@@ -71,9 +71,12 @@ public abstract class BoardGame {
 	// implement in child classes, for use on GameScreen
 	protected abstract void setTiles();
 	protected abstract void setPieces();
+	public abstract void handleMouseEnterTile(int[] coordinates);
+	public abstract void handleMouseLeaveTile(int[] coordinates);
+	public abstract void handleMouseClickTile(int[] coordinates);
 	
 	// implement in child classes, for use in logic TODO add more logic methods
-	//protected abstract boolean validMove(int[] move);
+	protected abstract boolean validMove(int x, int y);
 
 	/**
 	 * Returns a String with 3 parts delimited by ~

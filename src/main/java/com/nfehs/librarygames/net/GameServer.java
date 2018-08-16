@@ -400,9 +400,7 @@ public class GameServer extends Thread {
 			
 			System.out.println("GAME CREATED");
 			
-			// Send new game data to creator via 06 packet so opens game screen TODO consider revising and sending packet 8
-			//Packet06CreateGame returnPacket = new Packet06CreateGame(packet.getUuidKey(), packet.getUserKey(), gameKey, true);
-			//returnPacket.writeData(this, address, port);
+			// Send new game data to creator via 8 packet so opens game screen
 			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), gameKey);
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			getBoard(temp.getData(), address, port);
