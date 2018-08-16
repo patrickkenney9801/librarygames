@@ -56,7 +56,7 @@ public class Go extends BoardGame {
 	 * @Override
 	 */
 	public boolean update(String gameKey, String board, int lastMove, int player1Score, int player2Score) {
-		if (!((BoardGame) this).update(gameKey, board, lastMove, player1Score, player2Score))
+		if (!super.update(gameKey, board, lastMove, player1Score, player2Score))
 			return false;
 		setWhiteStonesCaptured(player1Score);
 		setBlackStonesCaptured(player2Score);

@@ -616,7 +616,7 @@ public class GameServer extends Thread {
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
 					+ "player1_turn = " + !player1Turn + ", last_move = " + packet.getMoveTo() + ", "
 					+ "board = '" + newBoard + "', p1_score = " + player1Score + ", p2_score = " + player2Score
-					+ ", winner = " + winner + ") WHERE game_key = '" + packet.getGameKey() + "';");
+					+ ", winner = " + winner + " WHERE game_key = '" + packet.getGameKey() + "';");
 			updateGame.executeUpdate();
 			
 			System.out.println("GAME UPDATED");
