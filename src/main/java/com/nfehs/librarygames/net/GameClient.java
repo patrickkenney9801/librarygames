@@ -224,7 +224,7 @@ public class GameClient extends Thread {
 			// if Go create Go board
 			if (packet.getGameType() < 3 && packet.getGameType() > -1)
 				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.isPlayer1Turn(),
-						packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score(), packet.getWinner(), packet.getBoard()));
+						packet.getPenultMove(), packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score(), packet.getWinner(), packet.getBoard()));
 			
 			// open GameScreen and exit
 			Game.openGameScreen();
@@ -232,7 +232,7 @@ public class GameClient extends Thread {
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
 		if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
-				packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score()))
+				packet.getPenultMove(), packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score()))
 			Game.updateGameBoard();
 	}
 
@@ -249,7 +249,7 @@ public class GameClient extends Thread {
 		
 		// update current board game, returns false if wrong game
 		// if successful update, update the game board
-		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getLastMove(),
+		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(),
 										packet.getPlayer1Score(), packet.getPlayer2Score()))
 			Game.updateGameBoard();
 	}

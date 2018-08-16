@@ -384,7 +384,7 @@ public class GameServer extends Thread {
 			String gameKey = "" + UUID.randomUUID();
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
 										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
-										+ "', " + packet.getGameType() + ", true, 0, '"
+										+ "', " + packet.getGameType() + ", true, -5, -5, '"
 										+ board + "', null, null, null);");
 			createGame.executeUpdate();
 			
@@ -489,6 +489,7 @@ public class GameServer extends Thread {
 			
 			int gameType = result.getInt("game_type");
 			boolean player1Turn = result.getBoolean("player1_turn");
+			int penultMove = result.getInt("penult_move");
 			int lastMove = result.getInt("last_move");
 			String board = result.getString("board");
 			int player1Score = result.getInt("p1_score");
@@ -521,7 +522,8 @@ public class GameServer extends Thread {
 			
 			// send requested game to client
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), gameType, 
-																 player1, player2, player1Turn, lastMove, player1Score, player2Score, winner, board, true);
+																 player1, player2, player1Turn, penultMove, lastMove, player1Score,
+																 player2Score, winner, board, true);
 			returnPacket.writeData(this, address, port);
 			
 			System.out.println("GAME SENT");
@@ -559,6 +561,7 @@ public class GameServer extends Thread {
 			String player2Key = result.getString("player2_key");
 			int gameType = result.getInt("game_type");
 			boolean player1Turn = result.getBoolean("player1_turn");
+			int penultMove = result.getInt("penult_move");
 			int lastMove = result.getInt("last_move");
 			String oldBoard = result.getString("board");
 			int player1Score = result.getInt("p1_score");
@@ -586,7 +589,7 @@ public class GameServer extends Thread {
 			}
 			
 			// make move
-			String newBoard = BoardGame.makeMove(gameType, oldBoard, player1Turn, lastMove, packet.getMoveFrom(), packet.getMoveTo());
+			String newBoard = BoardGame.makeMove(gameType, oldBoard, player1Turn, penultMove, lastMove, packet.getMoveFrom(), packet.getMoveTo());
 			
 			// if newBoard is null then an improper move was sent, send error and exit
 			if (newBoard == null) {
@@ -614,7 +617,7 @@ public class GameServer extends Thread {
 			
 			// update game
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
-					+ "player1_turn = " + !player1Turn + ", last_move = " + packet.getMoveTo() + ", "
+					+ "player1_turn = " + !player1Turn + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo() + ", "
 					+ "board = '" + newBoard + "', p1_score = " + player1Score + ", p2_score = " + player2Score
 					+ ", winner = " + winner + " WHERE game_key = '" + packet.getGameKey() + "';");
 			updateGame.executeUpdate();
@@ -623,7 +626,7 @@ public class GameServer extends Thread {
 			
 			// send basic update game info to player via 09 packet
 			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getUserKey(), 
-											packet.getGameKey(), packet.getMoveTo(), player1Score, player2Score, newBoard, true);
+											packet.getGameKey(), lastMove, packet.getMoveTo(), player1Score, player2Score, newBoard, true);
 			returnPacket.writeData(this, address, port);
 			
 			/*

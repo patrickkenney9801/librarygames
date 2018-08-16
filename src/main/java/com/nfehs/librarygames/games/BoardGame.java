@@ -39,6 +39,7 @@ public abstract class BoardGame {
 	private char[][] board;
 	protected Tile[][] tiles;
 	protected Piece[][] pieces;
+	private int penultMove;
 	private int lastMove;
 	
 	/**
@@ -52,13 +53,14 @@ public abstract class BoardGame {
 	 * @param board
 	 */
 	public BoardGame(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
-			int lastMove, int winner, String board) {
+			int penultMove, int lastMove, int winner, String board) {
 		setGameKey(gameKey);
 		setGameType((byte) gameType);
 		setGameName(lookupGameName(getGameType()));
 		setPlayer1(Security.decrypt(player1));
 		setPlayer2(Security.decrypt(player2));
 		setGameTitle(getGameName() + ":        " + getPlayer1() + "  vs.  " + getPlayer2());
+		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setBoard(board);
 		setTiles();
@@ -90,7 +92,20 @@ public abstract class BoardGame {
 	
 	// implement in child classes, for use in logic
 	protected abstract boolean validMove(int x, int y);
-	public static String makeMove(int gameType, String board1D, boolean isPlayer1Turn, int lastMove1D, int moveFrom1D, int moveTo1D) {
+	
+	/**
+	 * Handles validating and executing moves
+	 * @param gameType
+	 * @param board1D
+	 * @param isPlayer1Turn
+	 * @param penultMove1D
+	 * @param lastMove1D
+	 * @param moveFrom1D
+	 * @param moveTo1D
+	 * @return
+	 */
+	public static String makeMove(int gameType, String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D,
+									int moveFrom1D, int moveTo1D) {
 		// handle based on game type
 		switch (gameType) {
 			case 0:
@@ -123,6 +138,54 @@ public abstract class BoardGame {
 		coors2D[1] = coor % boardLength;
 		return coors2D;
 	}
+	
+	/**
+	 * Returns a copy of the board for testing or other cases
+	 * @return
+	 */
+	protected char[][] getBoardCopy() {
+		char[][] copy = new char[getBoard().length][getBoard().length];
+		for (int i = 0; i < copy.length; i++)
+			for (int j = 0; j < copy.length; j++)
+				copy[i][j] = getBoard()[i][j];
+		return copy;
+	}
+	
+	/**
+	 * Returns a padded copy of the board for testing or other cases
+	 * The board is surrounded by null characters so indexoutofboundexceptions do not occur
+	 * @return
+	 */
+	protected char[][] getPaddedBoardCopy() {
+		char[][] copy = new char[getBoard().length+2][getBoard().length+2];
+		for (int i = 0; i < copy.length-2; i++)
+			for (int j = 0; j < copy.length-2; j++)
+				copy[i+1][j+1] = getBoard()[i][j];
+		return copy;
+	}
+	
+	/**
+	 * This method WILL OVERWRITE a given board by replacing the given index with replaceChar
+	 * as well as any other connected characters of the same type
+	 * @param board
+	 * @param x
+	 * @param y
+	 * @param target
+	 * @param replace
+	 * @return
+	 */
+	protected static char[][] paintBoard(char[][] board, int x, int y, char target, char replace) {
+		board[x][y] = replace;
+		if (board[x][y+1] == target)
+			board = paintBoard(board, x, y+1, target, replace);
+		if (board[x][y-1] == target)
+			board = paintBoard(board, x, y-1, target, replace);
+		if (board[x+1][y] == target)
+			board = paintBoard(board, x+1, y, target, replace);
+		if (board[x-1][y] == target)
+			board = paintBoard(board, x-1, y, target, replace);
+		return board;
+	}
 
 	/**
 	 * Builds a brand new game for server
@@ -154,14 +217,16 @@ public abstract class BoardGame {
 	 * Updates a board game after receiving a 09 packet or 08 if on game screen
 	 * @param gameKey
 	 * @param board
+	 * @param penultMove
 	 * @param lastMove
 	 * @param player1Score
 	 * @param player2Score
 	 * @return false if not current game
 	 */
-	public boolean update(String gameKey, String board, int lastMove, int player1Score, int player2Score) {
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int player1Score, int player2Score) {
 		if (!getGameKey().equals(gameKey))
 			return false;
+		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setBoard(board);
 		setPieces();
@@ -418,5 +483,13 @@ public abstract class BoardGame {
 	 */
 	public void setWinner(String winner) {
 		this.winner = winner;
+	}
+
+	public int getPenultMove() {
+		return penultMove;
+	}
+
+	public void setPenultMove(int penultMove) {
+		this.penultMove = penultMove;
 	}
 }

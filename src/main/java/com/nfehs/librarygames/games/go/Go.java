@@ -19,8 +19,8 @@ public class Go extends BoardGame {
 	private int blackStonesCaptured;
 	
 	public Go(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
-			int lastMove, int whiteStonesCaptured, int blackStonesCaptured, int winner, String board) {
-		super(gameKey, gameType, player1, player2, player1Turn, lastMove, winner, board);
+			int penultMove, int lastMove, int whiteStonesCaptured, int blackStonesCaptured, int winner, String board) {
+		super(gameKey, gameType, player1, player2, player1Turn, penultMove, lastMove, winner, board);
 		setWhiteStonesCaptured(whiteStonesCaptured);
 		setBlackStonesCaptured(blackStonesCaptured);
 	}
@@ -42,10 +42,79 @@ public class Go extends BoardGame {
 	 * Returns true if the proposed move is allowed
 	 */
 	public boolean validMove(int x, int y) {
-		return true;
+		// if the location already has a stone, the move is invalid
+		if (getBoard()[x][y] != '0')
+			return false;
+		
+		// check ko rule
+		if (getPenultMove() == getLinearCoordinate(x, y))
+			return false;
+		
+		// copy board and add new piece to the copy
+		char[][] paddedCopy = getPaddedBoardCopy();
+		paddedCopy[x+1][y+1] = isPlayer1() ? '1' : '2';
+		
+		// check if the move has any liberties, if not it is invalid
+		return hasLiberties(paddedCopy, x+1, y+1);
 	}
 	
-	// TODO
+	/**
+	 * Returns true if the placement has at least one liberty
+	 * @param board
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	private boolean hasLiberties(char[][] paddedBoard, int x, int y) {
+		char piece = paddedBoard[x][y];
+		char opposingPiece = '2';
+		if (piece == '2')
+			opposingPiece = '1';
+		
+		// check if the group of stones created has a liberty
+		if (groupHasLiberty(paddedBoard, x, y))
+			return true;
+		// if not reset paddedBoard
+		paddedBoard = paintBoard(paddedBoard, x, y, '$', piece);
+		
+		// finally test if a surrounding opposing stone is captured, if so the move is valid
+		// unpainting boards is not neccessary
+		if (paddedBoard[x][y+1] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x, y+1))
+				return true;
+		if (paddedBoard[x][y-1] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x, y-1))
+				return true;
+		if (paddedBoard[x+1][y] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x+1, y))
+				return true;
+		if (paddedBoard[x-1][y] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x-1, y))
+				return true;
+		return false;
+	}
+	
+	/**
+	 * Returns true if a group of stones containing (x, y) has a liberty
+	 * @param board
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	private static boolean groupHasLiberty(char[][] board, int x, int y) {
+		board = paintBoard(board, x, y, board[x][y], '$');
+		for (int i = 1; i < board.length-1; i++)
+			for (int j = 1; j < board.length-1; j++)
+				if (board[i][j] == '$')
+					if (board[i][j+1] == '0' || board[i][j-1] == '0'|| board[i+1][j] == '0' || board[i-1][j] == '0')
+						return true;
+		return false;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	private static int getLiberties() {
 		return 0;
 	}
@@ -55,8 +124,8 @@ public class Go extends BoardGame {
 	 * Returns false if not current game
 	 * @Override
 	 */
-	public boolean update(String gameKey, String board, int lastMove, int player1Score, int player2Score) {
-		if (!super.update(gameKey, board, lastMove, player1Score, player2Score))
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int player1Score, int player2Score) {
+		if (!super.update(gameKey, board, penultMove, lastMove, player1Score, player2Score))
 			return false;
 		setWhiteStonesCaptured(player1Score);
 		setBlackStonesCaptured(player2Score);

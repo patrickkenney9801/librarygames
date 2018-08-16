@@ -17,6 +17,7 @@ public class Packet09SendMove extends Packet {
 	// data to send to client
 	// userKey
 	// gameKey
+	private int penultMove;
 	private int lastMove;
 	private int player1Score;
 	private int player2Score;
@@ -62,18 +63,20 @@ public class Packet09SendMove extends Packet {
 	 * @param packetKey
 	 * @param userKey
 	 * @param gameKey
+	 * @param penultMove
 	 * @param lastMove
 	 * @param player1Score
 	 * @param player2Score
 	 * @param board
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
-	public Packet09SendMove(String packetKey, String userKey, String gameKey, int lastMove,
+	public Packet09SendMove(String packetKey, String userKey, String gameKey, int penultMove, int lastMove,
 							int player1Score, int player2Score, String board, boolean serverUse) {
 		super(9);
 		setUuidKey(packetKey);
 		setUserKey(userKey);
 		setGameKey(gameKey);
+		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setPlayer1Score(player1Score);
 		setPlayer2Score(player2Score);
@@ -91,11 +94,12 @@ public class Packet09SendMove extends Packet {
 		setUuidKey(userdata[0]);
 		setUserKey(userdata[1]);
 		setGameKey(userdata[2]);
-		setBoard(userdata[6]);
+		setBoard(userdata[7]);
 		try {
-			setLastMove(Integer.parseInt(userdata[3]));
-			setPlayer1Score(Integer.parseInt(userdata[4]));
-			setPlayer2Score(Integer.parseInt(userdata[5]));
+			setPenultMove(Integer.parseInt(userdata[3]));
+			setLastMove(Integer.parseInt(userdata[4]));
+			setPlayer1Score(Integer.parseInt(userdata[5]));
+			setPlayer2Score(Integer.parseInt(userdata[6]));
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -109,7 +113,7 @@ public class Packet09SendMove extends Packet {
 	
 	@Override
 	public byte[] getDataServer() {
-		return ("09" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getLastMove()
+		return ("09" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getPenultMove() + ":" + getLastMove()
 		 		+ ":" + getPlayer1Score() + ":" + getPlayer2Score() + ":" + getBoard()).getBytes();
 	}
 
@@ -189,5 +193,13 @@ public class Packet09SendMove extends Packet {
 	 */
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public int getPenultMove() {
+		return penultMove;
+	}
+
+	public void setPenultMove(int penultMove) {
+		this.penultMove = penultMove;
 	}
 }

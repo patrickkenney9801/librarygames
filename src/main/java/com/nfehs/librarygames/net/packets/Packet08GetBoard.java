@@ -19,6 +19,7 @@ public class Packet08GetBoard extends Packet {
 	private String player1;
 	private String player2;
 	private boolean player1Turn;
+	private int penultMove;
 	private int lastMove;
 	private int player1Score;
 	private int player2Score;
@@ -60,6 +61,7 @@ public class Packet08GetBoard extends Packet {
 	 * @param player1
 	 * @param player2
 	 * @param player1Turn
+	 * @param penultMove
 	 * @param lastMove
 	 * @param player1Score
 	 * @param player2Score
@@ -68,7 +70,7 @@ public class Packet08GetBoard extends Packet {
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet08GetBoard(String packetKey, String userKey, String gameKey, int gameType, 
-							String player1, String player2, boolean player1Turn, int lastMove,
+							String player1, String player2, boolean player1Turn, int penultMove, int lastMove,
 							int player1Score, int player2Score, int winner, String board, boolean serverUse) {
 		super(8);
 		setUuidKey(packetKey);
@@ -78,6 +80,7 @@ public class Packet08GetBoard extends Packet {
 		setPlayer1(player1);
 		setPlayer2(player2);
 		setPlayer1Turn(player1Turn);
+		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setPlayer1Score(player1Score);
 		setPlayer2Score(player2Score);
@@ -99,13 +102,14 @@ public class Packet08GetBoard extends Packet {
 		setPlayer1(userdata[4]);
 		setPlayer2(userdata[5]);
 		setPlayer1Turn(Boolean.parseBoolean(userdata[6]));
-		setBoard(userdata[11]);
+		setBoard(userdata[12]);
 		try {
 			setGameType(Integer.parseInt(userdata[3]));
-			setLastMove(Integer.parseInt(userdata[7]));
-			setPlayer1Score(Integer.parseInt(userdata[8]));
-			setPlayer2Score(Integer.parseInt(userdata[9]));
-			setWinner(Integer.parseInt(userdata[10]));
+			setPenultMove(Integer.parseInt(userdata[7]));
+			setLastMove(Integer.parseInt(userdata[8]));
+			setPlayer1Score(Integer.parseInt(userdata[9]));
+			setPlayer2Score(Integer.parseInt(userdata[10]));
+			setWinner(Integer.parseInt(userdata[11]));
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -119,7 +123,7 @@ public class Packet08GetBoard extends Packet {
 	@Override
 	public byte[] getDataServer() {
 		return ("08" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getGameType()
-		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + isPlayer1Turn() + ":" + getLastMove()
+		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + isPlayer1Turn() + ":" + getPenultMove() + ":" + getLastMove()
 		 		+ ":" + getPlayer1Score() + ":" + getPlayer2Score() + ":" + getWinner() + ":" + getBoard()).getBytes();
 	}
 
@@ -271,5 +275,13 @@ public class Packet08GetBoard extends Packet {
 
 	public void setWinner(int winner) {
 		this.winner = winner;
+	}
+
+	public int getPenultMove() {
+		return penultMove;
+	}
+
+	public void setPenultMove(int penultMove) {
+		this.penultMove = penultMove;
 	}
 }
