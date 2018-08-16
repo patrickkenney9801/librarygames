@@ -77,7 +77,8 @@ public class Go extends BoardGame {
 	public void handleMouseLeaveTile() {
 		if (!isPlayerTurn())
 			return;
-		((GameScreen) Game.screen).removePieceShadow();
+		if (Game.screen instanceof GameScreen)
+			((GameScreen) Game.screen).removePieceShadow();
 	}
 
 	@Override
@@ -87,7 +88,8 @@ public class Go extends BoardGame {
 		if (!validMove(coordinates[0], coordinates[1]))
 			return;
 		// first remove piece shadow
-		((GameScreen) Game.screen).removePieceShadow();
+		if (Game.screen instanceof GameScreen)
+			((GameScreen) Game.screen).removePieceShadow();
 		
 		// get move coordinates in 1D
 		int move = getLinearCoordinate(coordinates[0], coordinates[1]);

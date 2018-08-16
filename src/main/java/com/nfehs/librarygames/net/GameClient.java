@@ -230,6 +230,10 @@ public class GameClient extends Thread {
 			Game.openGameScreen();
 			return;
 		}
+		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
+		if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
+				packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score()))
+			Game.updateGameBoard();
 	}
 
 	/**

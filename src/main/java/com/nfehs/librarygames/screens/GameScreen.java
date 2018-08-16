@@ -78,8 +78,9 @@ public class GameScreen extends Screen {
 		pane.setOpaque(false);
 		Game.mainWindow.add(pane);
 		
-		// add board to screen
+		// add board to screen and update pieces
 		addBoard();
+		updateBoard();
 
 		Game.mainWindow.repaint();
 	}
@@ -154,7 +155,6 @@ public class GameScreen extends Screen {
 		for (int i = 0; i < pieces.length; i++)
 			for (int j = 0; j < pieces.length; j++) {
 				if (gamePieces[i][j] != null) {
-					pane.remove(pieces[i][j]);
 					pieces[i][j] = new JLabel(new ImageIcon(gamePieces[i][j].getPiece()));
 					pane.add(pieces[i][j], JLayeredPane.DEFAULT_LAYER);
 					
