@@ -34,8 +34,53 @@ public class Go extends BoardGame {
 	 * @param moveTo1D
 	 * @return
 	 */
-	public static String makeMove(String board1D, boolean isPlayer1Turn, int lastMove1D, int moveFrom1D, int moveTo1D) {
-		return board1D.charAt(moveTo1D) == '0' ? board1D.substring(0, moveTo1D) + (isPlayer1Turn ? "1" : "2") + board1D.substring(moveTo1D + 1) : null;
+	public static String makeMove(String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D, int moveFrom1D, int moveTo1D) {
+		// check Ko rule first
+		if (moveTo1D == penultMove1D)
+			return null;
+		
+		// get 2D data and implement placement of move
+		char[][] paddedBoard = getPaddedBoard(board1D);
+		int[] coors = get2DCoordinates(moveTo1D, paddedBoard.length-2);
+		int x = coors[0]+1;
+		int y = coors[1]+1;
+		paddedBoard[x][y] = isPlayer1Turn ? '1' : '2';
+		char piece = paddedBoard[x][y];
+		char opposingPiece = piece == '1' ? '2' : '1';
+		
+		// check if the group of stones created has a liberty
+		boolean hasLiberty = groupHasLiberty(paddedBoard, x, y);
+		// if not reset paddedBoard
+		paddedBoard = paintBoard(paddedBoard, x, y, '$', piece);
+		
+		// finally test if a surrounding opposing stone is captured, if so the group has a liberty
+		// boards are not unpainted if the group has no liberties
+		// unpaint if they do so that they are not removed
+		if (paddedBoard[x][y+1] == opposingPiece)
+			if (groupHasLiberty(paddedBoard, x, y+1))
+				paddedBoard = paintBoard(paddedBoard, x, y+1, '$', opposingPiece);
+			else
+				hasLiberty = true;
+		if (paddedBoard[x][y-1] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x, y-1))
+				paddedBoard = paintBoard(paddedBoard, x, y-1, '$', opposingPiece);
+			else
+				hasLiberty = true;
+		if (paddedBoard[x+1][y] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x+1, y))
+				paddedBoard = paintBoard(paddedBoard, x+1, y, '$', opposingPiece);
+			else
+				hasLiberty = true;
+		if (paddedBoard[x-1][y] == opposingPiece)
+			if (!groupHasLiberty(paddedBoard, x-1, y))
+				paddedBoard = paintBoard(paddedBoard, x-1, y, '$', opposingPiece);
+			else
+				hasLiberty = true;
+		
+		// if it is a valid move, get board in String form and return
+		if (hasLiberty)
+			return buildBoard(paddedBoard);
+		return null;
 	}
 
 	/**
@@ -109,14 +154,6 @@ public class Go extends BoardGame {
 					if (board[i][j+1] == '0' || board[i][j-1] == '0'|| board[i+1][j] == '0' || board[i-1][j] == '0')
 						return true;
 		return false;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private static int getLiberties() {
-		return 0;
 	}
 
 	/**

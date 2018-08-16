@@ -110,7 +110,7 @@ public abstract class BoardGame {
 		switch (gameType) {
 			case 0:
 			case 1:						// get result of move for a Go game
-			case 2:						return  Go.makeMove(board1D, isPlayer1Turn, lastMove1D, moveFrom1D, moveTo1D);
+			case 2:						return  Go.makeMove(board1D, isPlayer1Turn, penultMove1D, lastMove1D, moveFrom1D, moveTo1D);
 			default:					System.out.println("GAME TYPE NOT FOUND");
 										return null;
 		}
@@ -152,6 +152,20 @@ public abstract class BoardGame {
 	}
 	
 	/**
+	 * Returns a padded board given a String
+	 * @param board
+	 * @return
+	 */
+	protected static char[][] getPaddedBoard(String board) {
+		char[][] reqBoard = getBoard(board);
+		char[][] padded = new char[reqBoard.length+2][reqBoard.length+2];
+		for (int i = 0; i < padded.length-2; i++)
+			for (int j = 0; j < padded.length-2; j++)
+				padded[i+1][j+1] = reqBoard[i][j];
+		return padded;
+	}
+	
+	/**
 	 * Returns a padded copy of the board for testing or other cases
 	 * The board is surrounded by null characters so indexoutofboundexceptions do not occur
 	 * @return
@@ -162,6 +176,20 @@ public abstract class BoardGame {
 			for (int j = 0; j < copy.length-2; j++)
 				copy[i+1][j+1] = getBoard()[i][j];
 		return copy;
+	}
+
+	/**
+	 * Returns a padded board in String form
+	 * @param paddedBoard
+	 * @return
+	 */
+	protected static String buildBoard(char[][] paddedBoard) {
+		// set all $ equal to 0, (capture pieces)
+		String board = "";
+		for (int i = 1; i < paddedBoard.length-1; i++)
+			for (int j = 1; j < paddedBoard.length-1; j++)
+				board += paddedBoard[i][j] != '$' ? paddedBoard[i][j] : '0';
+		return board;
 	}
 	
 	/**
