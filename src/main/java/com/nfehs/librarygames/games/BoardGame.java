@@ -72,7 +72,7 @@ public abstract class BoardGame {
 	protected abstract void setTiles();
 	protected abstract void setPieces();
 	public abstract void handleMouseEnterTile(int[] coordinates);
-	public abstract void handleMouseLeaveTile(int[] coordinates);
+	public abstract void handleMouseLeaveTile();
 	public abstract void handleMouseClickTile(int[] coordinates);
 	
 	// implement in child classes, for use in logic TODO add more logic methods

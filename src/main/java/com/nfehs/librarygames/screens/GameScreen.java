@@ -1,18 +1,21 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
 
 /**
@@ -24,6 +27,7 @@ import com.nfehs.librarygames.games.Tile;
 
 public class GameScreen extends Screen {
 	private static final double imageTileSize = 100;
+	
 	private double scale;
 	private double screenTileSize;
 	private int topLeftX;
@@ -32,7 +36,11 @@ public class GameScreen extends Screen {
 	private JLabel title;
 	private JButton back;
 	
+	private JLayeredPane pane;
 	private JLabel[][] board;
+	
+	// used in Go games
+	private JLabel shadowPiece;
 
 	public GameScreen() {
 		super(false);
@@ -51,15 +59,22 @@ public class GameScreen extends Screen {
 		});
 		
 		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
-		setScreenTileSize((int) ((Game.screenSize.getHeight() * 4 / 5) / Game.getBoardGame().getBoard().length));
+		int rowLength = Game.getBoardGame().getBoard().length;
+		setScreenTileSize((int) ((Game.screenSize.getHeight() * 4 / 5) / rowLength));
 		setScale(getScreenTileSize() / imageTileSize);
 		//System.out.println(getScale());
 		setTopLeftY((int) Game.screenSize.getHeight() / 10);
 		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
+
+		shadowPiece = new JLabel();
+		pane = new JLayeredPane();
+		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
+		pane.setOpaque(false);
+		Game.mainWindow.add(pane);
 		
 		// add board to screen
 		addBoard();
-		
+
 		Game.mainWindow.repaint();
 	}
 	
@@ -75,11 +90,11 @@ public class GameScreen extends Screen {
 		
 		for (int i = 0; i < board.length; i++)
 			for (int j = 0; j < board.length; j++) {
-				board[i][j] = new JLabel(new ImageIcon(getProperImage(tiles[i][j].getTile(), tiles[i][j].getRotations())));
-				Game.mainWindow.add(board[i][j]);
-				board[i][j].setBounds((int) (getTopLeftX() + i*getScreenTileSize()), (int) (getTopLeftY() + j*getScreenTileSize()),
-										(int) getScreenTileSize(), (int) getScreenTileSize());
-				board[i][j].addMouseListener(new MouseListener() {
+				board[i][j] = new JLabel(new ImageIcon(getProperImage(tiles[i][j].getTile(), tiles[i][j].getRotations(), 1)));
+				pane.add(board[i][j], JLayeredPane.FRAME_CONTENT_LAYER);
+				
+				board[i][j].setBounds((int) (i*getScreenTileSize()), (int) (j*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+				board[i][j].addMouseListener(new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
 						Game.getBoardGame().handleMouseClickTile(getCoordinates((JLabel) e.getSource()));
 					}
@@ -87,10 +102,8 @@ public class GameScreen extends Screen {
 						Game.getBoardGame().handleMouseEnterTile(getCoordinates((JLabel) e.getSource()));
 					}
 					public void mouseExited(MouseEvent e) {
-						Game.getBoardGame().handleMouseLeaveTile(getCoordinates((JLabel) e.getSource()));
+						Game.getBoardGame().handleMouseLeaveTile();
 					}
-					public void mousePressed(MouseEvent e) {}
-					public void mouseReleased(MouseEvent e) {}
 					
 					private int[] getCoordinates (JLabel tile) {
 						int[] coordinates = new int[2];
@@ -104,27 +117,32 @@ public class GameScreen extends Screen {
 					}
 				});
 			}
-		Game.mainWindow.repaint();
+		pane.repaint();
 	}
 	
 	/**
 	 * Returns a proper image in size and rotation
 	 * @param img
 	 * @param rotations
+	 * @param transparent
 	 * @return
 	 */
-	private BufferedImage getProperImage(BufferedImage img, int rotations) {
+	private BufferedImage getProperImage(BufferedImage img, int rotations, float transparent) {
 		BufferedImage properImage = new BufferedImage((int) getScreenTileSize(), (int) getScreenTileSize(), BufferedImage.TYPE_INT_ARGB);
 		AffineTransform at = new AffineTransform();
 		
 		// rotate image about center
-		at.rotate(Math.PI/2 * -rotations, getScreenTileSize() / 2, getScreenTileSize() / 2);
+		at.rotate(Math.PI/2 * rotations, getScreenTileSize() / 2, getScreenTileSize() / 2);
 		// scale image to right size
 		at.scale(getScale(), getScale());
+		
+		// change transparency
+		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparent);
 		
 		// draw image
 		Graphics2D g2d = properImage.createGraphics();
 		g2d.setTransform(at);
+		g2d.setComposite(ac);
 		g2d.drawImage(img, 0, 0, null);
 		g2d.dispose();
 		return properImage;
@@ -139,13 +157,27 @@ public class GameScreen extends Screen {
 	}
 	
 	/**
-	 * Removes board from screen
+	 * Used in Go games, this will show a shadow of where a piece would be placed on click
+	 * @param piece
+	 * @param x
+	 * @param y
 	 */
-	private void removeBoardAndPieces() {
-		for (JLabel[] row : board)
-			for (JLabel tile : row)
-				Game.mainWindow.remove(tile);
-		// TODO
+	public void displayPieceShadow(Piece piece, int x, int y) {
+		// set shadow pieces icon
+		shadowPiece.setIcon(new ImageIcon(getProperImage(piece.getPiece(), 0, .75f)));
+		pane.add(shadowPiece, JLayeredPane.DEFAULT_LAYER);
+		
+		shadowPiece.setBounds((int) (x*getScreenTileSize()), (int) (y*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+		pane.repaint();
+	}
+	
+	/**
+	 * Used in Go games, this will remove a shadow piece
+	 */
+	public void removePieceShadow() {
+		pane.remove(shadowPiece);
+		
+		pane.repaint();
 	}
 
 	@Override
@@ -154,12 +186,13 @@ public class GameScreen extends Screen {
 		
 		Game.mainWindow.remove(back);
 		Game.mainWindow.remove(title);
+		Game.mainWindow.remove(pane);
 		
 		back = null;
 		title = null;
-		
-		removeBoardAndPieces();
+		pane = null;
 		board = null;
+		shadowPiece = null;
 		
 		Game.mainWindow.repaint();
 	}

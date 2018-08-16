@@ -437,7 +437,7 @@ public class GameServer extends Thread {
 				info += result.getString("game_type") + ",";
 				info += result.getString("username") + ",";
 				info += Security.encrypt(packet.getUsername()) + ",";
-				info += result.getString("player1_turn");
+				info += result.getBoolean("player1_turn");
 				gameInfo.add(info);
 			}
 			
@@ -452,7 +452,7 @@ public class GameServer extends Thread {
 				info += result.getString("game_type") + ",";
 				info += Security.encrypt(packet.getUsername()) + ",";
 				info += result.getString("username") + ",";
-				info += result.getString("player1_turn");
+				info += result.getBoolean("player1_turn");
 				gameInfo.add(info);
 			}
 			

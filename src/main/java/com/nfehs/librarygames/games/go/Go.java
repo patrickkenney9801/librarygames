@@ -1,10 +1,12 @@
 package com.nfehs.librarygames.games.go;
 
+import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
 import com.nfehs.librarygames.games.go.pieces.Stone;
 import com.nfehs.librarygames.games.go.tiles.*;
+import com.nfehs.librarygames.screens.GameScreen;
 
 /**
  * This is the BoardGame class for Go
@@ -30,19 +32,31 @@ public class Go extends BoardGame {
 
 	@Override
 	public void handleMouseEnterTile(int[] coordinates) {
+		if (!isPlayerTurn())
+			return;
 		if (!validMove(coordinates[0], coordinates[1]))
 			return;
+		if (Game.screen instanceof GameScreen)
+			((GameScreen) Game.screen).displayPieceShadow(new Stone(getPlayer1().equals(Game.getPlayer().getUsername())), coordinates[0], coordinates[1]);
 	}
 
 	@Override
-	public void handleMouseLeaveTile(int[] coordinates) {
-		// TODO remove shadow
+	public void handleMouseLeaveTile() {
+		if (!isPlayerTurn())
+			return;
+		((GameScreen) Game.screen).removePieceShadow();
 	}
 
 	@Override
 	public void handleMouseClickTile(int[] coordinates) {
+		if (!isPlayerTurn())
+			return;
 		if (!validMove(coordinates[0], coordinates[1]))
 			return;
+		// first remove piece shadow
+		((GameScreen) Game.screen).removePieceShadow();
+		
+		// TODO send packet
 	}
 
 	@Override

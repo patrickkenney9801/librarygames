@@ -24,7 +24,7 @@ public class Game {
 	public static Container mainWindow;
 	public static Dimension screenSize;
 	
-	private static Screen screen;
+	public static Screen screen;
 	
 	private static GameClient client;
 	private static Player player;
