@@ -24,7 +24,7 @@ public class CornerTile extends Tile {
 	
 	private static BufferedImage getCornerTile() {
 		try {
-			return ImageIO.read(CornerTile.class.getResource("/com/nfehs/librarygames/media/go/goEdgeTile.png"));
+			return ImageIO.read(CornerTile.class.getResource("/com/nfehs/librarygames/media/go/goCornerTile.png"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

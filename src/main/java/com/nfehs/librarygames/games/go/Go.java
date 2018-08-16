@@ -31,10 +31,10 @@ public class Go extends BoardGame {
 		for (int i = 1; i < tiles.length - 1; i++) {
 			for (int j = 1; j < tiles.length - 1; j++)
 				tiles[i][j] = new CenterTile();
-			tiles[i][0] = new EdgeTile(0);					// set left edges
-			tiles[0][i] = new EdgeTile(1);					// top
-			tiles[i][tiles.length-1] = new EdgeTile(2);		// right
-			tiles[tiles.length-1][i] = new EdgeTile(3);		// bottom
+			tiles[i][0] = new EdgeTile(3);					// set left edges
+			tiles[0][i] = new EdgeTile(0);					// top
+			tiles[i][tiles.length-1] = new EdgeTile(1);		// right
+			tiles[tiles.length-1][i] = new EdgeTile(2);		// bottom
 		}
 		// set corner tiles
 		tiles[0][0] = new CornerTile(0);
