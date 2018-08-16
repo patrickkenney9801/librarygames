@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.nfehs.librarygames.Player;
+import com.nfehs.librarygames.games.BoardGame;
+import com.nfehs.librarygames.games.go.Go;
 import com.nfehs.librarygames.net.packets.*;
 import com.nfehs.librarygames.net.packets.Packet.PacketTypes;
 
@@ -125,6 +127,7 @@ public class GameServer extends Thread {
 										break;
 			case GETBOARD:				getBoard(data, address, port);
 										break;
+			case SENDMOVE:				sendMove(data, address, port);
 			default:					break;
 		}
 	}
@@ -344,26 +347,13 @@ public class GameServer extends Thread {
 		try {
 			Packet06CreateGame packet = new Packet06CreateGame(data);
 			
-			/*
-			 *  build game board from game type
-			 */
-			String board = "";
-			switch (packet.getGameType()) {
-				case 0:							// handle game type Go 9x9
-												for (int i = 0; i < 9*9; i++)
-													board += "0";
-												break;
-				case 1:							// handle game type Go 13x13
-												for (int i = 0; i < 13*13; i++)
-													board += "0";
-												break;
-				case 2:							// handle game type Go 19x19
-												for (int i = 0; i < 19*19; i++)
-													board += "0";
-												break;
-				default:						// error no valid game type, warn and exit
-												System.out.println("ERROR gameType: " + packet.getGameType());
-												return;
+			// build game board from game type
+			String board = BoardGame.createNewBoard(packet.getGameType());
+			// if it is null, send error wrong game type and exit
+			if (board == null) {
+				// TODO send packet
+				System.out.println("ERROR gameType: " + packet.getGameType());
+				return;
 			}
 			
 			/*
@@ -395,7 +385,7 @@ public class GameServer extends Thread {
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
 										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
 										+ "', " + packet.getGameType() + ", true, 0, '"
-										+ board + "');");
+										+ board + "', null, null, null);");
 			createGame.executeUpdate();
 			
 			System.out.println("GAME CREATED");
@@ -405,7 +395,7 @@ public class GameServer extends Thread {
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			getBoard(temp.getData(), address, port);
 			
-			// attempt to send data to opponent via 8 packet so sends notification TODO
+			// attempt to send data to opponent via 8 packet so sends notification
 			for (Player p : onlinePlayers)
 				if (p.getUser_key().equals(opponentKey))
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
@@ -428,6 +418,8 @@ public class GameServer extends Thread {
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
 																+ " WHERE games.player1_key = '" + packet.getUserKey() + "';");
 			ResultSet result = statement.executeQuery();
+			
+			// TODO put finished games in new arraylist
 			
 			// get game info and put into ArrayList
 			ArrayList<String> gameInfo = new ArrayList<String>();
@@ -494,13 +486,14 @@ public class GameServer extends Thread {
 				System.out.println("ERROR IMPROPER GAME KEY SENT");
 				return;
 			}
-			int gameType;
-			int lastMove;
 			
-			gameType = result.getInt("game_type");
+			int gameType = result.getInt("game_type");
 			boolean player1Turn = result.getBoolean("player1_turn");
-			lastMove = result.getInt("last_move");
+			int lastMove = result.getInt("last_move");
 			String board = result.getString("board");
+			int player1Score = result.getInt("p1_score");
+			int player2Score = result.getInt("p2_score");
+			int winner = result.getInt("winner");
 			
 			// get player usernames in proper order
 			String player1 = null;
@@ -528,10 +521,120 @@ public class GameServer extends Thread {
 			
 			// send requested game to client
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), gameType, 
-																 player1, player2, player1Turn, lastMove, board, true);
+																 player1, player2, player1Turn, lastMove, player1Score, player2Score, winner, board, true);
 			returnPacket.writeData(this, address, port);
 			
 			System.out.println("GAME SENT");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Verifies a given move, and makes it if valid
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void sendMove(byte[] data, InetAddress address, int port) {
+		try {
+			Packet09SendMove packet = new Packet09SendMove(data);
+			
+			// find game
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM games WHERE game_key = '" + packet.getGameKey() + "';");
+			ResultSet result = statement.executeQuery();
+			
+			/*
+			 *  get game info
+			 */
+			// if there are no results, exit print error and send error wrong game key
+			if (!result.next()) {
+				// TODO send error to user
+				System.out.println("ERROR IMPROPER GAME KEY SENT");
+				return;
+			}
+
+			// get essential checking information for move
+			String player1Key = result.getString("player1_key");
+			String player2Key = result.getString("player2_key");
+			int gameType = result.getInt("game_type");
+			boolean player1Turn = result.getBoolean("player1_turn");
+			int lastMove = result.getInt("last_move");
+			String oldBoard = result.getString("board");
+			int player1Score = result.getInt("p1_score");
+			int player2Score = result.getInt("p2_score");
+			int winner = result.getInt("winner");
+			
+			String playerTurnKey;
+			if (player1Turn)
+				playerTurnKey = player1Key;
+			else
+				playerTurnKey = player2Key;
+			
+			// if the game is already over, exit and send error
+			if (winner != 0) {
+				// TODO send error package
+				System.out.println("GAME IS ALREADY OVER");
+				return;
+			}
+			
+			// if it is not the sending player's turn, exit and send error
+			if (!packet.getUserKey().equals(playerTurnKey)) {
+				// TODO send error package
+				System.out.println("NOT SENDING PLAYER'S TURN");
+				return;
+			}
+			
+			// make move
+			String newBoard = BoardGame.makeMove(gameType, oldBoard, player1Turn, lastMove, packet.getMoveFrom(), packet.getMoveTo());
+			
+			// if newBoard is null then an improper move was sent, send error and exit
+			if (newBoard == null) {
+				// TODO send error package
+				System.out.println("ILLEGAL MOVE SENT");
+				return;
+			}
+
+			// update score
+			// if player did not pass, and the game is go, calculate captured pieces
+			if (gameType < 3 && packet.getMoveTo() != -1) {
+				int capturedPieces = -1;	// for use in go games
+				// calculate number of captured pieces in a go game
+				for (int i = 0; i < oldBoard.length(); i++)
+					if (oldBoard.charAt(i) != newBoard.charAt(i))
+						capturedPieces++;
+				if (player1Turn)
+					player1Score += capturedPieces;
+				else
+					player2Score += capturedPieces;
+			}
+			
+			// handle pass TODO
+			// handle winner TODO
+			
+			// update game
+			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
+					+ "player1_turn = " + !player1Turn + ", last_move = " + packet.getMoveTo() + ", "
+					+ "board = '" + newBoard + "', p1_score = " + player1Score + ", p2_score = " + player2Score
+					+ ", winner = " + winner + ") WHERE game_key = '" + packet.getGameKey() + "';");
+			updateGame.executeUpdate();
+			
+			System.out.println("GAME UPDATED");
+			
+			// send basic update game info to player via 09 packet
+			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getUserKey(), 
+											packet.getGameKey(), packet.getMoveTo(), player1Score, player2Score, newBoard, true);
+			returnPacket.writeData(this, address, port);
+			
+			/*
+			 *  send a 08 packet to opponent to notify or update their client
+			 */
+			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), packet.getGameKey());
+			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
+			
+			for (Player p : onlinePlayers)
+				if (p.getUser_key().equals(player1Turn ? player2Key : player1Key))
+					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

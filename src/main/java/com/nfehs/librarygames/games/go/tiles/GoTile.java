@@ -9,7 +9,7 @@ import com.nfehs.librarygames.games.Tile;
 /**
  * This class handles the tiles of a go board
  * @author Patrick Kenney and Syed Quadri
- * @date 8/15/2018
+ * @date 8/16/2018
  */
 
 public class GoTile extends Tile {

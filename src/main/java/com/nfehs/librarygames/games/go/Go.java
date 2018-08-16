@@ -15,18 +15,51 @@ import com.nfehs.librarygames.screens.GameScreen;
  */
 
 public class Go extends BoardGame {
-	private int blackStonesCaptured;
 	private int whiteStonesCaptured;
+	private int blackStonesCaptured;
 	
 	public Go(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
-			int lastMove, String board) {
-		super(gameKey, gameType, player1, player2, player1Turn, lastMove, board);
+			int lastMove, int whiteStonesCaptured, int blackStonesCaptured, int winner, String board) {
+		super(gameKey, gameType, player1, player2, player1Turn, lastMove, winner, board);
+		setWhiteStonesCaptured(whiteStonesCaptured);
+		setBlackStonesCaptured(blackStonesCaptured);
+	}
+
+	/**
+	 * Makes a given move if it is legal, otherwise return a null String
+	 * @param board1D
+	 * @param isPlayer1Turn
+	 * @param lastMove1D
+	 * @param moveFrom1D
+	 * @param moveTo1D
+	 * @return
+	 */
+	public static String makeMove(String board1D, boolean isPlayer1Turn, int lastMove1D, int moveFrom1D, int moveTo1D) {
+		return board1D.charAt(moveTo1D) == '0' ? board1D.substring(0, moveTo1D) + (isPlayer1Turn ? "1" : "2") + board1D.substring(moveTo1D + 1) : null;
 	}
 
 	/**
 	 * Returns true if the proposed move is allowed
 	 */
 	public boolean validMove(int x, int y) {
+		return true;
+	}
+	
+	// TODO
+	private static int getLiberties() {
+		return 0;
+	}
+
+	/**
+	 * Updates a Go game specifically after receiving a 09 packet or 08 if on game screen
+	 * Returns false if not current game
+	 * @Override
+	 */
+	public boolean update(String gameKey, String board, int lastMove, int player1Score, int player2Score) {
+		if (!((BoardGame) this).update(gameKey, board, lastMove, player1Score, player2Score))
+			return false;
+		setWhiteStonesCaptured(player1Score);
+		setBlackStonesCaptured(player2Score);
 		return true;
 	}
 
@@ -56,8 +89,21 @@ public class Go extends BoardGame {
 		// first remove piece shadow
 		((GameScreen) Game.screen).removePieceShadow();
 		
-		// TODO send packet
+		// get move coordinates in 1D
+		int move = getLinearCoordinate(coordinates[0], coordinates[1]);
+		
+		// send packet
+		Game.sendMove(move, move);
 	}
+	
+	// these methods are not used in go
+	@Override
+	public void handleMouseEnterPiece(int[] coordinates) {}
+	@Override
+	public void handleMouseLeavePiece() {}
+	@Override
+	public void handleMouseClickPiece(int[] coordinates) {}
+	
 
 	@Override
 	protected void setTiles() {
@@ -96,5 +142,21 @@ public class Go extends BoardGame {
 				else if (board[i][j] == '2')
 					pieces[i][j] = new Stone(getGameType(), false);
 		this.pieces = pieces;
+	}
+
+	public int getBlackStonesCaptured() {
+		return blackStonesCaptured;
+	}
+
+	public void setBlackStonesCaptured(int blackStonesCaptured) {
+		this.blackStonesCaptured = blackStonesCaptured;
+	}
+
+	public int getWhiteStonesCaptured() {
+		return whiteStonesCaptured;
+	}
+
+	public void setWhiteStonesCaptured(int whiteStonesCaptured) {
+		this.whiteStonesCaptured = whiteStonesCaptured;
 	}
 }

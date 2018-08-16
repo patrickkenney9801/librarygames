@@ -1,6 +1,7 @@
 package com.nfehs.librarygames.games;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.games.go.Go;
 import com.nfehs.librarygames.net.Security;
 
 /**
@@ -32,6 +33,7 @@ public abstract class BoardGame {
 	private boolean isPlayerTurn;
 	private String gameKey;
 	private boolean isPlayer1;
+	private String winner;	// TODO handle finished games
 	
 	// For use only when on GameScreen
 	private char[][] board;
@@ -50,7 +52,7 @@ public abstract class BoardGame {
 	 * @param board
 	 */
 	public BoardGame(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
-			int lastMove, String board) {
+			int lastMove, int winner, String board) {
 		setGameKey(gameKey);
 		setGameType((byte) gameType);
 		setGameName(lookupGameName(getGameType()));
@@ -62,6 +64,12 @@ public abstract class BoardGame {
 		setTiles();
 		setPieces();
 		setPlayer1(player1Turn);
+		
+		// if the game has a winner, set it to the winner's username
+		if (winner == 1)
+			setWinner(getPlayer1());
+		else if (winner == 2)
+			setWinner(getPlayer2());
 		
 		// determine whether it is the logged players turn or not
 		setPlayerTurn(false);
@@ -76,9 +84,92 @@ public abstract class BoardGame {
 	public abstract void handleMouseEnterTile(int[] coordinates);
 	public abstract void handleMouseLeaveTile();
 	public abstract void handleMouseClickTile(int[] coordinates);
+	public abstract void handleMouseEnterPiece(int[] coordinates);
+	public abstract void handleMouseLeavePiece();
+	public abstract void handleMouseClickPiece(int[] coordinates);
 	
-	// implement in child classes, for use in logic TODO add more logic methods
+	// implement in child classes, for use in logic
 	protected abstract boolean validMove(int x, int y);
+	public static String makeMove(int gameType, String board1D, boolean isPlayer1Turn, int lastMove1D, int moveFrom1D, int moveTo1D) {
+		// handle based on game type
+		switch (gameType) {
+			case 0:
+			case 1:						// get result of move for a Go game
+			case 2:						return  Go.makeMove(board1D, isPlayer1Turn, lastMove1D, moveFrom1D, moveTo1D);
+			default:					System.out.println("GAME TYPE NOT FOUND");
+										return null;
+		}
+	}
+	
+	/**
+	 * Converts 2D coordinates into 1D
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	protected int getLinearCoordinate(int x, int y) {
+		return getBoard().length * x + y;
+	}
+	
+	/**
+	 * Converts 1D coordinates into 2D
+	 * @param coor
+	 * @param boardLength
+	 * @return
+	 */
+	protected static int[] get2DCoordinates(int coor, int boardLength) {
+		int[] coors2D = new int[2];
+		coors2D[0] = coor / boardLength;
+		coors2D[1] = coor % boardLength;
+		return coors2D;
+	}
+
+	/**
+	 * Builds a brand new game for server
+	 * @param gameType
+	 * @return
+	 */
+	public static String createNewBoard(int gameType) {
+		String board = "";
+		switch (gameType) {
+			case 0:							// handle game type Go 9x9
+											for (int i = 0; i < 9*9; i++)
+												board += "0";
+											break;
+			case 1:							// handle game type Go 13x13
+											for (int i = 0; i < 13*13; i++)
+												board += "0";
+											break;
+			case 2:							// handle game type Go 19x19
+											for (int i = 0; i < 19*19; i++)
+												board += "0";
+											break;
+			default:						// error no valid game type, return null
+											return null;
+		}
+		return board;
+	}
+	
+	/**
+	 * Updates a board game after receiving a 09 packet or 08 if on game screen
+	 * @param gameKey
+	 * @param board
+	 * @param lastMove
+	 * @param player1Score
+	 * @param player2Score
+	 * @return false if not current game
+	 */
+	public boolean update(String gameKey, String board, int lastMove, int player1Score, int player2Score) {
+		if (!getGameKey().equals(gameKey))
+			return false;
+		setLastMove(lastMove);
+		setBoard(board);
+		setPieces();
+		setPlayer1(!isPlayer1());
+		setPlayerTurn(!isPlayerTurn());
+		
+		return true;
+	}
 
 	/**
 	 * Returns a String with 3 parts delimited by ~
@@ -244,6 +335,21 @@ public abstract class BoardGame {
 	}
 
 	/**
+	 * Converts a 1D board String into a 2D char array
+	 * @param board the board to decompress
+	 */
+	public static char[][] getBoard(String board) {
+		// get length of sides
+		int arrayLength = (int) Math.sqrt(board.length());
+		
+		// build 2D board
+		char[][] board2D = new char[arrayLength][arrayLength];
+		for (int i = 0; i < board2D.length; i++)
+			board2D[i] = board.substring(i*arrayLength, (i+1)*arrayLength).toCharArray();
+		return board2D;
+	}
+
+	/**
 	 * @param board the board to set
 	 */
 	public void setBoard(String board) {
@@ -299,5 +405,19 @@ public abstract class BoardGame {
 
 	public void setGameType(byte gameType) {
 		this.gameType = gameType;
+	}
+
+	/**
+	 * @return the winner
+	 */
+	public String getWinner() {
+		return winner;
+	}
+
+	/**
+	 * @param winner the winner to set
+	 */
+	public void setWinner(String winner) {
+		this.winner = winner;
 	}
 }

@@ -178,6 +178,16 @@ public class Game {
 		// sends get board packet to server
 		new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey).writeData(client);
 	}
+	
+	/**
+	 * This method attempts to send a move to the server
+	 * @param movingFrom
+	 * @param movingTo
+	 */
+	public static void sendMove(int movingFrom, int movingTo) {
+		// sends send move packet to server
+		new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(), movingFrom, movingTo, getPlayer().getUsername()).writeData(client);
+	}
 
 	/**
 	 * This method closes the screen for the user
@@ -254,6 +264,17 @@ public class Game {
 			return;
 		}
 		((CreateGameScreen) screen).loadPlayers();
+	}
+	
+	/**
+	 * This method updates the game board on the GameScreen
+	 */
+	public static void updateGameBoard() {
+		if (!(screen instanceof GameScreen)) {
+			System.out.println("GAMESTATE ERROR update game board called on wrong screen");
+			return;
+		}
+		((GameScreen) screen).updateBoard();
 	}
 
 	/**

@@ -80,6 +80,7 @@ public class GameClient extends Thread {
 										break;
 			case GETBOARD:				getBoard(packet.getData());
 										break;
+			case SENDMOVE:				updateBoard(packet.getData());
 			default:					break;
 		}
 	}
@@ -222,12 +223,30 @@ public class GameClient extends Thread {
 			
 			// if Go create Go board
 			if (packet.getGameType() < 3 && packet.getGameType() > -1)
-				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(),
-						packet.isPlayer1Turn(), packet.getLastMove(), packet.getBoard()));
+				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.isPlayer1Turn(),
+						packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score(), packet.getWinner(), packet.getBoard()));
 			
 			// open GameScreen and exit
 			Game.openGameScreen();
 			return;
 		}
+	}
+
+	/**
+	 * Handles a successful move, updates the game board
+	 * @param data
+	 */
+	private void updateBoard(byte[] data) {
+		// verify that user is still on game screen, if not exit
+		if (Game.gameState != Game.PLAYING_GAME)
+			return;
+		
+		Packet09SendMove packet = new Packet09SendMove(data, true);
+		
+		// update current board game, returns false if wrong game
+		// if successful update, update the game board
+		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getLastMove(),
+										packet.getPlayer1Score(), packet.getPlayer2Score()))
+			Game.updateGameBoard();
 	}
 }

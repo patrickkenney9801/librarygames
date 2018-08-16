@@ -20,6 +20,9 @@ public class Packet08GetBoard extends Packet {
 	private String player2;
 	private boolean player1Turn;
 	private int lastMove;
+	private int player1Score;
+	private int player2Score;
+	private int winner;
 	private String board;
 
 	/**
@@ -49,7 +52,6 @@ public class Packet08GetBoard extends Packet {
 	}
 	
 	/**
-	 * 
 	 * Used by server to send data to client
 	 * @param packetKey
 	 * @param userKey
@@ -59,12 +61,15 @@ public class Packet08GetBoard extends Packet {
 	 * @param player2
 	 * @param player1Turn
 	 * @param lastMove
+	 * @param player1Score
+	 * @param player2Score
+	 * @param winner
 	 * @param board
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet08GetBoard(String packetKey, String userKey, String gameKey, int gameType, 
 							String player1, String player2, boolean player1Turn, int lastMove,
-							String board, boolean serverUse) {
+							int player1Score, int player2Score, int winner, String board, boolean serverUse) {
 		super(8);
 		setUuidKey(packetKey);
 		setUserKey(userKey);
@@ -74,6 +79,9 @@ public class Packet08GetBoard extends Packet {
 		setPlayer2(player2);
 		setPlayer1Turn(player1Turn);
 		setLastMove(lastMove);
+		setPlayer1Score(player1Score);
+		setPlayer2Score(player2Score);
+		setWinner(winner);
 		setBoard(board);
 	}
 	
@@ -91,10 +99,13 @@ public class Packet08GetBoard extends Packet {
 		setPlayer1(userdata[4]);
 		setPlayer2(userdata[5]);
 		setPlayer1Turn(Boolean.parseBoolean(userdata[6]));
-		setBoard(userdata[8]);
+		setBoard(userdata[11]);
 		try {
 			setGameType(Integer.parseInt(userdata[3]));
 			setLastMove(Integer.parseInt(userdata[7]));
+			setPlayer1Score(Integer.parseInt(userdata[8]));
+			setPlayer2Score(Integer.parseInt(userdata[9]));
+			setWinner(Integer.parseInt(userdata[10]));
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -109,7 +120,7 @@ public class Packet08GetBoard extends Packet {
 	public byte[] getDataServer() {
 		return ("08" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getGameType()
 		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + isPlayer1Turn() + ":" + getLastMove()
-		 		+ ":" + getBoard()).getBytes();
+		 		+ ":" + getPlayer1Score() + ":" + getPlayer2Score() + ":" + getWinner() + ":" + getBoard()).getBytes();
 	}
 
 	/**
@@ -236,5 +247,29 @@ public class Packet08GetBoard extends Packet {
 	 */
 	public void setBoard(String board) {
 		this.board = board;
+	}
+
+	public int getPlayer1Score() {
+		return player1Score;
+	}
+
+	public void setPlayer1Score(int player1Score) {
+		this.player1Score = player1Score;
+	}
+
+	public int getPlayer2Score() {
+		return player2Score;
+	}
+
+	public void setPlayer2Score(int player2Score) {
+		this.player2Score = player2Score;
+	}
+
+	public int getWinner() {
+		return winner;
+	}
+
+	public void setWinner(int winner) {
+		this.winner = winner;
 	}
 }

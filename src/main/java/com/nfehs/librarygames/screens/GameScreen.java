@@ -39,6 +39,7 @@ public class GameScreen extends Screen {
 	
 	private JLayeredPane pane;
 	private JLabel[][] board;
+	private JLabel[][] pieces;
 	
 	// used in Go games
 	private JLabel shadowPiece;
@@ -64,7 +65,7 @@ public class GameScreen extends Screen {
 		setScreenTileSize((int) (getBoardSize() / rowLength));
 		setScale(getScreenTileSize() / imageTileSize);
 		//System.out.println(getScale());
-		setTopLeftY((int) Game.screenSize.getHeight() / 10);
+		setTopLeftY((int) Game.screenSize.getHeight() / 25);
 		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
 
 		shadowPiece = new JLabel();
@@ -88,8 +89,6 @@ public class GameScreen extends Screen {
 	 * Should only be called by constructor
 	 */
 	private void addBoard() {
-		System.out.println(getTopLeftX() + ", " + getTopLeftY() + ": " + getScreenTileSize());
-		
 		Tile[][] tiles = Game.getBoardGame().getTiles();
 		board = new JLabel[tiles.length][tiles.length];
 		
@@ -109,7 +108,6 @@ public class GameScreen extends Screen {
 					public void mouseExited(MouseEvent e) {
 						Game.getBoardGame().handleMouseLeaveTile();
 					}
-					
 					private int[] getCoordinates (JLabel tile) {
 						int[] coordinates = new int[2];
 						for (int i = 0; i < board.length; i++)
@@ -150,7 +148,41 @@ public class GameScreen extends Screen {
 	 * that changes during game play
 	 */
 	public void updateBoard() {
-		// TODO
+		Piece[][] gamePieces = Game.getBoardGame().getPieces();
+		pieces = new JLabel[gamePieces.length][gamePieces.length];
+		
+		for (int i = 0; i < pieces.length; i++)
+			for (int j = 0; j < pieces.length; j++) {
+				if (gamePieces[i][j] != null) {
+					pane.remove(pieces[i][j]);
+					pieces[i][j] = new JLabel(new ImageIcon(gamePieces[i][j].getPiece()));
+					pane.add(pieces[i][j], JLayeredPane.DEFAULT_LAYER);
+					
+					pieces[i][j].setBounds((int) (i*getScreenTileSize()), (int) (j*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+					pieces[i][j].addMouseListener(new MouseAdapter() {
+						public void mouseClicked(MouseEvent e) {
+							Game.getBoardGame().handleMouseClickPiece(getCoordinates((JLabel) e.getSource()));
+						}
+						public void mouseEntered(MouseEvent e) {
+							Game.getBoardGame().handleMouseEnterPiece(getCoordinates((JLabel) e.getSource()));
+						}
+						public void mouseExited(MouseEvent e) {
+							Game.getBoardGame().handleMouseLeavePiece();
+						}
+						private int[] getCoordinates (JLabel piece) {
+							int[] coordinates = new int[2];
+							for (int i = 0; i < pieces.length; i++)
+								for (int j = 0; j < pieces.length; j++)
+									if (piece.equals(pieces[i][j])) {
+										coordinates[0] = i;
+										coordinates[1] = j;
+									}
+							return coordinates;
+						}
+					});
+				}
+			}
+		pane.repaint();
 	}
 	
 	/**
