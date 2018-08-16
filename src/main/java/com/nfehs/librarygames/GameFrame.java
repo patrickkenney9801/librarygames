@@ -7,6 +7,10 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+import com.nfehs.librarygames.games.Piece;
+import com.nfehs.librarygames.games.Tile;
+import com.nfehs.librarygames.screens.GameScreen;
+
 /**
  * This handles the setup and maintenance of the game window
  * @author Patrick Kenney, Syed Quadri
@@ -37,5 +41,11 @@ public class GameFrame extends JFrame {
 		Game.mainWindow = Game.window.getContentPane();
 		Game.mainWindow.setLayout(null);
 		Game.mainWindow.setBackground(background);
+		
+		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+		
+		// load images here
+		Tile.loadImages();
+		Piece.loadImages();
 	}
 }

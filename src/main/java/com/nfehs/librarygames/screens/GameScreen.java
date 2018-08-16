@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
@@ -17,6 +16,7 @@ import javax.swing.JLayeredPane;
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
+import com.nfehs.librarygames.games.go.pieces.Stone;
 
 /**
  * This class handles the game being played
@@ -27,6 +27,7 @@ import com.nfehs.librarygames.games.Tile;
 
 public class GameScreen extends Screen {
 	private static final double imageTileSize = 100;
+	private static double boardSize;
 	
 	private double scale;
 	private double screenTileSize;
@@ -60,13 +61,17 @@ public class GameScreen extends Screen {
 		
 		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
 		int rowLength = Game.getBoardGame().getBoard().length;
-		setScreenTileSize((int) ((Game.screenSize.getHeight() * 4 / 5) / rowLength));
+		setScreenTileSize((int) (getBoardSize() / rowLength));
 		setScale(getScreenTileSize() / imageTileSize);
 		//System.out.println(getScale());
 		setTopLeftY((int) Game.screenSize.getHeight() / 10);
 		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
 
 		shadowPiece = new JLabel();
+		// if playing go, set the icon for shadow piece
+		if (Game.getBoardGame().getGameType() < 3)
+			shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getImage(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
+		
 		pane = new JLayeredPane();
 		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
 		pane.setOpaque(false);
@@ -90,7 +95,7 @@ public class GameScreen extends Screen {
 		
 		for (int i = 0; i < board.length; i++)
 			for (int j = 0; j < board.length; j++) {
-				board[i][j] = new JLabel(new ImageIcon(getProperImage(tiles[i][j].getTile(), tiles[i][j].getRotations(), 1)));
+				board[i][j] = new JLabel(new ImageIcon(tiles[i][j].getTile()));
 				pane.add(board[i][j], JLayeredPane.FRAME_CONTENT_LAYER);
 				
 				board[i][j].setBounds((int) (i*getScreenTileSize()), (int) (j*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
@@ -121,27 +126,19 @@ public class GameScreen extends Screen {
 	}
 	
 	/**
-	 * Returns a proper image in size and rotation
+	 * Returns a proper image in transparency
 	 * @param img
-	 * @param rotations
 	 * @param transparent
 	 * @return
 	 */
-	private BufferedImage getProperImage(BufferedImage img, int rotations, float transparent) {
+	private BufferedImage getProperImage(BufferedImage img, float transparent) {
 		BufferedImage properImage = new BufferedImage((int) getScreenTileSize(), (int) getScreenTileSize(), BufferedImage.TYPE_INT_ARGB);
-		AffineTransform at = new AffineTransform();
-		
-		// rotate image about center
-		at.rotate(Math.PI/2 * rotations, getScreenTileSize() / 2, getScreenTileSize() / 2);
-		// scale image to right size
-		at.scale(getScale(), getScale());
 		
 		// change transparency
 		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparent);
 		
 		// draw image
 		Graphics2D g2d = properImage.createGraphics();
-		g2d.setTransform(at);
 		g2d.setComposite(ac);
 		g2d.drawImage(img, 0, 0, null);
 		g2d.dispose();
@@ -162,9 +159,8 @@ public class GameScreen extends Screen {
 	 * @param x
 	 * @param y
 	 */
-	public void displayPieceShadow(Piece piece, int x, int y) {
-		// set shadow pieces icon
-		shadowPiece.setIcon(new ImageIcon(getProperImage(piece.getPiece(), 0, .75f)));
+	public void displayPieceShadow(int x, int y) {
+		// adds shadow piece to screen
 		pane.add(shadowPiece, JLayeredPane.DEFAULT_LAYER);
 		
 		shadowPiece.setBounds((int) (x*getScreenTileSize()), (int) (y*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
@@ -227,6 +223,24 @@ public class GameScreen extends Screen {
 
 	public void setTopLeftY(int topLeftY) {
 		this.topLeftY = topLeftY;
+	}
+
+	/**
+	 * @return the boardSize
+	 */
+	public static double getBoardSize() {
+		return boardSize;
+	}
+
+	/**
+	 * @param boardSize the boardSize to set
+	 */
+	public static void setBoardSize(double boardSize) {
+		GameScreen.boardSize = boardSize;
+	}
+
+	public static double getImagetilesize() {
+		return imageTileSize;
 	}
 
 }

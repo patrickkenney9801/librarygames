@@ -24,13 +24,14 @@ public abstract class BoardGame {
 	}
 	
 	// Universal use
-	private byte gameType;
+	protected byte gameType;
 	private String gameTitle;
 	private String gameName;
 	private String player1;
 	private String player2;
 	private boolean isPlayerTurn;
 	private String gameKey;
+	private boolean isPlayer1;
 	
 	// For use only when on GameScreen
 	private char[][] board;
@@ -51,8 +52,8 @@ public abstract class BoardGame {
 	public BoardGame(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
 			int lastMove, String board) {
 		setGameKey(gameKey);
-		this.gameType = (byte) gameType;
-		setGameName(lookupGameName(this.gameType));
+		setGameType((byte) gameType);
+		setGameName(lookupGameName(getGameType()));
 		setPlayer1(Security.decrypt(player1));
 		setPlayer2(Security.decrypt(player2));
 		setGameTitle(getGameName() + ":        " + getPlayer1() + "  vs.  " + getPlayer2());
@@ -60,6 +61,7 @@ public abstract class BoardGame {
 		setBoard(board);
 		setTiles();
 		setPieces();
+		setPlayer1(player1Turn);
 		
 		// determine whether it is the logged players turn or not
 		setPlayerTurn(false);
@@ -275,5 +277,27 @@ public abstract class BoardGame {
 
 	public Piece[][] getPieces() {
 		return pieces;
+	}
+
+	/**
+	 * @return the isPlayer1
+	 */
+	public boolean isPlayer1() {
+		return isPlayer1;
+	}
+
+	/**
+	 * @param isPlayer1 the isPlayer1 to set
+	 */
+	public void setPlayer1(boolean isPlayer1) {
+		this.isPlayer1 = isPlayer1;
+	}
+
+	public byte getGameType() {
+		return gameType;
+	}
+
+	public void setGameType(byte gameType) {
+		this.gameType = gameType;
 	}
 }

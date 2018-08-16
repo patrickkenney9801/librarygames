@@ -37,7 +37,7 @@ public class Go extends BoardGame {
 		if (!validMove(coordinates[0], coordinates[1]))
 			return;
 		if (Game.screen instanceof GameScreen)
-			((GameScreen) Game.screen).displayPieceShadow(new Stone(getPlayer1().equals(Game.getPlayer().getUsername())), coordinates[0], coordinates[1]);
+			((GameScreen) Game.screen).displayPieceShadow(coordinates[0], coordinates[1]);
 	}
 
 	@Override
@@ -68,17 +68,17 @@ public class Go extends BoardGame {
 		//first set center tiles and edge tiles
 		for (int i = 1; i < tiles.length - 1; i++) {
 			for (int j = 1; j < tiles.length - 1; j++)
-				tiles[i][j] = new CenterTile();
-			tiles[i][0] = new EdgeTile(1);					// set left edges
-			tiles[0][i] = new EdgeTile(0);					// top
-			tiles[i][tiles.length-1] = new EdgeTile(3);		// right
-			tiles[tiles.length-1][i] = new EdgeTile(2);		// bottom
+				tiles[i][j] = new GoTile(0, getGameType(), 0);
+			tiles[i][0] = new GoTile(1, getGameType(), 1);					// set left edges
+			tiles[0][i] = new GoTile(1, getGameType(), 0);					// top
+			tiles[i][tiles.length-1] = new GoTile(1, getGameType(), 3);		// right
+			tiles[tiles.length-1][i] = new GoTile(1, getGameType(), 2);		// bottom
 		}
 		// set corner tiles
-		tiles[0][0] = new CornerTile(0);
-		tiles[0][tiles.length-1] = new CornerTile(3);
-		tiles[tiles.length-1][tiles.length-1] = new CornerTile(2);
-		tiles[tiles.length-1][0] = new CornerTile(1);
+		tiles[0][0] = new GoTile(2, getGameType(), 0);
+		tiles[0][tiles.length-1] = new GoTile(2, getGameType(), 3);
+		tiles[tiles.length-1][tiles.length-1] = new GoTile(2, getGameType(), 2);
+		tiles[tiles.length-1][0] = new GoTile(2, getGameType(), 1);
 		
 		this.tiles = tiles;
 	}
@@ -92,9 +92,9 @@ public class Go extends BoardGame {
 		for (int i = 0; i < pieces.length; i++)
 			for (int j = 0; j < pieces.length; j++)
 				if (board[i][j] == '1')
-					pieces[i][j] = new Stone(true);
+					pieces[i][j] = new Stone(getGameType(), true);
 				else if (board[i][j] == '2')
-					pieces[i][j] = new Stone(false);
+					pieces[i][j] = new Stone(getGameType(), false);
 		this.pieces = pieces;
 	}
 }

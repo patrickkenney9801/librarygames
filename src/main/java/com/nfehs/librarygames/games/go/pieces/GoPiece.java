@@ -11,11 +11,21 @@ import com.nfehs.librarygames.games.Piece;
  */
 
 public abstract class GoPiece extends Piece {
+	protected static final int[] ROWS = {9, 13, 19};
+	
 	private boolean isBlackPiece;
 	
 	public GoPiece(BufferedImage piece, boolean isBlackPiece) {
 		super(piece);
 		setBlackPiece(isBlackPiece);
+	}
+	
+	/**
+	 * Should only be called once from superclass Piece
+	 * Loads all media for the GoPiece class and subclasses in proper size and rotation
+	 */
+	public static void loadImages() {
+		Stone.loadImages();
 	}
 
 	public boolean isBlackPiece() {

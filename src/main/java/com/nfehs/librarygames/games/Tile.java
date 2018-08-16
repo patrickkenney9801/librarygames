@@ -1,6 +1,11 @@
 package com.nfehs.librarygames.games;
 
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
+import com.nfehs.librarygames.games.go.tiles.GoTile;
+import com.nfehs.librarygames.screens.GameScreen;
 
 /**
  * This is the parent class for game tiles
@@ -29,6 +34,40 @@ public abstract class Tile {
 	public Tile (BufferedImage tile, int rotations) {
 		setTile(tile);
 		setRotations(rotations);
+	}
+	
+	/**
+	 * Should only be called once from GameFrame
+	 * Loads all media for the Tile class and subclasses in proper size and rotation
+	 */
+	public static void loadImages() {
+		GoTile.loadImages();
+	}
+	
+	/**
+	 * Returns a proper image in size and rotation
+	 * @param img
+	 * @param boardLength
+	 * @param rotations
+	 * @return
+	 */
+	protected static BufferedImage getProperImage(BufferedImage img, int boardLength, int rotations) {
+		int newLength = (int) (GameScreen.getBoardSize() / boardLength);
+		
+		BufferedImage properImage = new BufferedImage(newLength, newLength, BufferedImage.TYPE_INT_ARGB);
+		AffineTransform at = new AffineTransform();
+		
+		// rotate image about center
+		at.rotate(Math.PI/2 * rotations, newLength / 2, newLength / 2);
+		// scale image to right size
+		at.scale(newLength / GameScreen.getImagetilesize(), newLength / GameScreen.getImagetilesize());
+		
+		// draw image
+		Graphics2D g2d = properImage.createGraphics();
+		g2d.setTransform(at);
+		g2d.drawImage(img, 0, 0, null);
+		g2d.dispose();
+		return properImage;
 	}
 	
 	public int getRotations() {
