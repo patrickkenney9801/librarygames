@@ -9,10 +9,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.GameFrame;
@@ -41,12 +45,26 @@ public class GameScreen extends Screen {
 	private JButton pass;
 	private JButton resign;
 	
+	
 	private JLayeredPane pane;
 	private JLabel[][] board;
 	private JLabel[][] pieces;
-	
 	// used in Go games
 	private JLabel shadowPiece;
+	
+	private JPanel gameInfo;
+	private JLabel moveCount;
+	private JLabel player1Icon;
+	private JLabel player2Icon;
+	private JLabel player1User;
+	private JLabel player2User;
+	// used in Go games
+	private JLabel player1Score;
+	private JLabel player2Score;
+	
+	private JPanel chatInterface;
+	private JTextArea chatBox;
+	private JTextField chat;
 
 	public GameScreen() {
 		super(false);
@@ -62,8 +80,6 @@ public class GameScreen extends Screen {
 		title = new JLabel(Game.getBoardGame().getGameTitle());
 		Game.mainWindow.add(title);
 		title.setBounds(getTopLeftX(), getTopLeftY() - 20, 250, 15);
-		title.setBackground(GameFrame.background);
-		title.setForeground(Color.WHITE);
 		
 		back = new JButton("RETURN");
 		Game.mainWindow.add(back);
@@ -101,6 +117,10 @@ public class GameScreen extends Screen {
 				}
 			});
 		}
+		
+		gameInfo = new JPanel();
+		Game.mainWindow.add(gameInfo);
+		
 		
 		pane = new JLayeredPane();
 		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
@@ -218,6 +238,7 @@ public class GameScreen extends Screen {
 				}
 			}
 		pane.repaint();
+		gameInfo.repaint();
 	}
 	
 	/**
@@ -228,7 +249,7 @@ public class GameScreen extends Screen {
 	 */
 	public void displayPieceShadow(int x, int y) {
 		// adds shadow piece to screen
-		pane.add(shadowPiece, JLayeredPane.DEFAULT_LAYER);
+		pane.add(shadowPiece, JLayeredPane.PALETTE_LAYER);
 		
 		shadowPiece.setBounds((int) (y*getScreenTileSize()), (int) (x*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
 		pane.repaint();
@@ -252,6 +273,8 @@ public class GameScreen extends Screen {
 		Game.mainWindow.remove(pane);
 		Game.mainWindow.remove(pass);
 		Game.mainWindow.remove(resign);
+		Game.mainWindow.remove(gameInfo);
+		//Game.mainWindow.remove(chatInterface);
 		
 		back = null;
 		title = null;
@@ -260,6 +283,8 @@ public class GameScreen extends Screen {
 		shadowPiece = null;
 		pass = null;
 		resign = null;
+		gameInfo = null;
+		chatInterface = null;
 		
 		Game.mainWindow.repaint();
 	}

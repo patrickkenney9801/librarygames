@@ -25,8 +25,6 @@ public abstract class Screen {
 			loggedUser = new JLabel("Logged in as: " + Game.getPlayer().getUsername());
 			Game.mainWindow.add(loggedUser);
 			loggedUser.setBounds(0, 0, 300, 30);
-			loggedUser.setForeground(Color.WHITE);
-			loggedUser.setBackground(GameFrame.background);
 			
 			logout = new JButton("Logout");
 			Game.mainWindow.add(logout);

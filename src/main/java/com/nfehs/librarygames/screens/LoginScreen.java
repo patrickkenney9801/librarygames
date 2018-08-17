@@ -1,6 +1,5 @@
 package com.nfehs.librarygames.screens;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -12,7 +11,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import com.nfehs.librarygames.Game;
-import com.nfehs.librarygames.GameFrame;
 
 /**
  * This class handles the user's login creating accounts
@@ -34,14 +32,10 @@ public class LoginScreen extends Screen {
 		
 		user = new JLabel("Username:");
 		Game.mainWindow.add(user);
-		user.setBackground(GameFrame.background);
-		user.setForeground(Color.WHITE);
 		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
 		
 		username = new JTextField();
 		Game.mainWindow.add(username);
-		username.setBackground(GameFrame.textBackground);
-		username.setForeground(Color.WHITE);
 		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
 		username.requestFocusInWindow();
 		username.addKeyListener(new KeyListener() {
@@ -55,14 +49,10 @@ public class LoginScreen extends Screen {
 
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
-		pass.setBackground(GameFrame.background);
-		pass.setForeground(Color.WHITE);
 		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
 		
 		password = new JPasswordField();
 		Game.mainWindow.add(password);
-		password.setBackground(GameFrame.textBackground);
-		password.setForeground(Color.WHITE);
 		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
 		password.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}

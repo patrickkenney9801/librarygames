@@ -41,6 +41,7 @@ public abstract class BoardGame {
 	protected Piece[][] pieces;
 	private int penultMove;
 	private int lastMove;
+	private int moves;
 	
 	/**
 	 * Sets basic board game information
@@ -52,7 +53,7 @@ public abstract class BoardGame {
 	 * @param lastMove
 	 * @param board
 	 */
-	public BoardGame(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
+	public BoardGame(String gameKey, int gameType, String player1, String player2, int moves,
 			int penultMove, int lastMove, int winner, String board) {
 		setGameKey(gameKey);
 		setGameType((byte) gameType);
@@ -62,6 +63,7 @@ public abstract class BoardGame {
 		setGameTitle(getGameName() + ":        " + getPlayer1() + "  vs.  " + getPlayer2());
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
+		setMoves(moves);
 		setBoard(board);
 		setTiles();
 		setPieces();
@@ -73,6 +75,7 @@ public abstract class BoardGame {
 			setWinner(getPlayer2());
 		
 		// determine whether it is the logged players turn or not
+		boolean player1Turn = moves % 2 == 0;
 		setPlayerTurn(false);
 		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && player1Turn) 
 				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !player1Turn))
@@ -528,5 +531,19 @@ public abstract class BoardGame {
 
 	public void setPenultMove(int penultMove) {
 		this.penultMove = penultMove;
+	}
+
+	/**
+	 * @return the moves
+	 */
+	public int getMoves() {
+		return moves;
+	}
+
+	/**
+	 * @param moves the moves to set
+	 */
+	public void setMoves(int moves) {
+		this.moves = moves;
 	}
 }

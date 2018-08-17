@@ -42,22 +42,16 @@ public class CreateGameScreen extends Screen {
 		gameChoices = new JComboBox<String>(choices);
 		Game.mainWindow.add(gameChoices);
 		gameChoices.setBounds((int) Game.screenSize.getWidth() / 2 - 225, (int) Game.screenSize.getHeight() / 10, 150, 30);
-		gameChoices.setBackground(GameFrame.textBackground);
-		gameChoices.setForeground(Color.WHITE);
 		gameChoices.setSelectedIndex(0);
 		
 		userGoesFirst = new JRadioButton("I go first");
 		Game.mainWindow.add(userGoesFirst);
 		userGoesFirst.setBounds((int) Game.screenSize.getWidth() / 2 + 30, (int) Game.screenSize.getHeight() / 10, 120, 30);
-		userGoesFirst.setBackground(GameFrame.background);
-		userGoesFirst.setForeground(Color.WHITE);
 		userGoesFirst.setSelected(true);
 		
 		opponentGoesFirst = new JRadioButton("Opponent goes first");
 		Game.mainWindow.add(opponentGoesFirst);
 		opponentGoesFirst.setBounds((int) Game.screenSize.getWidth() / 2 + 160, (int) Game.screenSize.getHeight() / 10, 150, 30);
-		opponentGoesFirst.setBackground(GameFrame.background);
-		opponentGoesFirst.setForeground(Color.WHITE);
 		
 		startingPlayer = new ButtonGroup();
 		startingPlayer.add(userGoesFirst);
@@ -66,20 +60,14 @@ public class CreateGameScreen extends Screen {
 		chooseOpponent = new JLabel("Choose opponent:");
 		Game.mainWindow.add(chooseOpponent);
 		chooseOpponent.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 75, 150, 30);
-		chooseOpponent.setBackground(GameFrame.background);
-		chooseOpponent.setForeground(Color.WHITE);
 		
 		chooseFriend = new JLabel("Friends:");
 		Game.mainWindow.add(chooseFriend);
 		chooseFriend.setBounds((int) Game.screenSize.getWidth() / 2 - 275, (int) Game.screenSize.getHeight() / 10 + 125, 150, 30);
-		chooseFriend.setBackground(GameFrame.background);
-		chooseFriend.setForeground(Color.WHITE);
 		
 		chooseRandomPlayer = new JLabel("All players:");
 		Game.mainWindow.add(chooseRandomPlayer);
 		chooseRandomPlayer.setBounds((int) Game.screenSize.getWidth() / 2 + 10, (int) Game.screenSize.getHeight() / 10 + 125, 150, 30);
-		chooseRandomPlayer.setBackground(GameFrame.background);
-		chooseRandomPlayer.setForeground(Color.WHITE);
 		
 		players = new ButtonGroup();
 		friends = new JRadioButton[0];
@@ -153,8 +141,6 @@ public class CreateGameScreen extends Screen {
 			friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i]);
 			friends[i].setBounds((int) Game.screenSize.getWidth() / 2 - 275, 
 								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 150, 30);
-			friends[i].setForeground(Color.WHITE);
-			friends[i].setBackground(GameFrame.background);
 			players.add(friends[i]);
 			Game.mainWindow.add(friends[i]);
 		}
@@ -165,8 +151,6 @@ public class CreateGameScreen extends Screen {
 			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i]);
 			randomPlayers[i].setBounds((int) Game.screenSize.getWidth() / 2 + 10, 
 								(int) Game.screenSize.getHeight() / 10 + 155 + 30*i, 200, 30);
-			randomPlayers[i].setForeground(Color.WHITE);
-			randomPlayers[i].setBackground(GameFrame.background);
 			players.add(randomPlayers[i]);
 			Game.mainWindow.add(randomPlayers[i]);
 		}

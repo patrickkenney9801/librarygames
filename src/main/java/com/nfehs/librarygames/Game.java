@@ -245,6 +245,26 @@ public class Game {
 	}
 	
 	/**
+	 * This method refreshes the current screen, used when screen resized
+	 *
+	public static void refresh() {
+		exitCurrentScreen();
+		
+		switch (gameState) {
+			case LOGIN:					screen = new LoginScreen();
+										break;
+			case CREATE_ACCOUNT:		screen = new CreateAccountScreen();
+										break;
+			case ACTIVE_GAMES:			screen = new ActiveGamesScreen();
+										break;
+			case CREATE_GAME:			screen = new CreateGameScreen();
+										break;
+			case PLAYING_GAME:			screen = new GameScreen();
+										break;
+		}
+	}*/
+	
+	/**
 	 * This method updates the active games list on the ActiveGamesScreen
 	 */
 	public static void updateActiveGamesList() {

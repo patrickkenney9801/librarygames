@@ -77,8 +77,6 @@ public class ActiveGamesScreen extends Screen {
 		Game.mainWindow.add(userTurn);
 		userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
 							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
-		userTurn.setForeground(Color.WHITE);
-		userTurn.setBackground(GameFrame.background);
 		
 		activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().length];
 		for (int i = 0; i < activeGamesUserTurn.length; i++) {
@@ -109,8 +107,6 @@ public class ActiveGamesScreen extends Screen {
 		Game.mainWindow.add(opponentTurn);
 		opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
 							(int) Game.screenSize.getHeight() / 10 + 240 + height, 300, 30);
-		opponentTurn.setForeground(Color.WHITE);
-		opponentTurn.setBackground(GameFrame.background);
 		
 		activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().length];
 		for (int i = 0; i < activeGames.length; i++) {

@@ -2,10 +2,13 @@ package com.nfehs.librarygames;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
+import javax.swing.UIManager;
 
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
@@ -32,17 +35,40 @@ public class GameFrame extends JFrame {
 		Game.window.setResizable(false);
 		Game.window.setLocationRelativeTo(null);
 		Game.window.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				System.out.println("Closing window");
 				Game.logout();
 			}
 		});
+		/*
+		Game.window.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
+				Game.refresh();
+			}
+		});*/
 		
 		Game.mainWindow = Game.window.getContentPane();
 		Game.mainWindow.setLayout(null);
 		Game.mainWindow.setBackground(background);
 		
 		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+		
+		// set UI presets
+		UIManager.put("Label.foreground", Color.WHITE);
+		UIManager.put("Label.background", background);
+		UIManager.put("TextArea.foreground", Color.WHITE);
+		UIManager.put("TextArea.background", textBackground);
+		UIManager.put("TextField.foreground", Color.WHITE);
+		UIManager.put("TextField.background", textBackground);
+		UIManager.put("PasswordField.foreground", Color.WHITE);
+		UIManager.put("PasswordField.background", textBackground);
+		UIManager.put("ComboBox.foreground", Color.WHITE);
+		UIManager.put("ComboBox.background", textBackground);
+		UIManager.put("RadioButton.foreground", Color.WHITE);
+		UIManager.put("RadioButton.background", background);
 		
 		// load images here
 		Tile.loadImages();

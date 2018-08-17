@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 import com.nfehs.librarygames.games.go.tiles.GoTile;
+import com.nfehs.librarygames.screens.GameScreen;
 
 /**
  * This class handles the go piece stone
@@ -43,18 +44,9 @@ public class Stone extends GoPiece {
 		stones = new BufferedImage[3][2];
 		
 		// load images
-		try {
-			stones[2][0] = ImageIO.read(Stone.class.getResource("/com/nfehs/librarygames/media/go/blackStone.png"));
-			stones[2][1] = ImageIO.read(Stone.class.getResource("/com/nfehs/librarygames/media/go/whiteStone.png"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		// get proper sizes for images
 		for (int i = 0; i < stones.length; i++) {
-			stones[i][0] = getProperImage(stones[2][0], ROWS[i], 0);
-			stones[i][1] = getProperImage(stones[2][1], ROWS[i], 0);
+			stones[i][0] = getStoneImage(true, (int) GameScreen.getBoardSize() / ROWS[i], false);
+			stones[i][1] = getStoneImage(false, (int) GameScreen.getBoardSize() / ROWS[i], false);
 		}
 	}
 }

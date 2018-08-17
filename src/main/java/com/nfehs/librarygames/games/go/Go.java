@@ -18,9 +18,9 @@ public class Go extends BoardGame {
 	private int whiteStonesCaptured;
 	private int blackStonesCaptured;
 	
-	public Go(String gameKey, int gameType, String player1, String player2, boolean player1Turn,
+	public Go(String gameKey, int gameType, String player1, String player2, int moves,
 			int penultMove, int lastMove, int whiteStonesCaptured, int blackStonesCaptured, int winner, String board) {
-		super(gameKey, gameType, player1, player2, player1Turn, penultMove, lastMove, winner, board);
+		super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, board);
 		setWhiteStonesCaptured(whiteStonesCaptured);
 		setBlackStonesCaptured(blackStonesCaptured);
 	}
@@ -35,8 +35,8 @@ public class Go extends BoardGame {
 	 * @return
 	 */
 	public static String makeMove(String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D, int moveFrom1D, int moveTo1D) {
-		// check pass first
-		if (moveTo1D == -1)
+		// check pass or resign first
+		if (moveTo1D < 0)
 			return board1D;
 		
 		// check Ko rule
@@ -85,6 +85,67 @@ public class Go extends BoardGame {
 		if (hasLiberty)
 			return buildBoard(paddedBoard);
 		return null;
+	}
+
+	/**
+	 * Calculates the territory of each player in a Go game given its board
+	 * Does not account for Seki
+	 * For use by server
+	 * @param board
+	 * @return
+	 */
+	public static int[] calculateTerritory(String board) {
+		int[] territoryScores = new int[2];
+		
+		// get 2D padded board representation
+		char[][] paddedBoard = getPaddedBoard(board);
+		
+		// cycle through board to determine who controls empty territory or if it is neutral
+		// Board Key: 0=empty, 1=black, 2=white, 3=black territory, 4=white territory, 5=neutral territory
+		for (int i = 1; i < paddedBoard.length-1; i++)
+			for (int j = 1; j < paddedBoard.length-1; j++)
+				if (paddedBoard[i][j] == '0') {
+					// when an empty intersection is found, paint its entire group '$'
+					paddedBoard = paintBoard(paddedBoard, i, j, '0', '$');
+					
+					// check if the territory touches black stones
+					boolean touchesBlack = charTouches(paddedBoard, '$', '1');
+					// check if the territory touched white stones
+					boolean touchesWhite = charTouches(paddedBoard, '$', '2');
+					
+					// if only touches black stones, set territory black territory
+					if (touchesBlack && !touchesWhite)
+						paddedBoard = paintBoard(paddedBoard, i, j, '$', '3');
+					else if (!touchesBlack && touchesWhite)
+						paddedBoard = paintBoard(paddedBoard, i, j, '$', '4');
+					else
+						paddedBoard = paintBoard(paddedBoard, i, j, '$', '5');
+				}
+		// count territories each player holds
+		for (int i = 1; i < paddedBoard.length-1; i++)
+			for (int j = 1; j < paddedBoard.length-1; j++)
+				if (paddedBoard[i][j] == '3')
+					territoryScores[0]++;
+				else if (paddedBoard[i][j] == '4')
+					territoryScores[1]++;
+		return territoryScores;
+	}
+	
+	/**
+	 * Returns true if the given @param base touches a @param target anywhere on the board
+	 * @param board
+	 * @param base
+	 * @param target
+	 * @return
+	 */
+	private static boolean charTouches(char[][] board, char base, char target) {
+		for (int i = 1; i < board.length-1; i++)
+			for (int j = 1; j < board.length-1; j++)
+				if (board[i][j] == base)
+					if (	board[i][j+1] == target || board[i][j-1] == target
+						 || board[i+1][j] == target || board[i-1][j] == target)
+						return true;
+		return false;
 	}
 
 	/**

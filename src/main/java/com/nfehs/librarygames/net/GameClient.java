@@ -207,7 +207,7 @@ public class GameClient extends Thread {
 			
 			// if Go create Go board
 			if (packet.getGameType() < 3 && packet.getGameType() > -1)
-				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.isPlayer1Turn(),
+				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
 						packet.getPenultMove(), packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score(), packet.getWinner(), packet.getBoard()));
 			
 			// open GameScreen and exit

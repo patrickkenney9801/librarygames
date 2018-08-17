@@ -38,14 +38,10 @@ public class CreateAccountScreen extends Screen {
 		
 		user = new JLabel("Username:");
 		Game.mainWindow.add(user);
-		user.setBackground(GameFrame.background);
-		user.setForeground(Color.WHITE);
 		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 250, 150, 30);
 		
 		username = new JTextField();
 		Game.mainWindow.add(username);
-		username.setBackground(GameFrame.textBackground);
-		username.setForeground(Color.WHITE);
 		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
 		username.requestFocusInWindow();
 		username.addKeyListener(new KeyListener() {
@@ -59,14 +55,10 @@ public class CreateAccountScreen extends Screen {
 
 		em = new JLabel("Email (optional):");
 		Game.mainWindow.add(em);
-		em.setBackground(GameFrame.background);
-		em.setForeground(Color.WHITE);
 		em.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
 		
 		email = new JTextField();
 		Game.mainWindow.add(email);
-		email.setBackground(GameFrame.textBackground);
-		email.setForeground(Color.WHITE);
 		email.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 160, 150, 30);
 		email.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
@@ -79,14 +71,10 @@ public class CreateAccountScreen extends Screen {
 		
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
-		pass.setBackground(GameFrame.background);
-		pass.setForeground(Color.WHITE);
 		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 130, 150, 30);
 		
 		password = new JPasswordField();
 		Game.mainWindow.add(password);
-		password.setBackground(GameFrame.textBackground);
-		password.setForeground(Color.WHITE);
 		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 100, 150, 30);
 		password.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
@@ -99,14 +87,10 @@ public class CreateAccountScreen extends Screen {
 		
 		passConfirm = new JLabel("Password (confirm):");
 		Game.mainWindow.add(passConfirm);
-		passConfirm.setBackground(GameFrame.background);
-		passConfirm.setForeground(Color.WHITE);
 		passConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 70, 150, 30);
 		
 		passwordConfirm = new JPasswordField();
 		Game.mainWindow.add(passwordConfirm);
-		passwordConfirm.setBackground(GameFrame.textBackground);
-		passwordConfirm.setForeground(Color.WHITE);
 		passwordConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 40, 150, 30);
 		passwordConfirm.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}

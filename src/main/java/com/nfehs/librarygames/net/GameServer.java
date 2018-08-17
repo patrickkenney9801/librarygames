@@ -425,13 +425,16 @@ public class GameServer extends Thread {
 			// get game info and put into ArrayList
 			ArrayList<String> gameInfo = new ArrayList<String>();
 			while (result.next()) {
-				String info = "";
-				info += result.getString("game_key") + ",";
-				info += result.getString("game_type") + ",";
-				info += Security.encrypt(packet.getUsername()) + ",";
-				info += result.getString("username") + ",";
-				info += result.getBoolean("player1_turn");
-				gameInfo.add(info);
+				// do not include finished games
+				if (result.getInt("winner") == 0) {
+					String info = "";
+					info += result.getString("game_key") + ",";
+					info += result.getString("game_type") + ",";
+					info += Security.encrypt(packet.getUsername()) + ",";
+					info += result.getString("username") + ",";
+					info += result.getInt("moves");
+					gameInfo.add(info);
+				}
 			}
 			
 			statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
@@ -440,13 +443,16 @@ public class GameServer extends Thread {
 
 			// get game info and put into ArrayList
 			while (result.next()) {
-				String info = "";
-				info += result.getString("game_key") + ",";
-				info += result.getString("game_type") + ",";
-				info += result.getString("username") + ",";
-				info += Security.encrypt(packet.getUsername()) + ",";
-				info += result.getBoolean("player1_turn");
-				gameInfo.add(info);
+				// do not include finished games
+				if (result.getInt("winner") == 0) {
+					String info = "";
+					info += result.getString("game_key") + ",";
+					info += result.getString("game_type") + ",";
+					info += result.getString("username") + ",";
+					info += Security.encrypt(packet.getUsername()) + ",";
+					info += result.getInt("moves");
+					gameInfo.add(info);
+				}
 			}
 			
 			// convert ArrayList into array
@@ -489,7 +495,7 @@ public class GameServer extends Thread {
 			}
 			
 			int gameType = result.getInt("game_type");
-			boolean player1Turn = result.getBoolean("player1_turn");
+			int moves = result.getInt("moves");
 			int penultMove = result.getInt("penult_move");
 			int lastMove = result.getInt("last_move");
 			String board = result.getString("board");
@@ -523,7 +529,7 @@ public class GameServer extends Thread {
 			
 			// send requested game to client
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), gameType, 
-																 player1, player2, player1Turn, penultMove, lastMove, player1Score,
+																 player1, player2, moves, penultMove, lastMove, player1Score,
 																 player2Score, winner, board, true);
 			returnPacket.writeData(this, address, port);
 			
@@ -561,16 +567,17 @@ public class GameServer extends Thread {
 			String player1Key = result.getString("player1_key");
 			String player2Key = result.getString("player2_key");
 			int gameType = result.getInt("game_type");
-			boolean player1Turn = result.getBoolean("player1_turn");
+			int moves = result.getInt("moves");
 			int penultMove = result.getInt("penult_move");
 			int lastMove = result.getInt("last_move");
 			String oldBoard = result.getString("board");
 			int player1Score = result.getInt("p1_score");
 			int player2Score = result.getInt("p2_score");
 			int winner = result.getInt("winner");
+			boolean resigned = false;
 			
 			String playerTurnKey;
-			if (player1Turn)
+			if (moves % 2 == 0)
 				playerTurnKey = player1Key;
 			else
 				playerTurnKey = player2Key;
@@ -582,15 +589,29 @@ public class GameServer extends Thread {
 				return;
 			}
 			
+			// first handle resignation case
+			if (packet.getMoveTo() == -2) {
+				if (packet.getUserKey().equals(player1Key))
+					winner = 2;
+				else if (packet.getUserKey().equals(player2Key))
+					winner = 1;
+				else {
+					// TODO send error
+					System.out.println("USER KEY NOT IN GAME RESIGNED");
+					return;
+				}
+				resigned = true;
+			}
+			
 			// if it is not the sending player's turn, exit and send error
-			if (!packet.getUserKey().equals(playerTurnKey)) {
+			if (!resigned && !packet.getUserKey().equals(playerTurnKey)) {
 				// TODO send error package
 				System.out.println("NOT SENDING PLAYER'S TURN");
 				return;
 			}
 			
 			// make move
-			String newBoard = BoardGame.makeMove(gameType, oldBoard, player1Turn, penultMove, lastMove, packet.getMoveFrom(), packet.getMoveTo());
+			String newBoard = BoardGame.makeMove(gameType, oldBoard, moves % 2 == 0, penultMove, lastMove, packet.getMoveFrom(), packet.getMoveTo());
 			
 			// if newBoard is null then an improper move was sent, send error and exit
 			if (newBoard == null) {
@@ -608,25 +629,27 @@ public class GameServer extends Thread {
 					for (int i = 0; i < oldBoard.length(); i++)
 						if (oldBoard.charAt(i) != newBoard.charAt(i))
 							capturedPieces++;
-					if (player1Turn)
+					if (moves % 2 == 0)
 						player1Score += capturedPieces;
 					else
 						player2Score += capturedPieces;
 				}
 				// if the user passed, it is end of game if last move was a pass too
 				if (packet.getMoveTo() == -1 && lastMove == -1) {
-					// TODO handle end of game
-				}
+					// get player scores
+					int[] territoryScores = Go.calculateTerritory(oldBoard);
+					player1Score += territoryScores[0];
+					player2Score += territoryScores[1] + 6;		// plus 6.5 for Komi rule
 					
+					winner = 1;
+					if (player2Score >= player1Score)
+						winner = 2;
+				}
 			}
-			
-			// handle pass TODO
-			
-			// handle winner TODO
 			
 			// update game
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
-					+ "player1_turn = " + !player1Turn + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo() + ", "
+					+ "moves = " + moves++ + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo() + ", "
 					+ "board = '" + newBoard + "', p1_score = " + player1Score + ", p2_score = " + player2Score
 					+ ", winner = " + winner + " WHERE game_key = '" + packet.getGameKey() + "';");
 			updateGame.executeUpdate();
@@ -645,7 +668,7 @@ public class GameServer extends Thread {
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			
 			for (Player p : onlinePlayers)
-				if (p.getUser_key().equals(player1Turn ? player2Key : player1Key))
+				if (p.getUser_key().equals(moves % 2 == 0 ? player2Key : player1Key))
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
 		} catch (SQLException e) {
 			e.printStackTrace();

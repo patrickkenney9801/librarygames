@@ -18,7 +18,7 @@ public class Packet08GetBoard extends Packet {
 	private int gameType;
 	private String player1;
 	private String player2;
-	private boolean player1Turn;
+	private int moves;
 	private int penultMove;
 	private int lastMove;
 	private int player1Score;
@@ -60,7 +60,7 @@ public class Packet08GetBoard extends Packet {
 	 * @param gameType
 	 * @param player1
 	 * @param player2
-	 * @param player1Turn
+	 * @param moves
 	 * @param penultMove
 	 * @param lastMove
 	 * @param player1Score
@@ -70,7 +70,7 @@ public class Packet08GetBoard extends Packet {
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet08GetBoard(String packetKey, String userKey, String gameKey, int gameType, 
-							String player1, String player2, boolean player1Turn, int penultMove, int lastMove,
+							String player1, String player2, int moves, int penultMove, int lastMove,
 							int player1Score, int player2Score, int winner, String board, boolean serverUse) {
 		super(8);
 		setUuidKey(packetKey);
@@ -79,7 +79,7 @@ public class Packet08GetBoard extends Packet {
 		setGameType(gameType);
 		setPlayer1(player1);
 		setPlayer2(player2);
-		setPlayer1Turn(player1Turn);
+		setMoves(moves);
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setPlayer1Score(player1Score);
@@ -101,10 +101,10 @@ public class Packet08GetBoard extends Packet {
 		setGameKey(userdata[2]);
 		setPlayer1(userdata[4]);
 		setPlayer2(userdata[5]);
-		setPlayer1Turn(Boolean.parseBoolean(userdata[6]));
 		setBoard(userdata[12]);
 		try {
 			setGameType(Integer.parseInt(userdata[3]));
+			setMoves(Integer.parseInt(userdata[6]));
 			setPenultMove(Integer.parseInt(userdata[7]));
 			setLastMove(Integer.parseInt(userdata[8]));
 			setPlayer1Score(Integer.parseInt(userdata[9]));
@@ -123,7 +123,7 @@ public class Packet08GetBoard extends Packet {
 	@Override
 	public byte[] getDataServer() {
 		return ("08" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getGameType()
-		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + isPlayer1Turn() + ":" + getPenultMove() + ":" + getLastMove()
+		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + getMoves() + ":" + getPenultMove() + ":" + getLastMove()
 		 		+ ":" + getPlayer1Score() + ":" + getPlayer2Score() + ":" + getWinner() + ":" + getBoard()).getBytes();
 	}
 
@@ -212,20 +212,6 @@ public class Packet08GetBoard extends Packet {
 	}
 
 	/**
-	 * @return the player1Turn
-	 */
-	public boolean isPlayer1Turn() {
-		return player1Turn;
-	}
-
-	/**
-	 * @param player1Turn the player1Turn to set
-	 */
-	public void setPlayer1Turn(boolean player1Turn) {
-		this.player1Turn = player1Turn;
-	}
-
-	/**
 	 * @return the lastMove
 	 */
 	public int getLastMove() {
@@ -283,5 +269,19 @@ public class Packet08GetBoard extends Packet {
 
 	public void setPenultMove(int penultMove) {
 		this.penultMove = penultMove;
+	}
+
+	/**
+	 * @return the moves
+	 */
+	public int getMoves() {
+		return moves;
+	}
+
+	/**
+	 * @param moves the moves to set
+	 */
+	public void setMoves(int moves) {
+		this.moves = moves;
 	}
 }
