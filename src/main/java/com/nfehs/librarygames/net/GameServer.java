@@ -649,7 +649,7 @@ public class GameServer extends Thread {
 			
 			// update game
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
-					+ "moves = " + moves++ + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo() + ", "
+					+ "moves = " + ++moves + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo() + ", "
 					+ "board = '" + newBoard + "', p1_score = " + player1Score + ", p2_score = " + player2Score
 					+ ", winner = " + winner + " WHERE game_key = '" + packet.getGameKey() + "';");
 			updateGame.executeUpdate();
