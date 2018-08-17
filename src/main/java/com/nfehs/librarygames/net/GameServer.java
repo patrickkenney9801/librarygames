@@ -129,6 +129,8 @@ public class GameServer extends Thread {
 			case GETBOARD:				getBoard(data, address, port);
 										break;
 			case SENDMOVE:				sendMove(data, address, port);
+										break;
+			case SENDCHAT:				sendChat(data, address, port);
 			default:					break;
 		}
 	}
@@ -679,5 +681,27 @@ public class GameServer extends Thread {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Sends basic game chat to both players in the game, players must be logged into the game to receive
+	 * ***This does not use the database***
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void sendChat(byte[] data, InetAddress address, int port) {
+		Packet10SendChat packet = new Packet10SendChat(data);
+		
+		// create return packet
+		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), packet.getText(), true);
+		
+		// send chat back to sender
+		returnPacket.writeData(this, address, port);
+		
+		// send chat to opponent
+		for (Player p : onlinePlayers)
+			if (p.getUsername().equals(Security.encrypt(packet.getOpponentUsername())))
+				returnPacket.writeData(this, p.getIpAddress(), p.getPort());
 	}
 }

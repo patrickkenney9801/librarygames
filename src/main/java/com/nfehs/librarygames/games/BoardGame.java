@@ -103,6 +103,7 @@ public abstract class BoardGame {
 		setBoard(board);
 		setPieces();
 		setPlayerTurn(!isPlayerTurn());
+		setPlayer1Turn(!isPlayer1Turn());
 		setMoves(getMoves() + 1);
 		return true;
 	}

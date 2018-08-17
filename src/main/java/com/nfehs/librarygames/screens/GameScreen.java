@@ -179,7 +179,7 @@ public class GameScreen extends Screen {
 		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardSize() * 7 / 8);
 		chatInterface.setLayout(null);
 		
-		chatBox = new JTextArea("TEXT\ntext\nt3");
+		chatBox = new JTextArea("");
 		chatInterface.add(chatBox);
 		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
 		chatBox.setEditable(false);
@@ -338,9 +338,11 @@ public class GameScreen extends Screen {
 								? Game.getBoardGame().getPlayer2() : Game.getBoardGame().getPlayer1())
 								+ "   Passed", SwingConstants.CENTER);
 						pane.add(pass, JLayeredPane.POPUP_LAYER);
-						pass.setBounds(0, (int) getBoardSize() / 2 - (int) getScreenTileSize() / 2, (int) getBoardSize(), (int) getScreenTileSize());
+						pass.setBounds(0, (int) getBoardSize() / 2 - (int) getScreenTileSize() / 2,
+										(int) getBoardSize(), (int) getScreenTileSize());
 						pass.setFont(new Font("Serif", Font.PLAIN, 50));
 						pass.setOpaque(true);
+						
 						Thread.sleep(1500);
 						pane.remove(pass);
 						pane.repaint();
@@ -353,6 +355,22 @@ public class GameScreen extends Screen {
 		
 		pane.repaint();
 		gameInfo.repaint();
+	}
+	
+	/**
+	 * Updates the game chat
+	 * @param newText
+	 * @param senderKey
+	 */
+	public void updateChat(String newText, String senderKey) {
+		// update chat text
+		chatBox.setText(chatBox.getText() + "\n" + newText);
+		
+		// if the user sent the text, delete the users current text
+		if (senderKey.equals(Game.getPlayer().getUser_key()))
+			chat.setText("");
+		
+		chatInterface.repaint();
 	}
 	
 	/**

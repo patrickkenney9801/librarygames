@@ -194,7 +194,11 @@ public class Game {
 	 * @param text
 	 */
 	public static void sendChat(String text) {
-		
+		// sends chat packet to server
+		new Packet10SendChat(getPlayer().getUser_key(),
+				getBoardGame().getGameKey(),
+				getBoardGame().getPlayer1().equals(getPlayer().getUsername()) ? getBoardGame().getPlayer2() : getBoardGame().getPlayer1(),
+				getPlayer().getUsername() + ": " + text).writeData(client);
 	}
 
 	/**
@@ -303,6 +307,19 @@ public class Game {
 			return;
 		}
 		((GameScreen) screen).updateBoard();
+	}
+	
+	/**
+	 * This method updates the game chat on the GameScreen
+	 * @param text
+	 * @param senderKey
+	 */
+	public static void updateGameChat(String text, String senderKey) {
+		if (!(screen instanceof GameScreen)) {
+			System.out.println("GAMESTATE ERROR update game chat called on wrong screen");
+			return;
+		}
+		((GameScreen) screen).updateChat(text, senderKey);
 	}
 
 	/**

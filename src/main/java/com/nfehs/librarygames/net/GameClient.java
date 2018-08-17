@@ -81,6 +81,8 @@ public class GameClient extends Thread {
 			case GETBOARD:				getBoard(packet.getData());
 										break;
 			case SENDMOVE:				updateBoard(packet.getData());
+										break;
+			case SENDCHAT:				updateChat(packet.getData());
 			default:					break;
 		}
 	}
@@ -236,5 +238,21 @@ public class GameClient extends Thread {
 		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(),
 										packet.getPlayer1Score(), packet.getPlayer2Score()))
 			Game.updateGameBoard();
+	}
+
+	/**
+	 * Handles a server sent chat, updates the game chat
+	 * @param data
+	 */
+	private void updateChat(byte[] data) {
+		// verify that user is on game screen, if not exit
+		if (Game.gameState != Game.PLAYING_GAME)
+			return;
+		
+		Packet10SendChat packet = new Packet10SendChat(data, true);
+		
+		// check that client is on correct game, if so update the chat
+		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey()))
+			Game.updateGameChat(packet.getText(), packet.getUserKey());
 	}
 }

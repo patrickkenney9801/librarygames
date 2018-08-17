@@ -250,6 +250,8 @@ public class Go extends BoardGame {
 
 	@Override
 	public void handleMouseEnterTile(int[] coordinates) {
+		if (getWinner() != null)
+			return;
 		if (!isPlayerTurn())
 			return;
 		if (!validMove(coordinates[0], coordinates[1]))
@@ -260,6 +262,8 @@ public class Go extends BoardGame {
 
 	@Override
 	public void handleMouseLeaveTile() {
+		if (getWinner() != null)
+			return;
 		if (!isPlayerTurn())
 			return;
 		if (Game.screen instanceof GameScreen)
@@ -268,6 +272,8 @@ public class Go extends BoardGame {
 
 	@Override
 	public void handleMouseClickTile(int[] coordinates) {
+		if (getWinner() != null)
+			return;
 		if (!isPlayerTurn())
 			return;
 		if (!validMove(coordinates[0], coordinates[1]))
