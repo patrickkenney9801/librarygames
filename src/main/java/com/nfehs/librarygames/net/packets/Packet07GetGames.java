@@ -46,7 +46,7 @@ public class Packet07GetGames extends Packet {
 	 * @param gameType
 	 * @param player1
 	 * @param player2
-	 * @param player1Turn
+	 * @param moves
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet07GetGames(String packetKey, String userKey, String[] gameInfo, boolean serverUse) {

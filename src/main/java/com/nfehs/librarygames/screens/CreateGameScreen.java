@@ -1,6 +1,5 @@
 package com.nfehs.librarygames.screens;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -11,7 +10,6 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 
 import com.nfehs.librarygames.Game;
-import com.nfehs.librarygames.GameFrame;
 
 /**
  * Handles the user creating a game, 

@@ -101,8 +101,7 @@ public abstract class BoardGame {
 		setBoard(board);
 		setPieces();
 		setPlayerTurn(!isPlayerTurn());
-		//setPlayer1(!isPlayer1());
-		
+		setMoves(getMoves() + 1);
 		return true;
 	}
 
@@ -286,11 +285,12 @@ public abstract class BoardGame {
 		gameInformation += lookupGameName(gameType) + ":        ";
 		gameInformation += Security.decrypt(gameInfo[2]) + "  vs.  ";
 		gameInformation += Security.decrypt(gameInfo[3]) + "~";
+		boolean player1Turn = Integer.parseInt(gameInfo[4]) % 2 == 0;
 		
 		// determine whether it is the logged players turn or not
 		boolean playerTurn = false;
-		if ((Security.decrypt(gameInfo[2]).equals(Game.getPlayer().getUsername()) && Boolean.parseBoolean(gameInfo[4])) 
-				|| (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && !Boolean.parseBoolean(gameInfo[4])))
+		if ((Security.decrypt(gameInfo[2]).equals(Game.getPlayer().getUsername()) && player1Turn) 
+				|| (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && !player1Turn))
 			playerTurn = true;
 		
 		gameInformation += playerTurn;

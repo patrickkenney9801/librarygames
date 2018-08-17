@@ -1,7 +1,6 @@
 package com.nfehs.librarygames.screens;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,7 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -19,7 +17,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import com.nfehs.librarygames.Game;
-import com.nfehs.librarygames.GameFrame;
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
 import com.nfehs.librarygames.games.go.pieces.Stone;

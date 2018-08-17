@@ -668,7 +668,7 @@ public class GameServer extends Thread {
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			
 			for (Player p : onlinePlayers)
-				if (p.getUser_key().equals(moves % 2 == 0 ? player2Key : player1Key))
+				if (p.getUser_key().equals(moves % 2 == 0 ? player1Key : player2Key))
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
 		} catch (SQLException e) {
 			e.printStackTrace();

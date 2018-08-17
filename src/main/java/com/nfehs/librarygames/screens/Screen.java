@@ -1,6 +1,5 @@
 package com.nfehs.librarygames.screens;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -8,7 +7,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 
 import com.nfehs.librarygames.Game;
-import com.nfehs.librarygames.GameFrame;
 
 /**
  * This is the parent class for all screens
