@@ -1,9 +1,12 @@
 package com.nfehs.librarygames.games.go;
 
+import java.awt.image.BufferedImage;
+
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
+import com.nfehs.librarygames.games.go.pieces.GoPiece;
 import com.nfehs.librarygames.games.go.pieces.Stone;
 import com.nfehs.librarygames.games.go.tiles.*;
 import com.nfehs.librarygames.screens.GameScreen;
@@ -232,6 +235,17 @@ public class Go extends BoardGame {
 		setWhiteStonesCaptured(player1Score);
 		setBlackStonesCaptured(player2Score);
 		return true;
+	}
+	
+	public BufferedImage getPlayer1Icon() {
+		if (isPlayer1Turn())
+			return GoPiece.getPlayer1IconPlaying();
+		return GoPiece.getPlayer1Icon();
+	}
+	public BufferedImage getPlayer2Icon() {
+		if (!isPlayer1Turn())
+			return GoPiece.getPlayer2IconPlaying();
+		return GoPiece.getPlayer2Icon();
 	}
 
 	@Override

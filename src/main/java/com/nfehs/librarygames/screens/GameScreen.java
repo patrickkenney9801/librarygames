@@ -1,6 +1,7 @@
 package com.nfehs.librarygames.screens;
 
 import java.awt.AlphaComposite;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -102,7 +103,7 @@ public class GameScreen extends Screen {
 		pass = new JButton("PASS");
 		// if playing go, set the icon for shadow piece and define the pass button
 		if (Game.getBoardGame().getGameType() < 3) {
-			shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getImage(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
+			shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getPiece(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
 			
 			Game.mainWindow.add(pass);
 			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
@@ -117,7 +118,33 @@ public class GameScreen extends Screen {
 		
 		gameInfo = new JPanel();
 		Game.mainWindow.add(gameInfo);
+		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
+		gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
+							getTopLeftY() + (int) getBoardSize() / 8, panelWidth, 250);
+		gameInfo.setLayout(null);
 		
+		moveCount = new JLabel();
+		gameInfo.add(moveCount);
+		moveCount.setBounds(25, 25, 300, 50);
+		moveCount.setFont(new Font("Serif", Font.PLAIN, 50));
+		
+		player1Icon = new JLabel();
+		gameInfo.add(player1Icon);
+		player1Icon.setBounds(25, 100, 50, 50);
+		
+		player1User = new JLabel(Game.getBoardGame().getPlayer1());
+		gameInfo.add(player1User);
+		player1User.setBounds(100, 100, 300, 50);
+		player1User.setFont(new Font("Serif", Font.PLAIN, 50));
+		
+		player2Icon = new JLabel();
+		gameInfo.add(player2Icon);
+		player2Icon.setBounds(25, 175, 50, 50);
+		
+		player2User = new JLabel(Game.getBoardGame().getPlayer2());
+		gameInfo.add(player2User);
+		player2User.setBounds(100, 175, 300, 50);
+		player2User.setFont(new Font("Serif", Font.PLAIN, 50));
 		
 		pane = new JLayeredPane();
 		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
@@ -234,6 +261,16 @@ public class GameScreen extends Screen {
 					});
 				}
 			}
+		// highlight last move
+		int lastMove = Game.getBoardGame().getLastMove();
+		pieces[lastMove / pieces.length][lastMove % pieces.length].setIcon(
+				new ImageIcon(gamePieces[lastMove / pieces.length][lastMove % pieces.length].getLastMovePiece()));
+		
+		// update game info panel
+		moveCount.setText("Move: " + (Game.getBoardGame().getMoves() + 1));
+		player1Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer1Icon()));
+		player2Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer2Icon()));
+		
 		pane.repaint();
 		gameInfo.repaint();
 	}

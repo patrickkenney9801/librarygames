@@ -21,12 +21,15 @@ public abstract class GoPiece extends Piece {
 	
 	private static BufferedImage player1Icon;
 	private static BufferedImage player2Icon;
+	private static BufferedImage player1IconPlaying;
+	private static BufferedImage player2IconPlaying;
 	
 	private boolean isBlackPiece;
+	private byte gameType;
 	
-	public GoPiece(BufferedImage piece, boolean isBlackPiece) {
-		super(piece);
+	public GoPiece(byte gameType, boolean isBlackPiece) {
 		setBlackPiece(isBlackPiece);
+		setGameType(gameType);
 	}
 	
 
@@ -44,8 +47,14 @@ public abstract class GoPiece extends Piece {
 		Graphics2D g2d = stoneImage.createGraphics();
 		g2d.setComposite(AlphaComposite.Src);
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setColor(Color.CYAN);
+		if (border)
+			g2d.fillOval(0, 0, size, size);
 		g2d.setColor(isBlackStone ? Color.BLACK : Color.WHITE);
-		g2d.fillOval(0, 0, size, size);
+		if (!border)
+			g2d.fillOval(0, 0, size, size);
+		else
+			g2d.fillOval(size / 20, size / 20, size * 9 / 10, size * 9 / 10);
 		g2d.dispose();
 		return stoneImage;
 	}
@@ -56,6 +65,11 @@ public abstract class GoPiece extends Piece {
 	 */
 	public static void loadImages() {
 		Stone.loadImages();
+		
+		setPlayer1Icon(getStoneImage(true, 50, false));
+		setPlayer1IconPlaying(getStoneImage(true, 50, true));
+		setPlayer2Icon(getStoneImage(false, 50, false));
+		setPlayer2IconPlaying(getStoneImage(false, 50, true));
 	}
 
 	public boolean isBlackPiece() {
@@ -92,5 +106,35 @@ public abstract class GoPiece extends Piece {
 	 */
 	public static void setPlayer2Icon(BufferedImage player2Icon) {
 		GoPiece.player2Icon = player2Icon;
+	}
+
+
+	public static BufferedImage getPlayer1IconPlaying() {
+		return player1IconPlaying;
+	}
+
+
+	public static void setPlayer1IconPlaying(BufferedImage player1IconPlaying) {
+		GoPiece.player1IconPlaying = player1IconPlaying;
+	}
+
+
+	public static BufferedImage getPlayer2IconPlaying() {
+		return player2IconPlaying;
+	}
+
+
+	public static void setPlayer2IconPlaying(BufferedImage player2IconPlaying) {
+		GoPiece.player2IconPlaying = player2IconPlaying;
+	}
+
+
+	public byte getGameType() {
+		return gameType;
+	}
+
+
+	public void setGameType(byte gameType) {
+		this.gameType = gameType;
 	}
 }

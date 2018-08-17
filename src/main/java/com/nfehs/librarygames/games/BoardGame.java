@@ -1,5 +1,7 @@
 package com.nfehs.librarygames.games;
 
+import java.awt.image.BufferedImage;
+
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.go.Go;
 import com.nfehs.librarygames.net.Security;
@@ -42,6 +44,7 @@ public abstract class BoardGame {
 	private int penultMove;
 	private int lastMove;
 	private int moves;
+	private boolean isPlayer1Turn;
 	
 	/**
 	 * Sets basic board game information
@@ -49,7 +52,6 @@ public abstract class BoardGame {
 	 * @param gameType
 	 * @param player1
 	 * @param player2
-	 * @param player1Turn
 	 * @param lastMove
 	 * @param board
 	 */
@@ -75,12 +77,12 @@ public abstract class BoardGame {
 			setWinner(getPlayer2());
 		
 		// determine whether it is the logged players turn or not
-		boolean player1Turn = moves % 2 == 0;
+		setPlayer1Turn(moves % 2 == 0);
 		setPlayerTurn(false);
-		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && player1Turn) 
-				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !player1Turn))
+		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && isPlayer1Turn()) 
+				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !isPlayer1Turn()))
 			setPlayerTurn(true);
-		setPlayer1((player1Turn && isPlayerTurn()) || (!player1Turn && !isPlayerTurn()));
+		setPlayer1((isPlayer1Turn() && isPlayerTurn()) || (!isPlayer1Turn() && !isPlayerTurn()));
 	}
 	
 	/**
@@ -116,6 +118,8 @@ public abstract class BoardGame {
 	// implement in child classes, for use on GameScreen
 	protected abstract void setTiles();
 	protected abstract void setPieces();
+	public abstract BufferedImage getPlayer1Icon();
+	public abstract BufferedImage getPlayer2Icon();
 	public abstract void handleMouseEnterTile(int[] coordinates);
 	public abstract void handleMouseLeaveTile();
 	public abstract void handleMouseClickTile(int[] coordinates);
@@ -545,5 +549,13 @@ public abstract class BoardGame {
 	 */
 	public void setMoves(int moves) {
 		this.moves = moves;
+	}
+
+	public boolean isPlayer1Turn() {
+		return isPlayer1Turn;
+	}
+
+	public void setPlayer1Turn(boolean isPlayer1Turn) {
+		this.isPlayer1Turn = isPlayer1Turn;
 	}
 }

@@ -14,12 +14,6 @@ import com.nfehs.librarygames.screens.GameScreen;
  */
 
 public abstract class Piece {
-	private BufferedImage piece;
-	
-	public Piece (BufferedImage piece) {
-		setPiece(piece);
-	}
-	
 	/**
 	 * Should only be called once from GameFrame
 	 * Loads all media for the Piece class and subclasses in proper size and rotation
@@ -54,11 +48,6 @@ public abstract class Piece {
 		return properImage;
 	}
 
-	public BufferedImage getPiece() {
-		return piece;
-	}
-
-	public void setPiece(BufferedImage piece) {
-		this.piece = piece;
-	}
+	public abstract BufferedImage getPiece();
+	public abstract BufferedImage getLastMovePiece();
 }

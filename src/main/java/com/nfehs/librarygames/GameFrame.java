@@ -2,8 +2,6 @@ package com.nfehs.librarygames;
 
 import java.awt.Color;
 import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -69,6 +67,7 @@ public class GameFrame extends JFrame {
 		UIManager.put("ComboBox.background", textBackground);
 		UIManager.put("RadioButton.foreground", Color.WHITE);
 		UIManager.put("RadioButton.background", background);
+		UIManager.put("Panel.background", textBackground);
 		
 		// load images here
 		Tile.loadImages();
