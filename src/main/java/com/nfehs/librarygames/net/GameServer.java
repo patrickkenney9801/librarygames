@@ -78,9 +78,9 @@ public class GameServer extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			System.out.println("CLIENT > " + new String(packet.getData()));
 			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
 			
-			System.out.println("CLIENT > " + new String(packet.getData()));
 			System.out.println();
 		}
 	}
@@ -386,7 +386,7 @@ public class GameServer extends Thread {
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
 										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
 										+ "', " + packet.getGameType() + ", true, -5, -5, '"
-										+ board + "', null, null, null);");
+										+ board + "', 0, 0, 0);");
 			createGame.executeUpdate();
 			
 			System.out.println("GAME CREATED");
