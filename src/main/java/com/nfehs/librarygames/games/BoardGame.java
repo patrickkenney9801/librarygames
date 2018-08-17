@@ -79,6 +79,37 @@ public abstract class BoardGame {
 				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !player1Turn))
 			setPlayerTurn(true);
 	}
+	
+	/**
+	 * Updates a board game after receiving a 09 packet or 08 if on game screen
+	 * @param gameKey
+	 * @param board
+	 * @param penultMove
+	 * @param lastMove
+	 * @param player1Score
+	 * @param player2Score
+	 * @return false if not current game
+	 */
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int player1Score, int player2Score) {
+		if (!getGameKey().equals(gameKey))
+			return false;
+		setPenultMove(penultMove);
+		setLastMove(lastMove);
+		setBoard(board);
+		setPieces();
+		setPlayerTurn(!isPlayerTurn());
+		setPlayer1(!isPlayer1());
+		
+		return true;
+	}
+
+	public static void printArray(char[][] arr) {
+		for (char[] row : arr) {
+			for (char c : row)
+				System.out.print(c);
+			System.out.println();
+		}
+	}
 
 	// implement in child classes, for use on GameScreen
 	protected abstract void setTiles();
@@ -240,29 +271,6 @@ public abstract class BoardGame {
 		}
 		return board;
 	}
-	
-	/**
-	 * Updates a board game after receiving a 09 packet or 08 if on game screen
-	 * @param gameKey
-	 * @param board
-	 * @param penultMove
-	 * @param lastMove
-	 * @param player1Score
-	 * @param player2Score
-	 * @return false if not current game
-	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int player1Score, int player2Score) {
-		if (!getGameKey().equals(gameKey))
-			return false;
-		setPenultMove(penultMove);
-		setLastMove(lastMove);
-		setBoard(board);
-		setPieces();
-		setPlayerTurn(!isPlayerTurn());
-		
-		return true;
-	}
-
 	/**
 	 * Returns a String with 3 parts delimited by ~
 	 * Part 1 is the game key, 2 is game title, 3 is bool for user goes first

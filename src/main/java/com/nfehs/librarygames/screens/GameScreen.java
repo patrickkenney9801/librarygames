@@ -99,7 +99,7 @@ public class GameScreen extends Screen {
 				board[i][j] = new JLabel(new ImageIcon(tiles[i][j].getTile()));
 				pane.add(board[i][j], JLayeredPane.FRAME_CONTENT_LAYER);
 				
-				board[i][j].setBounds((int) (i*getScreenTileSize()), (int) (j*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+				board[i][j].setBounds((int) (j*getScreenTileSize()), (int) (i*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
 				board[i][j].addMouseListener(new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
 						Game.getBoardGame().handleMouseClickTile(getCoordinates((JLabel) e.getSource()));
@@ -160,7 +160,7 @@ public class GameScreen extends Screen {
 					pieces[i][j] = new JLabel(new ImageIcon(gamePieces[i][j].getPiece()));
 					pane.add(pieces[i][j], JLayeredPane.DEFAULT_LAYER);
 					
-					pieces[i][j].setBounds((int) (i*getScreenTileSize()), (int) (j*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+					pieces[i][j].setBounds((int) (j*getScreenTileSize()), (int) (i*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
 					pieces[i][j].addMouseListener(new MouseAdapter() {
 						public void mouseClicked(MouseEvent e) {
 							Game.getBoardGame().handleMouseClickPiece(getCoordinates((JLabel) e.getSource()));
@@ -197,7 +197,7 @@ public class GameScreen extends Screen {
 		// adds shadow piece to screen
 		pane.add(shadowPiece, JLayeredPane.DEFAULT_LAYER);
 		
-		shadowPiece.setBounds((int) (x*getScreenTileSize()), (int) (y*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+		shadowPiece.setBounds((int) (y*getScreenTileSize()), (int) (x*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
 		pane.repaint();
 	}
 	

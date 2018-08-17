@@ -81,6 +81,7 @@ public class GameServer extends Thread {
 			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
 			
 			System.out.println("CLIENT > " + new String(packet.getData()));
+			System.out.println();
 		}
 	}
 	

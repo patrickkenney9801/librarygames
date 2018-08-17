@@ -62,17 +62,17 @@ public class Go extends BoardGame {
 			else
 				hasLiberty = true;
 		if (paddedBoard[x][y-1] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x, y-1))
+			if (groupHasLiberty(paddedBoard, x, y-1))
 				paddedBoard = paintBoard(paddedBoard, x, y-1, '$', opposingPiece);
 			else
 				hasLiberty = true;
 		if (paddedBoard[x+1][y] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x+1, y))
+			if (groupHasLiberty(paddedBoard, x+1, y))
 				paddedBoard = paintBoard(paddedBoard, x+1, y, '$', opposingPiece);
 			else
 				hasLiberty = true;
 		if (paddedBoard[x-1][y] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x-1, y))
+			if (groupHasLiberty(paddedBoard, x-1, y))
 				paddedBoard = paintBoard(paddedBoard, x-1, y, '$', opposingPiece);
 			else
 				hasLiberty = true;
@@ -223,31 +223,30 @@ public class Go extends BoardGame {
 		for (int i = 1; i < tiles.length - 1; i++) {
 			for (int j = 1; j < tiles.length - 1; j++)
 				tiles[i][j] = new GoTile(0, getGameType(), 0);
-			tiles[i][0] = new GoTile(1, getGameType(), 1);					// set left edges
-			tiles[0][i] = new GoTile(1, getGameType(), 0);					// top
-			tiles[i][tiles.length-1] = new GoTile(1, getGameType(), 3);		// right
-			tiles[tiles.length-1][i] = new GoTile(1, getGameType(), 2);		// bottom
+			tiles[i][0] = new GoTile(1, getGameType(), 0);					// set left edges
+			tiles[0][i] = new GoTile(1, getGameType(), 1);					// top
+			tiles[i][tiles.length-1] = new GoTile(1, getGameType(), 2);		// right
+			tiles[tiles.length-1][i] = new GoTile(1, getGameType(), 3);		// bottom
 		}
 		// set corner tiles
 		tiles[0][0] = new GoTile(2, getGameType(), 0);
-		tiles[0][tiles.length-1] = new GoTile(2, getGameType(), 3);
+		tiles[0][tiles.length-1] = new GoTile(2, getGameType(), 1);
 		tiles[tiles.length-1][tiles.length-1] = new GoTile(2, getGameType(), 2);
-		tiles[tiles.length-1][0] = new GoTile(2, getGameType(), 1);
+		tiles[tiles.length-1][0] = new GoTile(2, getGameType(), 3);
 		
 		this.tiles = tiles;
 	}
 
 	@Override
 	protected void setPieces() {
-		char[][] board = getBoard();
-		Piece[][] pieces = new Piece[board.length][board.length];
+		Piece[][] pieces = new Piece[getBoard().length][getBoard().length];
 		
 		// set pieces, '0' is empty space, '1' is black stone, '2' is white stone
-		for (int i = 0; i < pieces.length; i++)
-			for (int j = 0; j < pieces.length; j++)
-				if (board[i][j] == '1')
+		for (int i = 0; i < getBoard().length; i++)
+			for (int j = 0; j < getBoard().length; j++)
+				if (getBoard()[i][j] == '1')
 					pieces[i][j] = new Stone(getGameType(), true);
-				else if (board[i][j] == '2')
+				else if (getBoard()[i][j] == '2')
 					pieces[i][j] = new Stone(getGameType(), false);
 		this.pieces = pieces;
 	}
