@@ -3,8 +3,11 @@ package com.nfehs.librarygames.screens;
 import java.awt.AlphaComposite;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -16,6 +19,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.Piece;
@@ -56,9 +60,13 @@ public class GameScreen extends Screen {
 	private JLabel player2Icon;
 	private JLabel player1User;
 	private JLabel player2User;
-	// used in Go games
-	private JLabel player1Score;
-	private JLabel player2Score;
+	
+	private JPanel capturedPieces;
+	private JLabel captured;
+	private JLabel[] player1Captured;
+	private JLabel[] player2Captured;
+	private JLabel[] player1CapturedNumber;
+	private JLabel[] player2CapturedNumber;
 	
 	private JPanel chatInterface;
 	private JTextArea chatBox;
@@ -116,6 +124,8 @@ public class GameScreen extends Screen {
 			});
 		}
 		
+		
+		
 		gameInfo = new JPanel();
 		Game.mainWindow.add(gameInfo);
 		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
@@ -145,6 +155,51 @@ public class GameScreen extends Screen {
 		gameInfo.add(player2User);
 		player2User.setBounds(100, 175, 300, 50);
 		player2User.setFont(new Font("Serif", Font.PLAIN, 50));
+		
+		
+		
+		capturedPieces= new JPanel();
+		Game.mainWindow.add(capturedPieces);
+		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
+							getTopLeftY() + (int) getBoardSize() / 2, panelWidth, 250);
+		capturedPieces.setLayout(null);
+		
+		captured = new JLabel("Captured Pieces: ");
+		capturedPieces.add(captured);
+		captured.setBounds(25, 25, panelWidth - 50, 50);
+		captured.setFont(new Font("Serif", Font.PLAIN, 50));
+		
+		
+		
+		// fully define player captured pieces here TODO
+		// do number in update
+		
+		chatInterface = new JPanel();
+		Game.mainWindow.add(chatInterface);
+		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardSize() * 7 / 8);
+		chatInterface.setLayout(null);
+		
+		chatBox = new JTextArea("TEXT\ntext\nt3");
+		chatInterface.add(chatBox);
+		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
+		chatBox.setEditable(false);
+		chatBox.setFont(new Font("Serif", Font.PLAIN, 15));
+		//chatBox.setMargin(new Insets(chatBox.getHeight()-15, 0, 0, 0));
+		
+		chat = new JTextField();
+		chatInterface.add(chat);
+		chat.setBounds(5, chatInterface.getHeight() - 35, chatInterface.getWidth() - 10, 30);
+		chat.setFont(new Font("Serif", Font.PLAIN, 15));
+		chat.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == '\n')
+					Game.sendChat(chat.getText());
+			}
+		});
+		
+		
 		
 		pane = new JLayeredPane();
 		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
@@ -263,13 +318,38 @@ public class GameScreen extends Screen {
 			}
 		// highlight last move
 		int lastMove = Game.getBoardGame().getLastMove();
-		pieces[lastMove / pieces.length][lastMove % pieces.length].setIcon(
-				new ImageIcon(gamePieces[lastMove / pieces.length][lastMove % pieces.length].getLastMovePiece()));
+		if (lastMove > -1)
+			pieces[lastMove / pieces.length][lastMove % pieces.length].setIcon(
+					new ImageIcon(gamePieces[lastMove / pieces.length][lastMove % pieces.length].getLastMovePiece()));
 		
 		// update game info panel
 		moveCount.setText("Move: " + (Game.getBoardGame().getMoves() + 1));
 		player1Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer1Icon()));
 		player2Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer2Icon()));
+		
+		// TODO handle captured pieces update
+		
+		// handle a pass
+		if (lastMove == -1) {
+			new Thread (new Runnable () {
+				public void run() {
+					try {
+						JLabel pass = new JLabel((Game.getBoardGame().isPlayer1Turn() 
+								? Game.getBoardGame().getPlayer2() : Game.getBoardGame().getPlayer1())
+								+ "   Passed", SwingConstants.CENTER);
+						pane.add(pass, JLayeredPane.POPUP_LAYER);
+						pass.setBounds(0, (int) getBoardSize() / 2 - (int) getScreenTileSize() / 2, (int) getBoardSize(), (int) getScreenTileSize());
+						pass.setFont(new Font("Serif", Font.PLAIN, 50));
+						pass.setOpaque(true);
+						Thread.sleep(1500);
+						pane.remove(pass);
+						pane.repaint();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+		}
 		
 		pane.repaint();
 		gameInfo.repaint();
@@ -308,7 +388,8 @@ public class GameScreen extends Screen {
 		Game.mainWindow.remove(pass);
 		Game.mainWindow.remove(resign);
 		Game.mainWindow.remove(gameInfo);
-		//Game.mainWindow.remove(chatInterface);
+		Game.mainWindow.remove(capturedPieces);
+		Game.mainWindow.remove(chatInterface);
 		
 		back = null;
 		title = null;
@@ -318,6 +399,7 @@ public class GameScreen extends Screen {
 		pass = null;
 		resign = null;
 		gameInfo = null;
+		capturedPieces = null;
 		chatInterface = null;
 		
 		Game.mainWindow.repaint();

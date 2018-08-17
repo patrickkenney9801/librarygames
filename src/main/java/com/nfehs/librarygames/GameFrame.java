@@ -61,8 +61,10 @@ public class GameFrame extends JFrame {
 		UIManager.put("TextArea.background", textBackground);
 		UIManager.put("TextField.foreground", Color.WHITE);
 		UIManager.put("TextField.background", textBackground);
+		UIManager.put("TextField.caretForeground", Color.WHITE);
 		UIManager.put("PasswordField.foreground", Color.WHITE);
 		UIManager.put("PasswordField.background", textBackground);
+		UIManager.put("PasswordField.caretForeground", Color.WHITE);
 		UIManager.put("ComboBox.foreground", Color.WHITE);
 		UIManager.put("ComboBox.background", textBackground);
 		UIManager.put("RadioButton.foreground", Color.WHITE);

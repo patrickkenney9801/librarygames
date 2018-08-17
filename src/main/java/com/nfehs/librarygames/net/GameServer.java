@@ -639,7 +639,13 @@ public class GameServer extends Thread {
 					// get player scores
 					int[] territoryScores = Go.calculateTerritory(oldBoard);
 					player1Score += territoryScores[0];
-					player2Score += territoryScores[1] + 6;		// plus 6.5 for Komi rule
+					
+					// apply Komi
+					switch (gameType) {
+						case 2:				player2Score += 3;
+						case 1:				player2Score += 2;
+						default: 			player2Score += territoryScores[1] + 1;
+					}
 					
 					winner = 1;
 					if (player2Score >= player1Score)

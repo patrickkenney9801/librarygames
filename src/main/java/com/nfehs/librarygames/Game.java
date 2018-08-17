@@ -188,6 +188,14 @@ public class Game {
 		// sends send move packet to server
 		new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(), movingFrom, movingTo, getPlayer().getUsername()).writeData(client);
 	}
+	
+	/**
+	 * This method attempts to send a line of text to their opponent
+	 * @param text
+	 */
+	public static void sendChat(String text) {
+		
+	}
 
 	/**
 	 * This method closes the screen for the user
