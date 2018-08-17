@@ -155,22 +155,6 @@ public class GameClient extends Thread {
 	}
 
 	/**
-	 * Handles a successful create game and opens the new game
-	 * @param data
-	 * TODO decide whether or not to keep
-	private void getNewGame(byte[] data) {
-		// verify that user is still on the create game screen, if not exit
-		if (Game.gameState != Game.CREATE_GAME)
-			return;
-		
-		Packet06CreateGame packet = new Packet06CreateGame(data, true);
-		
-		// open game screen if the user created the game
-		if (packet.getUserKey().equals(Game.getPlayer().getUser_key()))
-			Game.openGameScreen(packet.getGameKey());
-	}*/
-
-	/**
 	 * Handles a successful request for games
 	 * @param data
 	 */

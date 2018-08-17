@@ -65,7 +65,6 @@ public abstract class BoardGame {
 		setBoard(board);
 		setTiles();
 		setPieces();
-		setPlayer1(player1Turn);
 		
 		// if the game has a winner, set it to the winner's username
 		if (winner == 1)
@@ -78,6 +77,7 @@ public abstract class BoardGame {
 		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && player1Turn) 
 				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !player1Turn))
 			setPlayerTurn(true);
+		setPlayer1((player1Turn && isPlayerTurn()) || (!player1Turn && !isPlayerTurn()));
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public abstract class BoardGame {
 		setBoard(board);
 		setPieces();
 		setPlayerTurn(!isPlayerTurn());
-		setPlayer1(!isPlayer1());
+		//setPlayer1(!isPlayer1());
 		
 		return true;
 	}
@@ -286,9 +286,10 @@ public abstract class BoardGame {
 		
 		// determine whether it is the logged players turn or not
 		boolean playerTurn = false;
-		if ((Security.decrypt(gameInfo[2]).equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) == '1') 
-				|| (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && gameInfo[4].charAt(0) != '1'))
+		if ((Security.decrypt(gameInfo[2]).equals(Game.getPlayer().getUsername()) && Boolean.parseBoolean(gameInfo[4])) 
+				|| (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && !Boolean.parseBoolean(gameInfo[4])))
 			playerTurn = true;
+		
 		gameInformation += playerTurn;
 		return gameInformation;
 	}

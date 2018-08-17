@@ -1,6 +1,7 @@
 package com.nfehs.librarygames.screens;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.GameFrame;
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
 import com.nfehs.librarygames.games.go.pieces.Stone;
@@ -36,6 +38,8 @@ public class GameScreen extends Screen {
 
 	private JLabel title;
 	private JButton back;
+	private JButton pass;
+	private JButton resign;
 	
 	private JLayeredPane pane;
 	private JLabel[][] board;
@@ -47,19 +51,6 @@ public class GameScreen extends Screen {
 	public GameScreen() {
 		super(false);
 		
-		title = new JLabel(Game.getBoardGame().getGameTitle());
-		Game.mainWindow.add(title);
-		
-		back = new JButton("RETURN");
-		Game.mainWindow.add(back);
-		back.setBounds(0, 40, 150, 30);
-		back.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("RETURN TO GAMES LIST CLICKED");
-				Game.openActiveGamesScreen();
-			}
-		});
-		
 		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
 		int rowLength = Game.getBoardGame().getBoard().length;
 		setScreenTileSize((int) (getBoardSize() / rowLength));
@@ -67,11 +58,49 @@ public class GameScreen extends Screen {
 		//System.out.println(getScale());
 		setTopLeftY((int) Game.screenSize.getHeight() / 25);
 		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
+		
+		title = new JLabel(Game.getBoardGame().getGameTitle());
+		Game.mainWindow.add(title);
+		title.setBounds(getTopLeftX(), getTopLeftY() - 20, 250, 15);
+		title.setBackground(GameFrame.background);
+		title.setForeground(Color.WHITE);
+		
+		back = new JButton("RETURN");
+		Game.mainWindow.add(back);
+		back.setBounds(getTopLeftX(), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+		back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("RETURN TO GAMES LIST CLICKED");
+				Game.openActiveGamesScreen();
+			}
+		});
+		
+		resign = new JButton("RESIGN");
+		Game.mainWindow.add(resign);
+		resign.setBounds(getTopLeftX() + (int) getBoardSize() - 150, getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+		resign.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("RESIGN CLICKED");
+				// send resignation packet to server TODO
+			}
+		});
 
 		shadowPiece = new JLabel();
-		// if playing go, set the icon for shadow piece
-		if (Game.getBoardGame().getGameType() < 3)
+		pass = new JButton("PASS");
+		// if playing go, set the icon for shadow piece and define the pass button
+		if (Game.getBoardGame().getGameType() < 3) {
 			shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getImage(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
+			
+			Game.mainWindow.add(pass);
+			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+			pass.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("PASS CLICKED");
+					// send move pass to server
+					Game.sendMove(-1, -1);
+				}
+			});
+		}
 		
 		pane = new JLayeredPane();
 		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
@@ -150,6 +179,10 @@ public class GameScreen extends Screen {
 	 * that changes during game play
 	 */
 	public void updateBoard() {
+		if (Game.getBoardGame().isPlayerTurn())
+			pass.setEnabled(true);
+		else
+			pass.setEnabled(false);
 		Piece[][] gamePieces = Game.getBoardGame().getPieces();
 		
 		for (int i = 0; i < pieces.length; i++)
@@ -217,12 +250,16 @@ public class GameScreen extends Screen {
 		Game.mainWindow.remove(back);
 		Game.mainWindow.remove(title);
 		Game.mainWindow.remove(pane);
+		Game.mainWindow.remove(pass);
+		Game.mainWindow.remove(resign);
 		
 		back = null;
 		title = null;
 		pane = null;
 		board = null;
 		shadowPiece = null;
+		pass = null;
+		resign = null;
 		
 		Game.mainWindow.repaint();
 	}

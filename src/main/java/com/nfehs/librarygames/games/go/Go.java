@@ -35,7 +35,11 @@ public class Go extends BoardGame {
 	 * @return
 	 */
 	public static String makeMove(String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D, int moveFrom1D, int moveTo1D) {
-		// check Ko rule first
+		// check pass first
+		if (moveTo1D == -1)
+			return board1D;
+		
+		// check Ko rule
 		if (moveTo1D == penultMove1D)
 			return null;
 		

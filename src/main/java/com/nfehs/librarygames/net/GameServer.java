@@ -428,8 +428,8 @@ public class GameServer extends Thread {
 				String info = "";
 				info += result.getString("game_key") + ",";
 				info += result.getString("game_type") + ",";
-				info += result.getString("username") + ",";
 				info += Security.encrypt(packet.getUsername()) + ",";
+				info += result.getString("username") + ",";
 				info += result.getBoolean("player1_turn");
 				gameInfo.add(info);
 			}
@@ -443,8 +443,8 @@ public class GameServer extends Thread {
 				String info = "";
 				info += result.getString("game_key") + ",";
 				info += result.getString("game_type") + ",";
-				info += Security.encrypt(packet.getUsername()) + ",";
 				info += result.getString("username") + ",";
+				info += Security.encrypt(packet.getUsername()) + ",";
 				info += result.getBoolean("player1_turn");
 				gameInfo.add(info);
 			}
@@ -599,21 +599,29 @@ public class GameServer extends Thread {
 				return;
 			}
 
-			// update score
-			// if player did not pass, and the game is go, calculate captured pieces
-			if (gameType < 3 && packet.getMoveTo() != -1) {
-				int capturedPieces = -1;	// for use in go games
-				// calculate number of captured pieces in a go game
-				for (int i = 0; i < oldBoard.length(); i++)
-					if (oldBoard.charAt(i) != newBoard.charAt(i))
-						capturedPieces++;
-				if (player1Turn)
-					player1Score += capturedPieces;
-				else
-					player2Score += capturedPieces;
+			// update score if the game is go and check for end of game
+			if (gameType < 3) {
+				// if the user did not pass, calculate score
+				if (packet.getMoveTo() != -1) {
+					int capturedPieces = -1;	// for use in go games
+					// calculate number of captured pieces in a go game
+					for (int i = 0; i < oldBoard.length(); i++)
+						if (oldBoard.charAt(i) != newBoard.charAt(i))
+							capturedPieces++;
+					if (player1Turn)
+						player1Score += capturedPieces;
+					else
+						player2Score += capturedPieces;
+				}
+				// if the user passed, it is end of game if last move was a pass too
+				if (packet.getMoveTo() == -1 && lastMove == -1) {
+					// TODO handle end of game
+				}
+					
 			}
 			
 			// handle pass TODO
+			
 			// handle winner TODO
 			
 			// update game
