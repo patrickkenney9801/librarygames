@@ -184,7 +184,7 @@ public class GameScreen extends Screen {
 		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
 		chatBox.setEditable(false);
 		chatBox.setFont(new Font("Serif", Font.PLAIN, 15));
-		//chatBox.setMargin(new Insets(chatBox.getHeight()-15, 0, 0, 0));
+		chatBox.setMargin(new Insets(chatBox.getHeight()-20, 0, 0, 0));
 		
 		chat = new JTextField();
 		chatInterface.add(chat);
@@ -198,6 +198,7 @@ public class GameScreen extends Screen {
 					Game.sendChat(chat.getText());
 			}
 		});
+		chat.requestFocus();
 		
 		
 		
@@ -365,10 +366,12 @@ public class GameScreen extends Screen {
 	public void updateChat(String newText, String senderKey) {
 		// update chat text
 		chatBox.setText(chatBox.getText() + "\n" + newText);
+		chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 		
 		// if the user sent the text, delete the users current text
 		if (senderKey.equals(Game.getPlayer().getUser_key()))
 			chat.setText("");
+		chat.requestFocus();
 		
 		chatInterface.repaint();
 	}
