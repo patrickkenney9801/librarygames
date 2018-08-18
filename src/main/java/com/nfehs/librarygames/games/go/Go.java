@@ -20,12 +20,25 @@ import com.nfehs.librarygames.screens.GameScreen;
 public class Go extends BoardGame {
 	private int whiteStonesCaptured;
 	private int blackStonesCaptured;
+	private int player1Score;
+	private int player2Score;
 	
 	public Go(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int whiteStonesCaptured, int blackStonesCaptured, int winner, String board) {
+			int penultMove, int lastMove, int winner, String board, String extraData) {
 		super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, board);
-		setWhiteStonesCaptured(whiteStonesCaptured);
-		setBlackStonesCaptured(blackStonesCaptured);
+		String[] goData = extraData.split(",");
+		
+		try {
+			setWhiteStonesCaptured(Integer.parseInt(goData[0]));
+			setBlackStonesCaptured(Integer.parseInt(goData[1]));
+			setPlayer1Score(Integer.parseInt(goData[2]));
+			setPlayer2Score(Integer.parseInt(goData[3]));
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		
+		if (winner == 1 || winner == 2)
+			setScoreInfo("Score: " + getPlayer1Score() + " - " + getPlayer2Score());
 	}
 
 	/**
@@ -229,21 +242,36 @@ public class Go extends BoardGame {
 	 * Returns false if not current game
 	 * @Override
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int player1Score, int player2Score) {
-		if (!super.update(gameKey, board, penultMove, lastMove, player1Score, player2Score))
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, String extraData) {
+		if (!super.update(gameKey, board, penultMove, lastMove, winner, extraData))
 			return false;
-		setWhiteStonesCaptured(player1Score);
-		setBlackStonesCaptured(player2Score);
+		String[] goData = extraData.split(",");
+		
+		try {
+			setWhiteStonesCaptured(Integer.parseInt(goData[0]));
+			setBlackStonesCaptured(Integer.parseInt(goData[1]));
+			setPlayer1Score(Integer.parseInt(goData[2]));
+			setPlayer2Score(Integer.parseInt(goData[3]));
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 	
+	@Override
 	public BufferedImage getPlayer1Icon() {
-		if (isPlayer1Turn())
+		if (getWinner() == null && isPlayer1Turn())
+			return GoPiece.getPlayer1IconPlaying();
+		if (getPlayer1().equals(getWinner()))
 			return GoPiece.getPlayer1IconPlaying();
 		return GoPiece.getPlayer1Icon();
 	}
+	@Override
 	public BufferedImage getPlayer2Icon() {
-		if (!isPlayer1Turn())
+		if (getWinner() == null && !isPlayer1Turn())
+			return GoPiece.getPlayer2IconPlaying();
+		if (getPlayer2().equals(getWinner()))
 			return GoPiece.getPlayer2IconPlaying();
 		return GoPiece.getPlayer2Icon();
 	}
@@ -375,5 +403,33 @@ public class Go extends BoardGame {
 
 	public void setWhiteStonesCaptured(int whiteStonesCaptured) {
 		this.whiteStonesCaptured = whiteStonesCaptured;
+	}
+
+	/**
+	 * @return the player1Score
+	 */
+	public int getPlayer1Score() {
+		return player1Score;
+	}
+
+	/**
+	 * @param player1Score the player1Score to set
+	 */
+	public void setPlayer1Score(int player1Score) {
+		this.player1Score = player1Score;
+	}
+
+	/**
+	 * @return the player2Score
+	 */
+	public int getPlayer2Score() {
+		return player2Score;
+	}
+
+	/**
+	 * @param player2Score the player2Score to set
+	 */
+	public void setPlayer2Score(int player2Score) {
+		this.player2Score = player2Score;
 	}
 }

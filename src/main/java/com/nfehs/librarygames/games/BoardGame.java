@@ -35,7 +35,8 @@ public abstract class BoardGame {
 	private boolean isPlayerTurn;
 	private String gameKey;
 	private boolean isPlayer1;
-	private String winner;	// TODO handle finished games
+	private String winner;
+	private String scoreInfo;
 	
 	// For use only when on GameScreen
 	private char[][] board;
@@ -70,11 +71,17 @@ public abstract class BoardGame {
 		setTiles();
 		setPieces();
 		
-		// if the game has a winner, set it to the winner's username
-		if (winner == 1)
+		// if the game has a winner, set it to the winner's username, check if opponent resigned
+		setWinner(null);
+		setScoreInfo(null);
+		if (winner == 1 || winner == 3)
 			setWinner(getPlayer1());
-		else if (winner == 2)
+		else if (winner == 2 || winner == 4)
 			setWinner(getPlayer2());
+		if (winner == 3)
+			setScoreInfo(getPlayer2() + " resigned");
+		else if (winner == 4)
+			setScoreInfo(getPlayer1() + " resigned");
 		
 		// determine whether it is the logged players turn or not
 		setPlayer1Turn(moves % 2 == 0);
@@ -86,16 +93,43 @@ public abstract class BoardGame {
 	}
 	
 	/**
+	 * Creates a new board game given game info
+	 * @param gameKey
+	 * @param gameType
+	 * @param player1
+	 * @param player2
+	 * @param moves
+	 * @param penultMove
+	 * @param lastMove
+	 * @param winner
+	 * @param board
+	 * @param extraData
+	 * @return
+	 */
+	public static BoardGame createGame(String gameKey, int gameType, String player1, String player2, int moves,
+			int penultMove, int lastMove, int winner, String board, String extraData) {
+		// determine which game to make, then make it
+		switch (gameType) {
+			case 0:
+			case 1:
+			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, board, extraData);
+			default:					// handle wrong game type
+										System.out.println("ERROR WRONG GAME TYPE");
+										return null;
+		}
+	}
+	
+	/**
 	 * Updates a board game after receiving a 09 packet or 08 if on game screen
 	 * @param gameKey
 	 * @param board
 	 * @param penultMove
 	 * @param lastMove
-	 * @param player1Score
-	 * @param player2Score
+	 * @param winner
+	 * @param extraData
 	 * @return false if not current game
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int player1Score, int player2Score) {
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, String extraData) {
 		if (!getGameKey().equals(gameKey))
 			return false;
 		setPenultMove(penultMove);
@@ -104,7 +138,8 @@ public abstract class BoardGame {
 		setPieces();
 		setPlayerTurn(!isPlayerTurn());
 		setPlayer1Turn(!isPlayer1Turn());
-		setMoves(getMoves() + 1);
+		
+		// TODO update winner and end game texts
 		return true;
 	}
 
@@ -303,7 +338,8 @@ public abstract class BoardGame {
 				|| (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && !player1Turn))
 			playerTurn = true;
 		
-		gameInformation += playerTurn;
+		gameInformation += playerTurn + "~";
+		gameInformation += gameType;
 		return gameInformation;
 	}
 	
@@ -563,5 +599,19 @@ public abstract class BoardGame {
 
 	public void setPlayer1Turn(boolean isPlayer1Turn) {
 		this.isPlayer1Turn = isPlayer1Turn;
+	}
+
+	/**
+	 * @return the scoreInfo
+	 */
+	public String getScoreInfo() {
+		return scoreInfo;
+	}
+
+	/**
+	 * @param scoreInfo the scoreInfo to set
+	 */
+	public void setScoreInfo(String scoreInfo) {
+		this.scoreInfo = scoreInfo;
 	}
 }

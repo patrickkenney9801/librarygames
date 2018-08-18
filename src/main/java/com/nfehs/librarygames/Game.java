@@ -174,9 +174,9 @@ public class Game {
 	 * Ultimately leads to opening GameScreen
 	 * @param gameKey
 	 */
-	public static void getBoard(String gameKey) {
+	public static void getBoard(String gameKey, int gameType) {
 		// sends get board packet to server
-		new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey).writeData(client);
+		new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey, gameType).writeData(client);
 	}
 	
 	/**
@@ -186,7 +186,8 @@ public class Game {
 	 */
 	public static void sendMove(int movingFrom, int movingTo) {
 		// sends send move packet to server
-		new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(), movingFrom, movingTo, getPlayer().getUsername()).writeData(client);
+		new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(), movingFrom, movingTo,
+							getPlayer().getUsername(), getBoardGame().getGameType()).writeData(client);
 	}
 	
 	/**

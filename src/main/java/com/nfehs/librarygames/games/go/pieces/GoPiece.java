@@ -66,7 +66,7 @@ public abstract class GoPiece extends Piece {
 		if (!border)
 			g2d.fillOval(0, 0, size, size);
 		else
-			g2d.fillOval(size / 20, size / 20, size * 9 / 10, size * 9 / 10);
+			g2d.fillOval(size / 20, size / 20, size - 2*(size / 20), size - 2*(size / 20));
 		g2d.dispose();
 		return stoneImage;
 	}
@@ -78,10 +78,11 @@ public abstract class GoPiece extends Piece {
 	public static void loadImages() {
 		Stone.loadImages();
 		
-		setPlayer1Icon(getStoneImage(true, 50, false));
-		setPlayer1IconPlaying(getStoneImage(true, 50, true));
-		setPlayer2Icon(getStoneImage(false, 50, false));
-		setPlayer2IconPlaying(getStoneImage(false, 50, true));
+		int iconSize = GameScreen.getInfoTextSize();
+		setPlayer1Icon(getStoneImage(true, iconSize, false));
+		setPlayer1IconPlaying(getStoneImage(true, iconSize, true));
+		setPlayer2Icon(getStoneImage(false, iconSize, false));
+		setPlayer2IconPlaying(getStoneImage(false, iconSize, true));
 	}
 
 	public boolean isBlackPiece() {

@@ -38,6 +38,7 @@ import com.nfehs.librarygames.games.go.pieces.Stone;
 public class GameScreen extends Screen {
 	private static final double imageTileSize = 100;
 	private static double boardSize;
+	private static int infoTextSize;
 	
 	private double scale;
 	private double screenTileSize;
@@ -55,6 +56,10 @@ public class GameScreen extends Screen {
 	private JLabel[][] pieces;
 	// used in Go games
 	private JLabel shadowPiece;
+	
+	private JPanel gameOverInfo;
+	private JLabel winner;
+	private JLabel score;
 	
 	private JPanel gameInfo;
 	private JLabel moveCount;
@@ -111,6 +116,7 @@ public class GameScreen extends Screen {
 
 		shadowPiece = new JLabel();
 		pass = new JButton("PASS");
+		
 		// if playing go, set the icon for shadow piece and define the pass button
 		if (Game.getBoardGame().getGameType() < 3) {
 			shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getPiece(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
@@ -125,45 +131,59 @@ public class GameScreen extends Screen {
 				}
 			});
 		}
+
+		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
+		gameOverInfo = new JPanel();
+		gameOverInfo.setBounds(getTopLeftX() + (int) getBoardSize() + panelWidth / 20, getTopLeftY(), panelWidth, getInfoTextSize() * 7 / 2);
+		gameOverInfo.setLayout(null);
+		
+		winner = new JLabel();
+		gameOverInfo.add(winner);
+		winner.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		winner.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		
+		score = new JLabel();
+		gameOverInfo.add(score);
+		score.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		score.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		
 		
 		gameInfo = new JPanel();
 		Game.mainWindow.add(gameInfo);
-		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
 		gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
-							getTopLeftY() + (int) getBoardSize() / 8, panelWidth, 250);
+							getTopLeftY() + getInfoTextSize() * 2, panelWidth, getInfoTextSize() * 5);
 		gameInfo.setLayout(null);
 		
 		moveCount = new JLabel();
 		gameInfo.add(moveCount);
-		moveCount.setBounds(25, 25, panelWidth - 50, 50);
-		moveCount.setFont(new Font("Serif", Font.PLAIN, 50));
+		moveCount.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		moveCount.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		player1Icon = new JLabel();
 		gameInfo.add(player1Icon);
-		player1Icon.setBounds(25, 100, 50, 50);
+		player1Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, getInfoTextSize(), getInfoTextSize());
 		
 		player1User = new JLabel(Game.getBoardGame().getPlayer1());
 		gameInfo.add(player1User);
-		player1User.setBounds(100, 100, panelWidth - 125, 50);
-		player1User.setFont(new Font("Serif", Font.PLAIN, 50));
+		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
+		player1User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		player2Icon = new JLabel();
 		gameInfo.add(player2Icon);
-		player2Icon.setBounds(25, 175, 50, 50);
+		player2Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 7 / 2, getInfoTextSize(), getInfoTextSize());
 		
 		player2User = new JLabel(Game.getBoardGame().getPlayer2());
 		gameInfo.add(player2User);
-		player2User.setBounds(100, 175, panelWidth - 125, 50);
-		player2User.setFont(new Font("Serif", Font.PLAIN, 50));
+		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
+		player2User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		
 		
 		capturedPieces= new JLayeredPane();
 		Game.mainWindow.add(capturedPieces);
 		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
-							getTopLeftY() + (int) getBoardSize() / 2, panelWidth, 300);
+							getTopLeftY() + getInfoTextSize() * 8, panelWidth, getInfoTextSize() * 6);
 		capturedPieces.setLayout(null);
 		
 		capturedPiecesBG = new JPanel();
@@ -172,21 +192,19 @@ public class GameScreen extends Screen {
 		
 		captured = new JLabel("Captured Pieces: ");
 		capturedPieces.add(captured);
-		captured.setBounds(25, 25, panelWidth - 50, 50);
-		captured.setFont(new Font("Serif", Font.PLAIN, 50));
+		captured.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		captured.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
-		// TODO properly scale images
-		int sizeOfImages = 50;
 		BufferedImage[][] capturablePieces = Game.getBoardGame().getCapturablePieces();
 		playerCaptured = new JLabel[capturablePieces.length][capturablePieces[0].length];
 		playerCapturedNumber = new JLabel[capturablePieces.length][capturablePieces[0].length];
-		int gap = (capturedPieces.getWidth() - sizeOfImages*capturablePieces.length) / (capturablePieces.length+1);
+		int gap = (capturedPieces.getWidth() - getInfoTextSize()*capturablePieces.length) / (capturablePieces.length+1);
 		
 		for (int i = 0; i < playerCaptured.length; i++) {
 			for (int j = 0; j < playerCaptured[i].length; j++) {
 				playerCaptured[i][j] = new JLabel(new ImageIcon(capturablePieces[i][j]));
 				capturedPieces.add(playerCaptured[i][j], JLayeredPane.DEFAULT_LAYER);
-				playerCaptured[i][j].setBounds(gap + i*(sizeOfImages), 100 + j*100, sizeOfImages, sizeOfImages);
+				playerCaptured[i][j].setBounds(gap + i*(getInfoTextSize()), getInfoTextSize()*2 + j*(getInfoTextSize()*2), getInfoTextSize(), getInfoTextSize());
 				playerCaptured[i][j].addMouseListener(new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
 						Game.getBoardGame().handleMouseClickCapturedPiece(getCoordinates((JLabel) e.getSource()));
@@ -211,8 +229,8 @@ public class GameScreen extends Screen {
 				
 				playerCapturedNumber[i][j] = new JLabel();
 				capturedPieces.add(playerCapturedNumber[i][j], JLayeredPane.PALETTE_LAYER);
-				playerCapturedNumber[i][j].setBounds(gap + i*(sizeOfImages) + sizeOfImages/2, 125 + j*100, gap - sizeOfImages/2, sizeOfImages);
-				playerCapturedNumber[i][j].setFont(new Font("Serif", Font.PLAIN, 50));
+				playerCapturedNumber[i][j].setBounds(gap + i*(getInfoTextSize()) + getInfoTextSize()/2, getInfoTextSize()*5/2 + j*(getInfoTextSize()*2), gap - getInfoTextSize()/2, getInfoTextSize());
+				playerCapturedNumber[i][j].setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 				// if game is go set top number to black
 				if (Game.getBoardGame().getGameType() < 3)
 					playerCapturedNumber[0][0].setForeground(Color.BLACK);
@@ -259,12 +277,6 @@ public class GameScreen extends Screen {
 		addBoard();
 		updateBoard();
 		
-		// if the game is over disable moves
-		if (Game.getBoardGame().getWinner() != null) {
-			pass.setEnabled(false);
-			resign.setEnabled(false);
-		}
-
 		Game.mainWindow.repaint();
 	}
 	
@@ -376,8 +388,7 @@ public class GameScreen extends Screen {
 			pieces[lastMove / pieces.length][lastMove % pieces.length].setIcon(
 					new ImageIcon(gamePieces[lastMove / pieces.length][lastMove % pieces.length].getLastMovePiece()));
 		
-		// update game info panel
-		moveCount.setText("Move: " + (Game.getBoardGame().getMoves() + 1));
+		// update game info panel, update moves below
 		player1Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer1Icon()));
 		player2Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer2Icon()));
 		
@@ -395,32 +406,49 @@ public class GameScreen extends Screen {
 			playerCapturedNumber[i][0].setText(cap0);
 			playerCapturedNumber[i][1].setText(cap1);
 		}
-		
-		// handle a pass
-		if (lastMove == -1) {
-			new Thread (new Runnable () {
-				public void run() {
-					try {
-						JLabel pass = new JLabel((Game.getBoardGame().isPlayer1Turn() 
-								? Game.getBoardGame().getPlayer2() : Game.getBoardGame().getPlayer1())
-								+ "   Passed", SwingConstants.CENTER);
-						pane.add(pass, JLayeredPane.POPUP_LAYER);
-						pass.setBounds(0, (int) getBoardSize() / 2 - (int) getScreenTileSize() / 2,
-										(int) getBoardSize(), (int) getScreenTileSize());
-						pass.setFont(new Font("Serif", Font.PLAIN, 50));
-						pass.setOpaque(true);
-						
-						Thread.sleep(1500);
-						pane.remove(pass);
-						pane.repaint();
-					} catch (Exception e) {
-						e.printStackTrace();
+
+		// handle playing game
+		if (Game.getBoardGame().getWinner() == null) {
+			// handle a pass
+			if (lastMove == -1) {
+				new Thread (new Runnable () {
+					public void run() {
+						try {
+							JLabel pass = new JLabel((Game.getBoardGame().isPlayer1Turn() 
+									? Game.getBoardGame().getPlayer2() : Game.getBoardGame().getPlayer1())
+									+ "   Passed", SwingConstants.CENTER);
+							pane.add(pass, JLayeredPane.POPUP_LAYER);
+							pass.setBounds(0, (int) getBoardSize() / 2 - (int) getScreenTileSize() / 2,
+											(int) getBoardSize(), (int) getScreenTileSize());
+							pass.setFont(new Font("Serif", Font.PLAIN, 50));
+							pass.setOpaque(true);
+							
+							Thread.sleep(1000);
+							pane.remove(pass);
+							pane.repaint();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
-				}
-			}).start();
+				}).start();
+			}
+			moveCount.setText("Move: " + (Game.getBoardGame().getMoves() + 1));
+		} else {
+			Game.mainWindow.add(gameOverInfo);
+			gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + gameInfo.getWidth() / 20,
+					getTopLeftY() + getInfoTextSize() * 4, gameInfo.getWidth(), getInfoTextSize() * 5);
+			this.capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + gameInfo.getWidth() / 20,
+								getTopLeftY() + getInfoTextSize() * 10, gameInfo.getWidth(), getInfoTextSize() * 6);
+			moveCount.setText("Move: " + (Game.getBoardGame().getMoves()));
+			winner.setText("Winner: " + Game.getBoardGame().getWinner());
+			score.setText(Game.getBoardGame().getScoreInfo());
+			
+			pass.setEnabled(false);
+			resign.setEnabled(false);
+			this.capturedPieces.repaint();
 		}
-		
 		pane.repaint();
+		gameOverInfo.repaint();
 		gameInfo.repaint();
 	}
 	
@@ -540,6 +568,20 @@ public class GameScreen extends Screen {
 
 	public static double getImagetilesize() {
 		return imageTileSize;
+	}
+
+	/**
+	 * @return the infoTextSize
+	 */
+	public static int getInfoTextSize() {
+		return infoTextSize;
+	}
+
+	/**
+	 * @param infoTextSize the infoTextSize to set
+	 */
+	public static void setInfoTextSize(int infoTextSize) {
+		GameScreen.infoTextSize = infoTextSize;
 	}
 
 }

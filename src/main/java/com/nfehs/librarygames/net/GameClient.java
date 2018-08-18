@@ -201,16 +201,10 @@ public class GameClient extends Thread {
 		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen
 		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME) 
 					&& packet.getUserKey().equals(Game.getPlayer().getUser_key())) {
+			
 			// if so, set GameBoard and open GameScreen
-			
-			/*
-			 *  determine type of GameBoard to make
-			 */
-			
-			// if Go create Go board
-			if (packet.getGameType() < 3 && packet.getGameType() > -1)
-				Game.setBoardGame(new Go(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
-						packet.getPenultMove(), packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score(), packet.getWinner(), packet.getBoard()));
+			Game.setBoardGame(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getBoard(), packet.getExtraData()));
 			
 			// open GameScreen and exit
 			Game.openGameScreen();
@@ -218,7 +212,7 @@ public class GameClient extends Thread {
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
 		if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
-				packet.getPenultMove(), packet.getLastMove(), packet.getPlayer1Score(), packet.getPlayer2Score()))
+				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getExtraData()))
 			Game.updateGameBoard();
 	}
 
@@ -236,7 +230,7 @@ public class GameClient extends Thread {
 		// update current board game, returns false if wrong game
 		// if successful update, update the game board
 		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(),
-										packet.getPlayer1Score(), packet.getPlayer2Score()))
+										packet.getWinner(), packet.getExtraData()))
 			Game.updateGameBoard();
 	}
 

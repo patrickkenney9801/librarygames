@@ -53,6 +53,7 @@ public class GameFrame extends JFrame {
 		Game.mainWindow.setBackground(background);
 		
 		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+		GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
 		
 		// set UI presets
 		UIManager.put("Label.foreground", Color.WHITE);

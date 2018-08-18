@@ -93,7 +93,8 @@ public class ActiveGamesScreen extends Screen {
 							elemNumber = i;
 					
 					// send get board request to server
-					Game.getBoard(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[0]);
+					Game.getBoard(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[0],
+							Integer.parseInt(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[3]));
 				}
 			});
 		}
@@ -123,7 +124,8 @@ public class ActiveGamesScreen extends Screen {
 							elemNumber = i;
 					
 					// send get board request to server
-					Game.getBoard(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[0]);
+					Game.getBoard(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[0],
+						Integer.parseInt(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[3]));
 				}
 			});
 		}

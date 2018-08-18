@@ -13,15 +13,16 @@ public class Packet09SendMove extends Packet {
 	private int moveFrom;
 	private int moveTo;
 	private String username;
+	private int gameType;
 	
 	// data to send to client
 	// userKey
 	// gameKey
 	private int penultMove;
 	private int lastMove;
-	private int player1Score;
-	private int player2Score;
 	private String board;
+	private int winner;
+	private String extraData;
 
 	/**
 	 * Used by client to send data to server
@@ -29,14 +30,16 @@ public class Packet09SendMove extends Packet {
 	 * @param gameKey
 	 * @param moveFrom
 	 * @param moveTo
+	 * @param gameType
 	 */
-	public Packet09SendMove(String userkey, String gameKey, int moveFrom, int moveTo, String username) {
+	public Packet09SendMove(String userkey, String gameKey, int moveFrom, int moveTo, String username, int gameType) {
 		super(9);
 		setUserKey(userkey);
 		setGameKey(gameKey);
 		setMoveFrom(moveFrom);
 		setMoveTo(moveTo);
 		setUsername(username);
+		setGameType(gameType);
 	}
 	
 	/**
@@ -53,6 +56,7 @@ public class Packet09SendMove extends Packet {
 		try {
 			setMoveFrom(Integer.parseInt(userdata[3]));
 			setMoveTo(Integer.parseInt(userdata[4]));
+			setGameType(Integer.parseInt(userdata[6]));
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -65,22 +69,22 @@ public class Packet09SendMove extends Packet {
 	 * @param gameKey
 	 * @param penultMove
 	 * @param lastMove
-	 * @param player1Score
-	 * @param player2Score
+	 * @param winner
 	 * @param board
+	 * @param extraData
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet09SendMove(String packetKey, String userKey, String gameKey, int penultMove, int lastMove,
-							int player1Score, int player2Score, String board, boolean serverUse) {
+							int winner, String board, String extraData, boolean serverUse) {
 		super(9);
 		setUuidKey(packetKey);
 		setUserKey(userKey);
 		setGameKey(gameKey);
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
-		setPlayer1Score(player1Score);
-		setPlayer2Score(player2Score);
+		setWinner(winner);
 		setBoard(board);
+		setExtraData(extraData);
 	}
 	
 	/**
@@ -94,12 +98,12 @@ public class Packet09SendMove extends Packet {
 		setUuidKey(userdata[0]);
 		setUserKey(userdata[1]);
 		setGameKey(userdata[2]);
-		setBoard(userdata[7]);
+		setBoard(userdata[6]);
+		setExtraData(userdata[7]);
 		try {
 			setPenultMove(Integer.parseInt(userdata[3]));
 			setLastMove(Integer.parseInt(userdata[4]));
-			setPlayer1Score(Integer.parseInt(userdata[5]));
-			setPlayer2Score(Integer.parseInt(userdata[6]));
+			setWinner(Integer.parseInt(userdata[5]));
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -108,13 +112,13 @@ public class Packet09SendMove extends Packet {
 	@Override
 	public byte[] getData() {
 		return ("09" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":"
-				+ getMoveFrom() + ":" + getMoveTo() + ":" + getUsername()).getBytes();
+				+ getMoveFrom() + ":" + getMoveTo() + ":" + getUsername() + ":" + getGameType()).getBytes();
 	}
 	
 	@Override
 	public byte[] getDataServer() {
 		return ("09" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getPenultMove() + ":" + getLastMove()
-		 		+ ":" + getPlayer1Score() + ":" + getPlayer2Score() + ":" + getBoard()).getBytes();
+		 		+ ":" + getWinner() + ":" + getBoard() + ":" + getExtraData()).getBytes();
 	}
 
 	public String getUserKey() {
@@ -157,22 +161,6 @@ public class Packet09SendMove extends Packet {
 		this.lastMove = lastMove;
 	}
 
-	public int getPlayer1Score() {
-		return player1Score;
-	}
-
-	public void setPlayer1Score(int player1Score) {
-		this.player1Score = player1Score;
-	}
-
-	public int getPlayer2Score() {
-		return player2Score;
-	}
-
-	public void setPlayer2Score(int player2Score) {
-		this.player2Score = player2Score;
-	}
-
 	public String getBoard() {
 		return board;
 	}
@@ -201,5 +189,47 @@ public class Packet09SendMove extends Packet {
 
 	public void setPenultMove(int penultMove) {
 		this.penultMove = penultMove;
+	}
+
+	/**
+	 * @return the winner
+	 */
+	public int getWinner() {
+		return winner;
+	}
+
+	/**
+	 * @param winner the winner to set
+	 */
+	public void setWinner(int winner) {
+		this.winner = winner;
+	}
+
+	/**
+	 * @return the gameType
+	 */
+	public int getGameType() {
+		return gameType;
+	}
+
+	/**
+	 * @param gameType the gameType to set
+	 */
+	public void setGameType(int gameType) {
+		this.gameType = gameType;
+	}
+
+	/**
+	 * @return the extraData
+	 */
+	public String getExtraData() {
+		return extraData;
+	}
+
+	/**
+	 * @param extraData the extraData to set
+	 */
+	public void setExtraData(String extraData) {
+		this.extraData = extraData;
 	}
 }

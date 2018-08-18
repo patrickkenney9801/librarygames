@@ -387,14 +387,22 @@ public class GameServer extends Thread {
 			String gameKey = "" + UUID.randomUUID();
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
 										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
-										+ "', " + packet.getGameType() + ", 0, -5, -5, '"
-										+ board + "', 0, 0, 0);");
+										+ "', " + packet.getGameType() + ", 0, -5, -5, 0, '"
+										+ board + "');");
 			createGame.executeUpdate();
+			
+			// next create specific game table for extra data
+			if(packet.getGameType() < 3) {
+				// if go, make a go table as well
+				PreparedStatement createGoGame = database.prepareStatement("INSERT INTO go VALUES ('" 
+						+ gameKey + "', 0, 0, 0, 0);");
+				createGoGame.executeUpdate();
+			}
 			
 			System.out.println("GAME CREATED");
 			
 			// Send new game data to creator via 8 packet so opens game screen
-			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), gameKey);
+			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), gameKey, packet.getGameType());
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			getBoard(temp.getData(), address, port);
 			
@@ -482,8 +490,18 @@ public class GameServer extends Thread {
 		try {
 			Packet08GetBoard packet = new Packet08GetBoard(data);
 			
+			// find String name for gameType so tables can be joined
+			String type = getTableName(packet.getGameType());
+			
+			// if no game name is found
+			if (type == null) {
+				// TODO send error to client
+				System.out.println("ERROR IMPROPER GAME TYPE SENT");
+			}
+			
 			// find game
-			PreparedStatement statement = database.prepareStatement("SELECT * FROM games WHERE game_key = '" + packet.getGameKey() + "';");
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM games RIGHT JOIN " + type + " ON games.game_key = " + type 
+																	+ ".game_key WHERE games.game_key = '" + packet.getGameKey() + "';");
 			ResultSet result = statement.executeQuery();
 			
 			/*
@@ -501,8 +519,6 @@ public class GameServer extends Thread {
 			int penultMove = result.getInt("penult_move");
 			int lastMove = result.getInt("last_move");
 			String board = result.getString("board");
-			int player1Score = result.getInt("p1_score");
-			int player2Score = result.getInt("p2_score");
 			int winner = result.getInt("winner");
 			
 			// get player usernames in proper order
@@ -529,10 +545,19 @@ public class GameServer extends Thread {
 				player1 = opponentUser.getString("username");
 			}
 			
+			// retrieve specific game data
+			String extraData = "";
+			if (gameType < 3) {
+				// handle getting extra data for go games
+				extraData += result.getInt("p1_stones_captured");
+				extraData += "," + result.getInt("p2_stones_captured");
+				extraData += "," + result.getInt("p1_score");
+				extraData += "," + result.getInt("p2_score");
+			}
+			
 			// send requested game to client
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), gameType, 
-																 player1, player2, moves, penultMove, lastMove, player1Score,
-																 player2Score, winner, board, true);
+																 player1, player2, moves, penultMove, lastMove, winner, board, extraData, true);
 			returnPacket.writeData(this, address, port);
 			
 			System.out.println("GAME SENT");
@@ -551,8 +576,18 @@ public class GameServer extends Thread {
 		try {
 			Packet09SendMove packet = new Packet09SendMove(data);
 			
+			// find String name for gameType so tables can be joined
+			String type = getTableName(packet.getGameType());
+			
+			// if no game name is found
+			if (type == null) {
+				// TODO send error to client
+				System.out.println("ERROR IMPROPER GAME TYPE SENT");
+			}
+			
 			// find game
-			PreparedStatement statement = database.prepareStatement("SELECT * FROM games WHERE game_key = '" + packet.getGameKey() + "';");
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM games RIGHT JOIN " + type + " ON games.game_key = " + type 
+																	+ ".game_key WHERE games.game_key = '" + packet.getGameKey() + "';");
 			ResultSet result = statement.executeQuery();
 			
 			/*
@@ -572,10 +607,8 @@ public class GameServer extends Thread {
 			int moves = result.getInt("moves");
 			int penultMove = result.getInt("penult_move");
 			int lastMove = result.getInt("last_move");
-			String oldBoard = result.getString("board");
-			int player1Score = result.getInt("p1_score");
-			int player2Score = result.getInt("p2_score");
 			int winner = result.getInt("winner");
+			String oldBoard = result.getString("board");
 			boolean resigned = false;
 			
 			String playerTurnKey;
@@ -597,9 +630,9 @@ public class GameServer extends Thread {
 					// TODO delete game from database
 				}
 				if (packet.getUserKey().equals(player1Key))
-					winner = 2;
+					winner = 4;
 				else if (packet.getUserKey().equals(player2Key))
-					winner = 1;
+					winner = 3;
 				else {
 					// TODO send error
 					System.out.println("USER KEY NOT IN GAME RESIGNED");
@@ -624,9 +657,16 @@ public class GameServer extends Thread {
 				System.out.println("ILLEGAL MOVE SENT");
 				return;
 			}
-
-			// update score if the game is go and check for end of game
+			
+			// update game specific info and check for end of game
+			String extraInfo = "";
 			if (gameType < 3) {
+				// if the game is go
+				int p1StonesCaptured = result.getInt("p1_stones_captured");
+				int p2StonesCaptured = result.getInt("p2_stones_captured");
+				int p1Score = result.getInt("p1_score");
+				int p2Score = result.getInt("p2_score");
+				
 				// if the user did not pass, calculate score
 				if (packet.getMoveTo() > -1) {
 					int capturedPieces = -1;	// for use in go games
@@ -635,47 +675,57 @@ public class GameServer extends Thread {
 						if (oldBoard.charAt(i) != newBoard.charAt(i))
 							capturedPieces++;
 					if (moves % 2 == 0)
-						player1Score += capturedPieces;
+						p1StonesCaptured += capturedPieces;
 					else
-						player2Score += capturedPieces;
+						p2StonesCaptured += capturedPieces;
 				}
+				
 				// if the user passed, it is end of game if last move was a pass too
 				if (packet.getMoveTo() == -1 && lastMove == -1) {
 					// get player scores
 					int[] territoryScores = Go.calculateTerritory(oldBoard);
-					player1Score += territoryScores[0];
+					p1Score += territoryScores[0];
 					
 					// apply Komi
 					switch (gameType) {
-						case 2:				player2Score += 3;
-						case 1:				player2Score += 2;
-						default: 			player2Score += territoryScores[1] + 1;
+						case 2:				p2Score += 3;
+						case 1:				p2Score += 2;
+						default: 			p2Score += territoryScores[1] + 1;
 					}
 					
 					winner = 1;
-					if (player2Score >= player1Score)
+					if (p2Score >= p1Score)
 						winner = 2;
 				}
+				// update go game info
+				PreparedStatement updateGoGame = database.prepareStatement("UPDATE go SET " 
+						+ "p1_stones_captured = " + p1StonesCaptured + ", p2_stones_captured = " + p2StonesCaptured
+						 + ", p2_score = " + p1Score + ", p2_score = " + p2Score + " WHERE game_key = '" + packet.getGameKey() + "';");
+				updateGoGame.executeUpdate();
+				
+				extraInfo += p1StonesCaptured;
+				extraInfo += "," + p2StonesCaptured;
+				extraInfo += "," + p1Score;
+				extraInfo += "," + p2Score;
 			}
 			
 			// update game
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
-					+ "moves = " + ++moves + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo() + ", "
-					+ "board = '" + newBoard + "', p1_score = " + player1Score + ", p2_score = " + player2Score
-					+ ", winner = " + winner + " WHERE game_key = '" + packet.getGameKey() + "';");
+					+ "moves = " + ++moves + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo()
+					 + ", winner = " + winner + ", board = '" + newBoard + "' WHERE game_key = '" + packet.getGameKey() + "';");
 			updateGame.executeUpdate();
 			
 			System.out.println("GAME UPDATED");
 			
 			// send basic update game info to player via 09 packet
 			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(),
-												lastMove, packet.getMoveTo(), player1Score, player2Score, newBoard, true);
+												lastMove, packet.getMoveTo(), winner, newBoard, extraInfo, true);
 			returnPacket.writeData(this, address, port);
 			
 			/*
 			 *  send a 08 packet to opponent to notify or update their client
 			 */
-			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), packet.getGameKey());
+			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), packet.getGameKey(), gameType);
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			
 			for (Player p : onlinePlayers)
@@ -706,5 +756,19 @@ public class GameServer extends Thread {
 		for (Player p : onlinePlayers)
 			if (p.getUsername().equals(Security.encrypt(packet.getOpponentUsername())))
 				returnPacket.writeData(this, p.getIpAddress(), p.getPort());
+	}
+
+	/**
+	 * Returns the table name of a given game type
+	 * @param gameType
+	 * @return
+	 */
+	private String getTableName(int gameType) {
+		switch (gameType) {
+		case 0:
+		case 1:
+		case 2:						return "go";
+		default:					return null;
+	}
 	}
 }
