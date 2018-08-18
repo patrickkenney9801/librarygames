@@ -32,6 +32,18 @@ public abstract class GoPiece extends Piece {
 		setGameType(gameType);
 	}
 	
+	/**
+	 * Returns a 2D array of all capturable pieces
+	 * 0,0 is white stone
+	 * 0,1 is black stone
+	 * @return
+	 */
+	public static BufferedImage[][] getCapturablePieces() {
+		BufferedImage[][] pieces = new BufferedImage[1][2];
+		pieces[0][0] = getPlayer2Icon();
+		pieces[0][1] = getPlayer1Icon();
+		return pieces;
+	}
 
 	/**
 	 * Returns a stone in proper size given

@@ -1,6 +1,7 @@
 package com.nfehs.librarygames.screens;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -61,12 +62,11 @@ public class GameScreen extends Screen {
 	private JLabel player1User;
 	private JLabel player2User;
 	
-	private JPanel capturedPieces;
+	private JLayeredPane capturedPieces;
+	private JPanel capturedPiecesBG;
 	private JLabel captured;
-	private JLabel[] player1Captured;
-	private JLabel[] player2Captured;
-	private JLabel[] player1CapturedNumber;
-	private JLabel[] player2CapturedNumber;
+	private JLabel[][] playerCaptured;
+	private JLabel[][] playerCapturedNumber;
 	
 	private JPanel chatInterface;
 	private JTextArea chatBox;
@@ -135,7 +135,7 @@ public class GameScreen extends Screen {
 		
 		moveCount = new JLabel();
 		gameInfo.add(moveCount);
-		moveCount.setBounds(25, 25, 300, 50);
+		moveCount.setBounds(25, 25, panelWidth - 50, 50);
 		moveCount.setFont(new Font("Serif", Font.PLAIN, 50));
 		
 		player1Icon = new JLabel();
@@ -144,7 +144,7 @@ public class GameScreen extends Screen {
 		
 		player1User = new JLabel(Game.getBoardGame().getPlayer1());
 		gameInfo.add(player1User);
-		player1User.setBounds(100, 100, 300, 50);
+		player1User.setBounds(100, 100, panelWidth - 125, 50);
 		player1User.setFont(new Font("Serif", Font.PLAIN, 50));
 		
 		player2Icon = new JLabel();
@@ -153,26 +153,71 @@ public class GameScreen extends Screen {
 		
 		player2User = new JLabel(Game.getBoardGame().getPlayer2());
 		gameInfo.add(player2User);
-		player2User.setBounds(100, 175, 300, 50);
+		player2User.setBounds(100, 175, panelWidth - 125, 50);
 		player2User.setFont(new Font("Serif", Font.PLAIN, 50));
 		
 		
 		
-		capturedPieces= new JPanel();
+		capturedPieces= new JLayeredPane();
 		Game.mainWindow.add(capturedPieces);
 		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
-							getTopLeftY() + (int) getBoardSize() / 2, panelWidth, 250);
+							getTopLeftY() + (int) getBoardSize() / 2, panelWidth, 300);
 		capturedPieces.setLayout(null);
+		
+		capturedPiecesBG = new JPanel();
+		capturedPiecesBG.setBounds(0, 0, capturedPieces.getWidth(), capturedPieces.getHeight());
+		capturedPieces.add(capturedPiecesBG, JLayeredPane.FRAME_CONTENT_LAYER);
 		
 		captured = new JLabel("Captured Pieces: ");
 		capturedPieces.add(captured);
 		captured.setBounds(25, 25, panelWidth - 50, 50);
 		captured.setFont(new Font("Serif", Font.PLAIN, 50));
 		
+		// TODO properly scale images
+		int sizeOfImages = 50;
+		BufferedImage[][] capturablePieces = Game.getBoardGame().getCapturablePieces();
+		playerCaptured = new JLabel[capturablePieces.length][capturablePieces[0].length];
+		playerCapturedNumber = new JLabel[capturablePieces.length][capturablePieces[0].length];
+		int gap = (capturedPieces.getWidth() - sizeOfImages*capturablePieces.length) / (capturablePieces.length+1);
+		
+		for (int i = 0; i < playerCaptured.length; i++) {
+			for (int j = 0; j < playerCaptured[i].length; j++) {
+				playerCaptured[i][j] = new JLabel(new ImageIcon(capturablePieces[i][j]));
+				capturedPieces.add(playerCaptured[i][j], JLayeredPane.DEFAULT_LAYER);
+				playerCaptured[i][j].setBounds(gap + i*(sizeOfImages), 100 + j*100, sizeOfImages, sizeOfImages);
+				playerCaptured[i][j].addMouseListener(new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						Game.getBoardGame().handleMouseClickCapturedPiece(getCoordinates((JLabel) e.getSource()));
+					}
+					public void mouseEntered(MouseEvent e) {
+						Game.getBoardGame().handleMouseEnterCapturedPiece(getCoordinates((JLabel) e.getSource()));
+					}
+					public void mouseExited(MouseEvent e) {
+						Game.getBoardGame().handleMouseLeaveCapturedPiece();
+					}
+					private int[] getCoordinates (JLabel piece) {
+						int[] coordinates = new int[2];
+						for (int i = 0; i < playerCaptured.length; i++)
+							for (int j = 0; j < playerCaptured[i].length; j++)
+								if (piece.equals(board[i][j])) {
+									coordinates[0] = i;
+									coordinates[1] = j;
+								}
+						return coordinates;
+					}
+				});
+				
+				playerCapturedNumber[i][j] = new JLabel();
+				capturedPieces.add(playerCapturedNumber[i][j], JLayeredPane.PALETTE_LAYER);
+				playerCapturedNumber[i][j].setBounds(gap + i*(sizeOfImages) + sizeOfImages/2, 125 + j*100, gap - sizeOfImages/2, sizeOfImages);
+				playerCapturedNumber[i][j].setFont(new Font("Serif", Font.PLAIN, 50));
+				// if game is go set top number to black
+				if (Game.getBoardGame().getGameType() < 3)
+					playerCapturedNumber[0][0].setForeground(Color.BLACK);
+			}
+		}
 		
 		
-		// fully define player captured pieces here TODO
-		// do number in update
 		
 		chatInterface = new JPanel();
 		Game.mainWindow.add(chatInterface);
@@ -328,7 +373,20 @@ public class GameScreen extends Screen {
 		player1Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer1Icon()));
 		player2Icon.setIcon(new ImageIcon(Game.getBoardGame().getPlayer2Icon()));
 		
-		// TODO handle captured pieces update
+		// update captured pieces panel
+		int[][] capturedPieces = Game.getBoardGame().getNumberCapturedPieces();
+		for (int i = 0; i < playerCapturedNumber.length; i++) {
+			// ensure both numbers are the same length
+			String cap0 = "" + capturedPieces[i][0];
+			String cap1 = "" + capturedPieces[i][1];
+			while (cap0.length() < cap1.length())
+				cap0 = "0" + cap0;
+			while (cap1.length() < cap0.length())
+				cap1 = "0" + cap1;
+			
+			playerCapturedNumber[i][0].setText(cap0);
+			playerCapturedNumber[i][1].setText(cap1);
+		}
 		
 		// handle a pass
 		if (lastMove == -1) {

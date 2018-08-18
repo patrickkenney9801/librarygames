@@ -247,6 +247,25 @@ public class Go extends BoardGame {
 			return GoPiece.getPlayer2IconPlaying();
 		return GoPiece.getPlayer2Icon();
 	}
+	
+	/**
+	 * Returns a 2D array of the images of capturable pieces
+	 * col 0 are white pieces, col 1 are black pieces
+	 */
+	public BufferedImage[][] getCapturablePieces() {
+		return GoPiece.getCapturablePieces();
+	}
+	
+	/**
+	 * Returns 2D array of the number of pieces taken
+	 * col 0 are white pieces, col 1 are black pieces
+	 */
+	public int[][] getNumberCapturedPieces() {
+		int[][] numCaptured = new int[1][2];
+		numCaptured[0][0] = getWhiteStonesCaptured();
+		numCaptured[0][1] = getBlackStonesCaptured();
+		return numCaptured;
+	}
 
 	@Override
 	public void handleMouseEnterTile(int[] coordinates) {
@@ -296,6 +315,12 @@ public class Go extends BoardGame {
 	public void handleMouseLeavePiece() {}
 	@Override
 	public void handleMouseClickPiece(int[] coordinates) {}
+	@Override
+	public void handleMouseEnterCapturedPiece(int[] coordinates) {}
+	@Override
+	public void handleMouseLeaveCapturedPiece() {}
+	@Override
+	public void handleMouseClickCapturedPiece(int[] coordinates) {}
 	
 
 	@Override

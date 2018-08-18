@@ -121,12 +121,17 @@ public abstract class BoardGame {
 	protected abstract void setPieces();
 	public abstract BufferedImage getPlayer1Icon();
 	public abstract BufferedImage getPlayer2Icon();
+	public abstract BufferedImage[][] getCapturablePieces();
+	public abstract int[][] getNumberCapturedPieces();
 	public abstract void handleMouseEnterTile(int[] coordinates);
 	public abstract void handleMouseLeaveTile();
 	public abstract void handleMouseClickTile(int[] coordinates);
 	public abstract void handleMouseEnterPiece(int[] coordinates);
 	public abstract void handleMouseLeavePiece();
 	public abstract void handleMouseClickPiece(int[] coordinates);
+	public abstract void handleMouseEnterCapturedPiece(int[] coordinates);
+	public abstract void handleMouseLeaveCapturedPiece();
+	public abstract void handleMouseClickCapturedPiece(int[] coordinates);
 	
 	// implement in child classes, for use in logic
 	protected abstract boolean validMove(int x, int y);
