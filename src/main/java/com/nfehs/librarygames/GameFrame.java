@@ -70,6 +70,9 @@ public class GameFrame extends JFrame {
 		UIManager.put("RadioButton.foreground", Color.WHITE);
 		UIManager.put("RadioButton.background", background);
 		UIManager.put("Panel.background", textBackground);
+		UIManager.put("OptionPane.messageForeground", Color.WHITE);
+		UIManager.put("OptionPane.foreground", Color.WHITE);
+		UIManager.put("OptionPane.background", background);
 		
 		// load images here
 		Tile.loadImages();

@@ -387,7 +387,7 @@ public class GameServer extends Thread {
 			String gameKey = "" + UUID.randomUUID();
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
 										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
-										+ "', " + packet.getGameType() + ", true, -5, -5, '"
+										+ "', " + packet.getGameType() + ", 0, -5, -5, '"
 										+ board + "', 0, 0, 0);");
 			createGame.executeUpdate();
 			
@@ -593,6 +593,9 @@ public class GameServer extends Thread {
 			
 			// first handle resignation case
 			if (packet.getMoveTo() == -2) {
+				if (moves < 2) {
+					// TODO delete game from database
+				}
 				if (packet.getUserKey().equals(player1Key))
 					winner = 2;
 				else if (packet.getUserKey().equals(player2Key))
@@ -625,7 +628,7 @@ public class GameServer extends Thread {
 			// update score if the game is go and check for end of game
 			if (gameType < 3) {
 				// if the user did not pass, calculate score
-				if (packet.getMoveTo() != -1) {
+				if (packet.getMoveTo() > -1) {
 					int capturedPieces = -1;	// for use in go games
 					// calculate number of captured pieces in a go game
 					for (int i = 0; i < oldBoard.length(); i++)
@@ -665,8 +668,8 @@ public class GameServer extends Thread {
 			System.out.println("GAME UPDATED");
 			
 			// send basic update game info to player via 09 packet
-			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getUserKey(), 
-											packet.getGameKey(), lastMove, packet.getMoveTo(), player1Score, player2Score, newBoard, true);
+			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(),
+												lastMove, packet.getMoveTo(), player1Score, player2Score, newBoard, true);
 			returnPacket.writeData(this, address, port);
 			
 			/*

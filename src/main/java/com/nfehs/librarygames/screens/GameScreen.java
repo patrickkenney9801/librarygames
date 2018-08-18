@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -103,7 +104,8 @@ public class GameScreen extends Screen {
 		resign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("RESIGN CLICKED");
-				// send resignation packet to server TODO
+				if (JOptionPane.showConfirmDialog(null, "Are you sure you want to resign?", "Resign", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
+					Game.sendMove(-2, -2);
 			}
 		});
 
@@ -256,6 +258,12 @@ public class GameScreen extends Screen {
 		pieces = new JLabel[rowLength][rowLength];
 		addBoard();
 		updateBoard();
+		
+		// if the game is over disable moves
+		if (Game.getBoardGame().getWinner() != null) {
+			pass.setEnabled(false);
+			resign.setEnabled(false);
+		}
 
 		Game.mainWindow.repaint();
 	}
