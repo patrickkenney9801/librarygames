@@ -45,7 +45,7 @@ public class GameScreen extends Screen {
 	private int topLeftX;
 	private int topLeftY;
 
-	private JLabel title;
+	protected JLabel title;
 	private JButton back;
 	private JButton pass;
 	private JButton resign;
@@ -259,7 +259,7 @@ public class GameScreen extends Screen {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
 			public void keyTyped(KeyEvent e) {
-				if (e.getKeyChar() == '\n')
+				if (e.getKeyChar() == '\n' && ((JButton) e.getSource()).getText().length() > 0)
 					Game.sendChat(chat.getText());
 			}
 		});

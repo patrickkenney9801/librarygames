@@ -59,7 +59,7 @@ public class GameServer extends Thread {
 			String driver = "com.mysql.cj.jdbc.Driver";
 			Class.forName(driver);
 			
-			return DriverManager.getConnection("jdbc:mysql://localhost:3306/library_games", DATABASE_USER, DATABASE_PASS);
+			return DriverManager.getConnection("jdbc:mysql://localhost:3306/library_games?autoReconnect=true", DATABASE_USER, DATABASE_PASS);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

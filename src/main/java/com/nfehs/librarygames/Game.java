@@ -325,6 +325,14 @@ public class Game {
 		}
 		((GameScreen) screen).updateChat(text, senderKey);
 	}
+	
+	/**
+	 * This method notifies the user if a change was made to one of their games
+	 * @param boardGame
+	 */
+	public static void notifyUser(BoardGame boardGame) {
+		screen.notifyUser(boardGame);
+	}
 
 	/**
 	 * @return the player

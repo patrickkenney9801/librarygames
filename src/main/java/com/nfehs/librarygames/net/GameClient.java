@@ -202,14 +202,22 @@ public class GameClient extends Thread {
 			Game.setBoardGame(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
 					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getBoard(), packet.getExtraData()));
 			
-			// open GameScreen and exit
+			// open GameScreen
 			Game.openGameScreen();
-			return;
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
-		if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
+		else if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
 				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getExtraData()))
 			Game.updateGameBoard();
+		// if none of the above, notify the client
+		else {
+			// if the user is on the active games screen, update it
+			if (Game.gameState == Game.ACTIVE_GAMES)
+				Game.getActiveGames();
+			// notify the user
+			Game.notifyUser(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getBoard(), packet.getExtraData()));
+		}
 	}
 
 	/**
