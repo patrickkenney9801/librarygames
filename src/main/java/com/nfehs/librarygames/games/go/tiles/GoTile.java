@@ -19,6 +19,9 @@ public class GoTile extends Tile {
 	private static BufferedImage[][] edgeTiles;
 	private static BufferedImage[][] cornerTiles;
 	
+	private int tileType;
+	private int gameType;
+	
 	/**
 	 * Sets the image for the tile
 	 * @param tileType	0 for center, 1 for edge, 2 for corner
@@ -26,7 +29,9 @@ public class GoTile extends Tile {
 	 * @param rotation
 	 */
 	public GoTile(int tileType, int gameType, int rotation) {
-		super(getGoTile(tileType, gameType, rotation));
+		super(rotation);
+		setTileType(tileType);
+		setGameType(gameType);
 	}
 	
 	/**
@@ -36,11 +41,11 @@ public class GoTile extends Tile {
 	 * @param rotation
 	 * @return
 	 */
-	private static BufferedImage getGoTile(int tileType, int gameType, int rotation) {
-		switch (tileType) {
-			case 0:						return centerTiles[gameType];
-			case 1:						return edgeTiles[gameType][rotation];
-			case 2:						return cornerTiles[gameType][rotation];
+	public BufferedImage getTile() {
+		switch (getTileType()) {
+			case 0:						return centerTiles[getGameType()];
+			case 1:						return edgeTiles[getGameType()][getRotations()];
+			case 2:						return cornerTiles[getGameType()][getRotations()];
 			default:					return null;
 		}
 	}
@@ -75,5 +80,21 @@ public class GoTile extends Tile {
 				cornerTiles[i][j] = getProperImage(cornerTiles[2][j], ROWS[i], 0);
 			}
 		}
+	}
+
+	public int getTileType() {
+		return tileType;
+	}
+
+	public void setTileType(int tileType) {
+		this.tileType = tileType;
+	}
+
+	public int getGameType() {
+		return gameType;
+	}
+
+	public void setGameType(int gameType) {
+		this.gameType = gameType;
 	}
 }

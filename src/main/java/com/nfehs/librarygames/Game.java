@@ -43,7 +43,7 @@ public class Game {
 	public static boolean gamePlaying = true;
 
 	public Game() throws UnknownHostException {
-		client = new GameClient(this, SERVER_IP_ADDRESS);
+		client = new GameClient(SERVER_IP_ADDRESS);
 		client.start();
 	}
 	
@@ -259,8 +259,11 @@ public class Game {
 	
 	/**
 	 * This method refreshes the current screen, used when screen resized
-	 *
+	 */
 	public static void refresh() {
+		// make sure screen is defined
+		if (screen == null)
+			return;
 		exitCurrentScreen();
 		
 		switch (gameState) {
@@ -275,7 +278,7 @@ public class Game {
 			case PLAYING_GAME:			screen = new GameScreen();
 										break;
 		}
-	}*/
+	}
 	
 	/**
 	 * This method updates the active games list on the ActiveGamesScreen

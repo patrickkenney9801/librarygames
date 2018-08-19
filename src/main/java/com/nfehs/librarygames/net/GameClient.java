@@ -25,7 +25,7 @@ public class GameClient extends Thread {
 	private DatagramSocket socket;
 	public static final int PORT = 19602;
 	
-	public GameClient(Game game, byte[] ipAddress) {
+	public GameClient(byte[] ipAddress) {
 		try {
 			this.socket = new DatagramSocket();
 			this.ipAddress = InetAddress.getByAddress(ipAddress);
@@ -71,8 +71,7 @@ public class GameClient extends Thread {
 										break;
 			case GETPLAYERS:			getPlayers(packet.getData());
 										break;
-			case CREATEGAME:			//getNewGame(packet.getData());
-										break;
+			case CREATEGAME:			break;
 			case GETGAMES:				getGames(packet.getData());
 										break;
 			case GETBOARD:				getBoard(packet.getData());

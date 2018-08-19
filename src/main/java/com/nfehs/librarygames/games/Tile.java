@@ -14,15 +14,13 @@ import com.nfehs.librarygames.screens.GameScreen;
  */
 
 public abstract class Tile {
-	private BufferedImage tile;
 	private int rotations;
 	
 	/**
 	 * Does not allow rotation of tile
 	 * @param tile
 	 */
-	public Tile (BufferedImage tile) {
-		setTile(tile);
+	public Tile () {
 		setRotations(0);
 	}
 	
@@ -31,8 +29,7 @@ public abstract class Tile {
 	 * @param tile
 	 * @param rotations
 	 */
-	public Tile (BufferedImage tile, int rotations) {
-		setTile(tile);
+	public Tile (int rotations) {
 		setRotations(rotations);
 	}
 	
@@ -84,12 +81,6 @@ public abstract class Tile {
 		else
 			this.rotations = rotations;
 	}
-
-	public BufferedImage getTile() {
-		return tile;
-	}
-
-	public void setTile(BufferedImage tile) {
-		this.tile = tile;
-	}
+	
+	public abstract BufferedImage getTile();
 }

@@ -2,6 +2,8 @@ package com.nfehs.librarygames;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -31,7 +33,7 @@ public class GameFrame extends JFrame {
 		Game.window.setVisible(true);
 		Game.window.setSize((int) Game.screenSize.getWidth(), (int) Game.screenSize.getHeight());
 		Game.window.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		Game.window.setResizable(false);
+		Game.window.setResizable(true);
 		Game.window.setLocationRelativeTo(null);
 		Game.window.addWindowListener(new WindowAdapter() {
 			@Override
@@ -40,21 +42,22 @@ public class GameFrame extends JFrame {
 				Game.logout();
 			}
 		});
-		/*
 		Game.window.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
+				GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+				GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
+				Tile.loadImages();
+				Piece.loadImages();
+				
 				Game.refresh();
 			}
-		});*/
+		});
 		
 		Game.mainWindow = Game.window.getContentPane();
 		Game.mainWindow.setLayout(null);
 		Game.mainWindow.setBackground(background);
-		
-		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
-		GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
 		
 		// set UI presets
 		UIManager.put("Label.foreground", Color.WHITE);
@@ -77,6 +80,8 @@ public class GameFrame extends JFrame {
 		UIManager.put("OptionPane.background", background);
 		
 		// load images here
+		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+		GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
 		Tile.loadImages();
 		Piece.loadImages();
 	}
