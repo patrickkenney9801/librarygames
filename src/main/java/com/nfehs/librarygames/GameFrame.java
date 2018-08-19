@@ -78,6 +78,7 @@ public class GameFrame extends JFrame {
 		UIManager.put("OptionPane.messageForeground", Color.WHITE);
 		UIManager.put("OptionPane.foreground", Color.WHITE);
 		UIManager.put("OptionPane.background", background);
+		UIManager.put("TextPane.background", textBackground);
 		
 		// load images here
 		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));

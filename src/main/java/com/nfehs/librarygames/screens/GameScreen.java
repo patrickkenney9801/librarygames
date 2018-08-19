@@ -13,14 +13,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
@@ -75,7 +76,7 @@ public class GameScreen extends Screen {
 	private JLabel[][] playerCapturedNumber;
 	
 	private JPanel chatInterface;
-	private JTextArea chatBox;
+	private JTextPane chatBox;
 	private JTextField chat;
 
 	public GameScreen() {
@@ -244,11 +245,10 @@ public class GameScreen extends Screen {
 		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardSize() * 7 / 8);
 		chatInterface.setLayout(null);
 		
-		chatBox = new JTextArea("");
+		chatBox = new JTextPane();
 		chatInterface.add(chatBox);
 		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
 		chatBox.setEditable(false);
-		chatBox.setFont(new Font("Serif", Font.PLAIN, 15));
 		chatBox.setMargin(new Insets(chatBox.getHeight()-20, 0, 0, 0));
 		
 		chat = new JTextField();
@@ -259,7 +259,7 @@ public class GameScreen extends Screen {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
 			public void keyTyped(KeyEvent e) {
-				if (e.getKeyChar() == '\n' && ((JButton) e.getSource()).getText().length() > 0)
+				if (e.getKeyChar() == '\n' && ((JTextField) e.getSource()).getText().length() > 0)
 					Game.sendChat(chat.getText());
 			}
 		});
@@ -460,14 +460,19 @@ public class GameScreen extends Screen {
 	 */
 	public void updateChat(String newText, String senderKey) {
 		// update chat text
-		chatBox.setText(chatBox.getText() + "\n" + newText);
-		chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
+		chatBox.setMargin(new Insets(chatBox.getInsets().top-16, 0, 0, 0));
+		int textStart = newText.indexOf(":") + 1;
 		
-		// if the user sent the text, delete the users current text
-		if (senderKey.equals(Game.getPlayer().getUser_key()))
+		// if the user sent the text and make user text green, delete the users current text, otherwise set user red
+		if (senderKey.equals(Game.getPlayer().getUser_key())) {
+			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
 			chat.setText("");
+		} else
+			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
+		appendText(chatBox, newText.substring(textStart), Color.WHITE);
 		chat.requestFocus();
 		
+		chatBox.repaint();
 		chatInterface.repaint();
 	}
 	

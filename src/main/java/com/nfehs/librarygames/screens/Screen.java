@@ -1,10 +1,16 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.BoardGame;
@@ -75,6 +81,27 @@ public abstract class Screen {
 			}
 		}).start();
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Appends a message in a certain color to a JTextPane
+	 * @param tp
+	 * @param msg
+	 * @param c
+	 */
+	protected void appendText(JTextPane tp, String msg, Color c) {
+		// set color for text
+		StyleContext sc = StyleContext.getDefaultStyleContext();
+		AttributeSet as = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
+		as = sc.addAttribute(as, StyleConstants.FontFamily, "Lucida Console");
+		as = sc.addAttribute(as, StyleConstants.FontSize, 15);
+		as = sc.addAttribute(as, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+		
+		tp.setEditable(true);
+		tp.setCaretPosition(tp.getDocument().getLength());
+		tp.setCharacterAttributes(as, false);
+		tp.replaceSelection(msg);
+		tp.setEditable(false);
 	}
 	
 	public abstract void exit();
