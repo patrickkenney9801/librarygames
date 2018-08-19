@@ -7,6 +7,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
@@ -35,6 +36,11 @@ public class GameFrame extends JFrame {
 		Game.window.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		Game.window.setResizable(true);
 		Game.window.setLocationRelativeTo(null);
+		try {
+			Game.window.setIconImage(ImageIO.read(GameFrame.class.getResource("/com/nfehs/librarygames/media/yinyang.png")));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		Game.window.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
