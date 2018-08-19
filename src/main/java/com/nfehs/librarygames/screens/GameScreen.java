@@ -460,7 +460,7 @@ public class GameScreen extends Screen {
 	 */
 	public void updateChat(String newText, String senderKey) {
 		// update chat text
-		chatBox.setMargin(new Insets(chatBox.getInsets().top-16, 0, 0, 0));
+		chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 		int textStart = newText.indexOf(":") + 1;
 		
 		// if the user sent the text and make user text green, delete the users current text, otherwise set user red

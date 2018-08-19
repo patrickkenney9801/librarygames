@@ -93,7 +93,7 @@ public abstract class Screen {
 		// set color for text
 		StyleContext sc = StyleContext.getDefaultStyleContext();
 		AttributeSet as = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
-		as = sc.addAttribute(as, StyleConstants.FontFamily, "Lucida Console");
+		as = sc.addAttribute(as, StyleConstants.FontFamily, "Serif");
 		as = sc.addAttribute(as, StyleConstants.FontSize, 15);
 		as = sc.addAttribute(as, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
 		
