@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -427,11 +428,12 @@ public class GameServer extends Thread {
 			
 			// find games list
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
-																+ " WHERE games.player1_key = '" + packet.getUserKey() + "' ORDER BY last_action_date;");
+																+ " WHERE games.player1_key = '" + packet.getUserKey() + "' ORDER BY last_action_date DESC;");
 			ResultSet result = statement.executeQuery();
 			
 			// get game info and put into ArrayList
 			ArrayList<String> gameInfo = new ArrayList<String>();
+			ArrayList<Timestamp> lastMoved = new ArrayList<Timestamp>();
 			while (result.next()) {
 				int winner = result.getInt("winner");
 				String info = "";
@@ -443,13 +445,15 @@ public class GameServer extends Thread {
 				if (winner != 0)
 					info += "," + winner;
 				gameInfo.add(info);
+				lastMoved.add(result.getTimestamp("last_action_date"));
 			}
 			
 			statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
-												+ " WHERE games.player2_key = '" + packet.getUserKey() + "';");
+												+ " WHERE games.player2_key = '" + packet.getUserKey() + "' ORDER BY last_action_date DESC;");
 			result = statement.executeQuery();
 
 			// get game info and put into ArrayList
+			int lastTime = 0;
 			while (result.next()) {
 				int winner = result.getInt("winner");
 				String info = "";
@@ -460,7 +464,19 @@ public class GameServer extends Thread {
 				info += result.getInt("moves");
 				if (winner != 0)
 					info += "," + winner;
-				gameInfo.add(info);
+				// make sure gameInfo stays ordered by last_action_date
+				boolean added = false;
+				for (int i = lastTime; i < lastMoved.size() && !(i > lastMoved.size()); i++)
+					if (!added && result.getTimestamp("last_action_date").after(lastMoved.get(i))) {
+						gameInfo.add(i, info);
+						lastMoved.add(i, result.getTimestamp("last_action_date"));
+						lastTime = i;
+						added = true;
+					}
+				if (!added) {
+					gameInfo.add(info);
+					lastMoved.add(result.getTimestamp("last_action_date"));
+				}
 			}
 			
 			// convert ArrayList into array
