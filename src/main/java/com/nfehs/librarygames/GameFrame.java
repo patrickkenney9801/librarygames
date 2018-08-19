@@ -19,6 +19,7 @@ import com.nfehs.librarygames.screens.GameScreen;
  */
 
 public class GameFrame extends JFrame {
+	private static final long serialVersionUID = 1L;
 	public static final Color background = new Color(25, 25, 25);
 	public static final Color textBackground = new Color(50, 50, 50);
 

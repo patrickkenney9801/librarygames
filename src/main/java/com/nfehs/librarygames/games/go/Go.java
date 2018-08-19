@@ -208,12 +208,18 @@ public class Go extends BoardGame {
 		if (paddedBoard[x][y+1] == opposingPiece)
 			if (!groupHasLiberty(paddedBoard, x, y+1))
 				return true;
+			else
+				paddedBoard = paintBoard(paddedBoard, x, y+1, '$', opposingPiece);
 		if (paddedBoard[x][y-1] == opposingPiece)
 			if (!groupHasLiberty(paddedBoard, x, y-1))
 				return true;
+			else
+				paddedBoard = paintBoard(paddedBoard, x, y-1, '$', opposingPiece);
 		if (paddedBoard[x+1][y] == opposingPiece)
 			if (!groupHasLiberty(paddedBoard, x+1, y))
 				return true;
+			else
+				paddedBoard = paintBoard(paddedBoard, x+1, y, '$', opposingPiece);
 		if (paddedBoard[x-1][y] == opposingPiece)
 			if (!groupHasLiberty(paddedBoard, x-1, y))
 				return true;
@@ -256,6 +262,9 @@ public class Go extends BoardGame {
 			e.printStackTrace();
 			return false;
 		}
+		updateWinner(winner);
+		if (winner == 1 || winner == 2)
+			setScoreInfo("Score: " + getPlayer1Score() + " - " + getPlayer2Score() + ".5");
 		return true;
 	}
 	

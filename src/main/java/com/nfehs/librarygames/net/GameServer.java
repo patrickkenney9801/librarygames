@@ -664,8 +664,8 @@ public class GameServer extends Thread {
 				// if the game is go
 				int p1StonesCaptured = result.getInt("p1_stones_captured");
 				int p2StonesCaptured = result.getInt("p2_stones_captured");
-				int p1Score = result.getInt("p1_score");
-				int p2Score = result.getInt("p2_score");
+				int p1Score = 0;
+				int p2Score = 0;
 				
 				// if the user did not pass, calculate score
 				if (packet.getMoveTo() > -1) {
@@ -684,13 +684,13 @@ public class GameServer extends Thread {
 				if (packet.getMoveTo() == -1 && lastMove == -1) {
 					// get player scores
 					int[] territoryScores = Go.calculateTerritory(oldBoard);
-					p1Score += territoryScores[0];
+					p1Score = territoryScores[0] + p1StonesCaptured;
 					
 					// apply Komi
 					switch (gameType) {
 						case 2:				p2Score += 3;
 						case 1:				p2Score += 2;
-						default: 			p2Score += territoryScores[1] + 1;
+						default: 			p2Score += territoryScores[1] + 1 + p2StonesCaptured;
 					}
 					
 					winner = 1;
@@ -700,7 +700,7 @@ public class GameServer extends Thread {
 				// update go game info
 				PreparedStatement updateGoGame = database.prepareStatement("UPDATE go SET " 
 						+ "p1_stones_captured = " + p1StonesCaptured + ", p2_stones_captured = " + p2StonesCaptured
-						 + ", p2_score = " + p1Score + ", p2_score = " + p2Score + " WHERE game_key = '" + packet.getGameKey() + "';");
+						 + ", p1_score = " + p1Score + ", p2_score = " + p2Score + " WHERE game_key = '" + packet.getGameKey() + "';");
 				updateGoGame.executeUpdate();
 				
 				extraInfo += p1StonesCaptured;

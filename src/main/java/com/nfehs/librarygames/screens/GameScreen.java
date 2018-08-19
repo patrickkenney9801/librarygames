@@ -139,12 +139,12 @@ public class GameScreen extends Screen {
 		
 		winner = new JLabel();
 		gameOverInfo.add(winner);
-		winner.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		winner.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize() * 3 / 2);
 		winner.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		score = new JLabel();
 		gameOverInfo.add(score);
-		score.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		score.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize(), getInfoTextSize() * 3 / 2);
 		score.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		
@@ -157,7 +157,7 @@ public class GameScreen extends Screen {
 		
 		moveCount = new JLabel();
 		gameInfo.add(moveCount);
-		moveCount.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		moveCount.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize() * 3 / 2);
 		moveCount.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		player1Icon = new JLabel();
@@ -166,7 +166,7 @@ public class GameScreen extends Screen {
 		
 		player1User = new JLabel(Game.getBoardGame().getPlayer1());
 		gameInfo.add(player1User);
-		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
+		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize() * 3 / 2);
 		player1User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		player2Icon = new JLabel();
@@ -175,7 +175,7 @@ public class GameScreen extends Screen {
 		
 		player2User = new JLabel(Game.getBoardGame().getPlayer2());
 		gameInfo.add(player2User);
-		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
+		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize() * 3 / 2);
 		player2User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		
@@ -192,7 +192,7 @@ public class GameScreen extends Screen {
 		
 		captured = new JLabel("Captured Pieces: ");
 		capturedPieces.add(captured);
-		captured.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		captured.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize() * 3 / 2);
 		captured.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		BufferedImage[][] capturablePieces = Game.getBoardGame().getCapturablePieces();
@@ -502,6 +502,7 @@ public class GameScreen extends Screen {
 		Game.mainWindow.remove(pane);
 		Game.mainWindow.remove(pass);
 		Game.mainWindow.remove(resign);
+		Game.mainWindow.remove(gameOverInfo);
 		Game.mainWindow.remove(gameInfo);
 		Game.mainWindow.remove(capturedPieces);
 		Game.mainWindow.remove(chatInterface);
@@ -513,6 +514,7 @@ public class GameScreen extends Screen {
 		shadowPiece = null;
 		pass = null;
 		resign = null;
+		gameOverInfo = null;
 		gameInfo = null;
 		capturedPieces = null;
 		chatInterface = null;

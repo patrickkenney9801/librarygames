@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.Player;
 import com.nfehs.librarygames.games.BoardGame;
-import com.nfehs.librarygames.games.go.Go;
 import com.nfehs.librarygames.net.packets.*;
 
 /**
@@ -24,11 +23,9 @@ public class GameClient extends Thread {
 
 	private InetAddress ipAddress;
 	private DatagramSocket socket;
-	private Game game;
 	public static final int PORT = 19602;
 	
 	public GameClient(Game game, byte[] ipAddress) {
-		this.game = game;
 		try {
 			this.socket = new DatagramSocket();
 			this.ipAddress = InetAddress.getByAddress(ipAddress);

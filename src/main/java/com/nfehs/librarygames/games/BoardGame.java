@@ -72,16 +72,7 @@ public abstract class BoardGame {
 		setPieces();
 		
 		// if the game has a winner, set it to the winner's username, check if opponent resigned
-		setWinner(null);
-		setScoreInfo(null);
-		if (winner == 1 || winner == 3)
-			setWinner(getPlayer1());
-		else if (winner == 2 || winner == 4)
-			setWinner(getPlayer2());
-		if (winner == 3)
-			setScoreInfo(getPlayer2() + " resigned");
-		else if (winner == 4)
-			setScoreInfo(getPlayer1() + " resigned");
+		updateWinner(winner);
 		
 		// determine whether it is the logged players turn or not
 		setPlayer1Turn(moves % 2 == 0);
@@ -138,9 +129,28 @@ public abstract class BoardGame {
 		setPieces();
 		setPlayerTurn(!isPlayerTurn());
 		setPlayer1Turn(!isPlayer1Turn());
+		updateWinner(winner);
+		if (winner == 0)
+			setMoves(getMoves() + 1);
 		
-		// TODO update winner and end game texts
 		return true;
+	}
+	
+	/**
+	 * Updates winner and resigned
+	 * @param winner
+	 */
+	public void updateWinner(int winner) {
+		setWinner(null);
+		setScoreInfo(null);
+		if (winner == 1 || winner == 3)
+			setWinner(getPlayer1());
+		else if (winner == 2 || winner == 4)
+			setWinner(getPlayer2());
+		if (winner == 3)
+			setScoreInfo(getPlayer2() + " resigned");
+		else if (winner == 4)
+			setScoreInfo(getPlayer1() + " resigned");
 	}
 
 	public static void printArray(char[][] arr) {
