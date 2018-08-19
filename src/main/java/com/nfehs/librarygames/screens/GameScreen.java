@@ -443,6 +443,7 @@ public class GameScreen extends Screen {
 			winner.setText("Winner: " + Game.getBoardGame().getWinner());
 			score.setText(Game.getBoardGame().getScoreInfo());
 			
+			removePieceShadow();
 			pass.setEnabled(false);
 			resign.setEnabled(false);
 			this.capturedPieces.repaint();

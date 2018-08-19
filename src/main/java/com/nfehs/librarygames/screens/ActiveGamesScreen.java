@@ -73,14 +73,14 @@ public class ActiveGamesScreen extends Screen {
 		// add active games user turn
 		userTurn = new JLabel("Your turn:");
 		Game.mainWindow.add(userTurn);
-		userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
+		userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 325, 
 							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 		
 		activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().length];
 		for (int i = 0; i < activeGamesUserTurn.length; i++) {
 			activeGamesUserTurn[i] = new JButton(Game.getPlayer().getYourTurnBoardGames()[i].split("~")[1]);
 			Game.mainWindow.add(activeGamesUserTurn[i]);
-			activeGamesUserTurn[i].setBounds((int) Game.screenSize.getWidth() / 2 - 150, 
+			activeGamesUserTurn[i].setBounds((int) Game.screenSize.getWidth() / 2 - 325, 
 									 (int) Game.screenSize.getHeight() / 10 + 230 + i*50, 300, 30);
 			activeGamesUserTurn[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -99,20 +99,18 @@ public class ActiveGamesScreen extends Screen {
 			});
 		}
 		
-		// add new active games
-		int height = activeGamesUserTurn.length * 50;
-		
-		opponentTurn = new JLabel("Opponent turn:");
+		// add new active games, opponent's turn games
+		opponentTurn = new JLabel("Opponent's turn:");
 		Game.mainWindow.add(opponentTurn);
-		opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
-							(int) Game.screenSize.getHeight() / 10 + 240 + height, 300, 30);
+		opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 + 25, 
+							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 		
 		activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().length];
 		for (int i = 0; i < activeGames.length; i++) {
 			activeGames[i] = new JButton(Game.getPlayer().getOpponentTurnBoardGames()[i].split("~")[1]);
 			Game.mainWindow.add(activeGames[i]);
-			activeGames[i].setBounds((int) Game.screenSize.getWidth() / 2 - 150, 
-									 (int) Game.screenSize.getHeight() / 10 + 270 + height + i*50, 300, 30);
+			activeGames[i].setBounds((int) Game.screenSize.getWidth() / 2 + 25, 
+									 (int) Game.screenSize.getHeight() / 10 + 230 + i*50, 300, 30);
 			activeGames[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("An active game clicked: " + ((JButton) e.getSource()).getText());
