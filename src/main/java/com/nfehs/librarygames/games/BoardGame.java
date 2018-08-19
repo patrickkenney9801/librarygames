@@ -329,8 +329,8 @@ public abstract class BoardGame {
 		return board;
 	}
 	/**
-	 * Returns a String with 3 parts delimited by ~
-	 * Part 1 is the game key, 2 is game title, 3 is bool for user goes first
+	 * Returns a String with 5 parts delimited by ~
+	 * Part 1 is the game key, 2 is game title, 3 is bool for user goes first, 4 is gameType, 5 is bool for if user won the game
 	 * @param gameInfo
 	 * @return
 	 */
@@ -350,6 +350,8 @@ public abstract class BoardGame {
 		
 		gameInformation += playerTurn + "~";
 		gameInformation += gameType;
+		if (gameInfo.length > 5)
+			gameInformation += "~" + (Security.decrypt(gameInfo[3 - Integer.parseInt(gameInfo[5]) % 2]).equals(Game.getPlayer().getUsername()));
 		return gameInformation;
 	}
 	

@@ -1,5 +1,6 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -105,6 +106,7 @@ public class ActiveGamesScreen extends Screen {
 			finishedGames[i] = new JButton(Game.getPlayer().getFinishedBoardGames()[i].split("~")[1]);
 			finishedGamesTab.add(finishedGames[i]);
 			finishedGames[i].setBounds(5, 5 + i*50, finishedGamesTab.getWidth() - 10, 30);
+			finishedGames[i].setForeground(Boolean.parseBoolean(Game.getPlayer().getFinishedBoardGames()[i].split("~")[4]) ? new Color(0, 150, 0) : Color.RED);
 			finishedGames[i].addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("An finished game clicked: " + ((JButton) e.getSource()).getText());
