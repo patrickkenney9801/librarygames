@@ -35,7 +35,7 @@ public abstract class Screen {
 			
 			logout = new JButton("Logout");
 			Game.mainWindow.add(logout);
-			logout.setBounds((int) Game.screenSize.getWidth() - 110, 5, 100, 30);
+			logout.setBounds((int) Game.screenSize.getWidth() - 125, 5, 100, 30);
 			logout.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("Logout clicked");

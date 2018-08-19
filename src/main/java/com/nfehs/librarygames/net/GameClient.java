@@ -165,19 +165,23 @@ public class GameClient extends Thread {
 		
 		// set your and opponent turn board games
 		String[] gameInfo = packet.getGameInfo();
+		ArrayList<String> finished = new ArrayList<String>();
 		ArrayList<String> userTurn = new ArrayList<String>();
 		ArrayList<String> opponentTurn = new ArrayList<String>();
 		
 		for (String info : gameInfo) {
 			String gameData = BoardGame.getGameInfo(info.split(","));
 			
-			if (Boolean.parseBoolean(gameData.split("~")[2]))
+			if (info.split(",").length == 6)
+				finished.add(gameData);
+			else if (Boolean.parseBoolean(gameData.split("~")[2]))
 				userTurn.add(gameData);
 			else
 				opponentTurn.add(gameData);
 		}
 		
 		// set board game Strings in Player
+		Game.getPlayer().setFinishedBoardGames(finished);
 		Game.getPlayer().setYourTurnBoardGames(userTurn);
 		Game.getPlayer().setOpponentTurnBoardGames(opponentTurn);
 		

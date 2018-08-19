@@ -16,6 +16,7 @@ public class Player {
 	private InetAddress ipAddress;
 	private int port;
 	
+	private String[] finishedBoardGames;
 	private String[] yourTurnBoardGames;
 	private String[] opponentTurnBoardGames;
 	private String[] friends;
@@ -150,5 +151,22 @@ public class Player {
 			return;
 		}
 		this.otherPlayers = otherPlayers.split(",");
+	}
+
+	/**
+	 * @return the finishedBoardGames
+	 */
+	public String[] getFinishedBoardGames() {
+		return finishedBoardGames;
+	}
+
+	/**
+	 * @param finishedBoardGames the finishedBoardGames to set
+	 */
+	public void setFinishedBoardGames(ArrayList<String> finishedBoardGames) {
+		String[] finBoardGames = new String[finishedBoardGames.size()];
+		for (int i = 0; i < finBoardGames.length; i++)
+			finBoardGames[i] = finishedBoardGames.get(i);
+		this.finishedBoardGames = finBoardGames;
 	}
 }

@@ -387,7 +387,7 @@ public class GameServer extends Thread {
 			String gameKey = "" + UUID.randomUUID();
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
 										+ gameKey + "', '" +  player1Key + "', '" + player2Key 
-										+ "', " + packet.getGameType() + ", 0, -5, -5, 0, '"
+										+ "', " + packet.getGameType() + ", 0, -5, -5, 0, NOW(), '"
 										+ board + "');");
 			createGame.executeUpdate();
 			
@@ -427,24 +427,22 @@ public class GameServer extends Thread {
 			
 			// find games list
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
-																+ " WHERE games.player1_key = '" + packet.getUserKey() + "';");
+																+ " WHERE games.player1_key = '" + packet.getUserKey() + "' ORDER BY last_action_date;");
 			ResultSet result = statement.executeQuery();
-			
-			// TODO put finished games in new arraylist
 			
 			// get game info and put into ArrayList
 			ArrayList<String> gameInfo = new ArrayList<String>();
 			while (result.next()) {
-				// do not include finished games
-				if (result.getInt("winner") == 0) {
-					String info = "";
-					info += result.getString("game_key") + ",";
-					info += result.getString("game_type") + ",";
-					info += Security.encrypt(packet.getUsername()) + ",";
-					info += result.getString("username") + ",";
-					info += result.getInt("moves");
-					gameInfo.add(info);
-				}
+				int winner = result.getInt("winner");
+				String info = "";
+				info += result.getString("game_key") + ",";
+				info += result.getString("game_type") + ",";
+				info += Security.encrypt(packet.getUsername()) + ",";
+				info += result.getString("username") + ",";
+				info += result.getInt("moves");
+				if (winner != 0)
+					info += "," + winner;
+				gameInfo.add(info);
 			}
 			
 			statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
@@ -453,16 +451,16 @@ public class GameServer extends Thread {
 
 			// get game info and put into ArrayList
 			while (result.next()) {
-				// do not include finished games
-				if (result.getInt("winner") == 0) {
-					String info = "";
-					info += result.getString("game_key") + ",";
-					info += result.getString("game_type") + ",";
-					info += result.getString("username") + ",";
-					info += Security.encrypt(packet.getUsername()) + ",";
-					info += result.getInt("moves");
-					gameInfo.add(info);
-				}
+				int winner = result.getInt("winner");
+				String info = "";
+				info += result.getString("game_key") + ",";
+				info += result.getString("game_type") + ",";
+				info += result.getString("username") + ",";
+				info += Security.encrypt(packet.getUsername()) + ",";
+				info += result.getInt("moves");
+				if (winner != 0)
+					info += "," + winner;
+				gameInfo.add(info);
 			}
 			
 			// convert ArrayList into array
@@ -712,7 +710,7 @@ public class GameServer extends Thread {
 			// update game
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
 					+ "moves = " + ++moves + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo()
-					 + ", winner = " + winner + ", board = '" + newBoard + "' WHERE game_key = '" + packet.getGameKey() + "';");
+					 + ", winner = " + winner + ", last_action_date = NOW(), board = '" + newBoard + "' WHERE game_key = '" + packet.getGameKey() + "';");
 			updateGame.executeUpdate();
 			
 			System.out.println("GAME UPDATED");

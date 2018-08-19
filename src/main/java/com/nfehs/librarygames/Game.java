@@ -264,18 +264,17 @@ public class Game {
 		// make sure screen is defined
 		if (screen == null)
 			return;
-		exitCurrentScreen();
 		
 		switch (gameState) {
-			case LOGIN:					screen = new LoginScreen();
+			case LOGIN:					openLoginScreen();
 										break;
-			case CREATE_ACCOUNT:		screen = new CreateAccountScreen();
+			case CREATE_ACCOUNT:		openCreateAccountScreen();
 										break;
-			case ACTIVE_GAMES:			screen = new ActiveGamesScreen();
+			case ACTIVE_GAMES:			openActiveGamesScreen();
 										break;
-			case CREATE_GAME:			screen = new CreateGameScreen();
+			case CREATE_GAME:			openCreateGameScreen();
 										break;
-			case PLAYING_GAME:			screen = new GameScreen();
+			case PLAYING_GAME:			openGameScreen();
 										break;
 		}
 	}
