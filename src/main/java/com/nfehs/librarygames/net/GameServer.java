@@ -79,10 +79,10 @@ public class GameServer extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			System.out.println("CLIENT > " + new String(packet.getData()));
-			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
-			
 			System.out.println();
+			System.out.println("CLIENT > " + new String(packet.getData()));
+			
+			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
 		}
 	}
 	
@@ -105,35 +105,40 @@ public class GameServer extends Thread {
 	 * @param address
 	 * @param port
 	 */
-	private void parsePacket(byte[] data, InetAddress address, int port) {
-		String message = new String(data).trim();
-		PacketTypes type = Packet.lookupPacket(message.substring(0, 2));
-		
-		switch (type) {
-			case INVALID:				break;
-			case LOGIN:					loginUser(data, address, port);
-										break;
-			case CREATEACCOUNT:			createAccount(data, address, port);
-										break;
-			case ERROR:					// TODO, probably will not be used by server
-										break;
-			case LOGOUT:				logout(data, address, port);
-										break;
-			case GETPLAYERS:			getPlayers(data, address, port);
-										break;
-			case ADDFRIEND:				addFriend(data, address, port);
-										break;
-			case CREATEGAME:			createGame(data, address, port);
-										break;
-			case GETGAMES:				getGames(data, address, port);
-										break;
-			case GETBOARD:				getBoard(data, address, port);
-										break;
-			case SENDMOVE:				sendMove(data, address, port);
-										break;
-			case SENDCHAT:				sendChat(data, address, port);
-			default:					break;
-		}
+	private void parsePacket(final byte[] data, final InetAddress address, final int port) {
+		// start new thread to handle packet
+		new Thread (new Runnable () {
+			public void run() {
+				String message = new String(data).trim();
+				PacketTypes type = Packet.lookupPacket(message.substring(0, 2));
+				
+				switch (type) {
+					case INVALID:				break;
+					case LOGIN:					loginUser(data, address, port);
+												break;
+					case CREATEACCOUNT:			createAccount(data, address, port);
+												break;
+					case ERROR:					// TODO, probably will not be used by server
+												break;
+					case LOGOUT:				logout(data, address, port);
+												break;
+					case GETPLAYERS:			getPlayers(data, address, port);
+												break;
+					case ADDFRIEND:				addFriend(data, address, port);
+												break;
+					case CREATEGAME:			createGame(data, address, port);
+												break;
+					case GETGAMES:				getGames(data, address, port);
+												break;
+					case GETBOARD:				getBoard(data, address, port);
+												break;
+					case SENDMOVE:				sendMove(data, address, port);
+												break;
+					case SENDCHAT:				sendChat(data, address, port);
+					default:					break;
+				}
+			}
+		}).run();
 	}
 
 	/**

@@ -115,8 +115,6 @@ public class ActiveGamesScreen extends Screen {
 		// remove current active games
 		removeAndNullActiveGames();
 		
-		
-		
 		// finished games
 		finished = new JLabel("Finished Games:");
 		Game.mainWindow.add(finished);
@@ -124,8 +122,8 @@ public class ActiveGamesScreen extends Screen {
 							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 		
 		finishedGames = new JButton[Game.getPlayer().getFinishedBoardGames().length];
-		finishedGamesPanel.setPreferredSize(new Dimension(285, 10 + finishedGames.length*50));
-		finishedGamesPanel.setBounds(5, 5, 285, 10 + finishedGames.length*50);
+		finishedGamesPanel.setPreferredSize(new Dimension(285, finishedGames.length*50 - 10));
+		finishedGamesPanel.setBounds(5, 5, 285, finishedGames.length*50 - 10);
 		
 		finishedGamesTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 500,
 				(int) Game.screenSize.getHeight() / 10 + 230, 300,
@@ -146,6 +144,8 @@ public class ActiveGamesScreen extends Screen {
 					for (int i = 0; i < finishedGames.length; i++)
 						if (finishedGames[i].equals(e.getSource()))
 							elemNumber = i;
+					if (elemNumber == -1)
+						return;
 					
 					// send get board request to server
 					Game.getBoard(Game.getPlayer().getFinishedBoardGames()[elemNumber].split("~")[0],
@@ -163,8 +163,8 @@ public class ActiveGamesScreen extends Screen {
 							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 		
 		activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().length];
-		activeGamesUserPanel.setPreferredSize(new Dimension(285, 10 + activeGamesUserTurn.length*50));
-		activeGamesUserPanel.setBounds(5, 5, 285, 10 + activeGamesUserTurn.length*50);
+		activeGamesUserPanel.setPreferredSize(new Dimension(285, activeGamesUserTurn.length*50 - 10));
+		activeGamesUserPanel.setBounds(5, 5, 285, activeGamesUserTurn.length*50 - 10);
 		
 		activeGamesUserTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
 									(int) Game.screenSize.getHeight() / 10 + 230, 300,
@@ -184,6 +184,8 @@ public class ActiveGamesScreen extends Screen {
 					for (int i = 0; i < activeGamesUserTurn.length; i++)
 						if (activeGamesUserTurn[i].equals(e.getSource()))
 							elemNumber = i;
+					if (elemNumber == -1)
+						return;
 					
 					// send get board request to server
 					Game.getBoard(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[0],
@@ -201,8 +203,8 @@ public class ActiveGamesScreen extends Screen {
 							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 
 		activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().length];
-		activeGamesPanel.setPreferredSize(new Dimension(285, 10 + activeGames.length*50));
-		activeGamesPanel.setBounds(5, 5, 285, 10 + activeGames.length*50);
+		activeGamesPanel.setPreferredSize(new Dimension(285, activeGames.length*50 - 10));
+		activeGamesPanel.setBounds(5, 5, 285, activeGames.length*50 - 10);
 		
 		activeGamesTab.setBounds   ((int) Game.screenSize.getWidth() / 2 + 200,
 									(int) Game.screenSize.getHeight() / 10 + 230, 300,
@@ -222,6 +224,8 @@ public class ActiveGamesScreen extends Screen {
 					for (int i = 0; i < activeGames.length; i++)
 						if (activeGames[i].equals(e.getSource()))
 							elemNumber = i;
+					if (elemNumber == -1)
+						return;
 					
 					// send get board request to server
 					Game.getBoard(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[0],
@@ -240,24 +244,24 @@ public class ActiveGamesScreen extends Screen {
 	 */
 	private void removeAndNullActiveGames() {
 		for (JButton finishedGame : finishedGames) {
-			activeGamesUserTab.remove(finishedGame);
+			finishedGamesPanel.remove(finishedGame);
 			finishedGame = null;
 		}
 		for (JButton activeGame : activeGamesUserTurn) {
-			activeGamesUserTab.remove(activeGame);
+			activeGamesUserPanel.remove(activeGame);
 			activeGame = null;
 		}
 		for (JButton activeGame : activeGames) {
-			activeGamesTab.remove(activeGame);
+			activeGamesPanel.remove(activeGame);
 			activeGame = null;
 		}
 		Game.mainWindow.remove(finished);
 		Game.mainWindow.remove(userTurn);
 		Game.mainWindow.remove(opponentTurn);
 		
-		//Game.mainWindow.remove(finishedGamesTab);
-		//Game.mainWindow.remove(activeGamesTab);
-		//Game.mainWindow.remove(activeGamesUserTab);
+		Game.mainWindow.remove(finishedGamesTab);
+		Game.mainWindow.remove(activeGamesTab);
+		Game.mainWindow.remove(activeGamesUserTab);
 		
 		finished = null;
 		userTurn = null;

@@ -50,6 +50,7 @@ public class GameClient extends Thread {
 				e.printStackTrace();
 			}
 			System.out.println("SERVER > " + new String(packet.getData()));
+
 			handle(packet);
 		}
 	}
@@ -58,29 +59,34 @@ public class GameClient extends Thread {
 	 * Determines what to do with incoming packets
 	 * @param packet
 	 */
-	private void handle(DatagramPacket packet) {
-		switch (Packet.lookupPacket(new String(packet.getData()).trim().substring(0, 2))) {
-			case INVALID:				break;
-			case LOGIN:					loginUser(packet.getData());
-										break;
-			case CREATEACCOUNT:			createAccountLogin(packet.getData());
-										break;
-			case ERROR:					// TODO will handle all errors
-										break;
-			case LOGOUT:				// TODO probably will not be used
-										break;
-			case GETPLAYERS:			getPlayers(packet.getData());
-										break;
-			case CREATEGAME:			break;
-			case GETGAMES:				getGames(packet.getData());
-										break;
-			case GETBOARD:				getBoard(packet.getData());
-										break;
-			case SENDMOVE:				updateBoard(packet.getData());
-										break;
-			case SENDCHAT:				updateChat(packet.getData());
-			default:					break;
-		}
+	private void handle(final DatagramPacket packet) {
+		// create new thread to handle packet
+		new Thread (new Runnable () {
+			public void run() {
+				switch (Packet.lookupPacket(new String(packet.getData()).trim().substring(0, 2))) {
+					case INVALID:				break;
+					case LOGIN:					loginUser(packet.getData());
+												break;
+					case CREATEACCOUNT:			createAccountLogin(packet.getData());
+												break;
+					case ERROR:					// TODO will handle all errors
+												break;
+					case LOGOUT:				// TODO probably will not be used
+												break;
+					case GETPLAYERS:			getPlayers(packet.getData());
+												break;
+					case CREATEGAME:			break;
+					case GETGAMES:				getGames(packet.getData());
+												break;
+					case GETBOARD:				getBoard(packet.getData());
+												break;
+					case SENDMOVE:				updateBoard(packet.getData());
+												break;
+					case SENDCHAT:				updateChat(packet.getData());
+					default:					break;
+				}
+			}
+		}).run();
 	}
 
 	/**
