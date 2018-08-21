@@ -220,6 +220,16 @@ public class Game {
 		packet.writeData(client);
 		client.getLastPacketKeysSent()[10] = packet.getUuidKey();
 	}
+	
+	/**
+	 * This method attempts to update the client's current GameScreen
+	 */
+	public static void sendOnGameUpdate() {
+		// sends chat packet to server
+		Packet packet = new Packet11OnGame(getPlayer().getUser_key(), getBoardGame().getGameKey());
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[11] = packet.getUuidKey();
+	}
 
 	/**
 	 * This method closes the screen for the user
@@ -342,6 +352,17 @@ public class Game {
 			return;
 		}
 		((GameScreen) screen).updateChat(text, senderKey);
+	}
+	
+	/**
+	 * This method updates the color of the opponent on the GameScreen by whether they are on the game or not
+	 */
+	public static void updateOpponentOnGame() {
+		if (!(screen instanceof GameScreen)) {
+			System.out.println("GAMESTATE ERROR update game chat called on wrong screen");
+			return;
+		}
+		((GameScreen) screen).updateOpponentOnGame();
 	}
 	
 	/**

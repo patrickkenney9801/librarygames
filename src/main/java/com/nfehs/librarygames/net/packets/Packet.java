@@ -21,7 +21,7 @@ public abstract class Packet {
 	public static enum PacketTypes {
 		INVALID(-1), LOGIN(00), CREATEACCOUNT(01), ERROR(02), LOGOUT(03),
 		GETPLAYERS(04), ADDFRIEND(05), CREATEGAME(06), GETGAMES(07), GETBOARD(8),
-		SENDMOVE(9), SENDCHAT(10);
+		SENDMOVE(9), SENDCHAT(10), ONGAME(11);
 		
 		private int packetId;
 		private PacketTypes(int packetId) {

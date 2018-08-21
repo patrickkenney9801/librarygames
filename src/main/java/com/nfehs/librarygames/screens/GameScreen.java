@@ -484,7 +484,7 @@ public class GameScreen extends Screen {
 	/**
 	 * Sets opponent player's name green if they are online, red if not
 	 */
-	private void updateOpponentOnGame() {
+	public void updateOpponentOnGame() {
 		if (Game.getPlayer().getUsername().equals(player1User.getText()))
 			player2User.setForeground(Game.getBoardGame().isOpponentOnGame() ? Color.GREEN : Color.RED);
 		else

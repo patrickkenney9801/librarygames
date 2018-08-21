@@ -135,6 +135,8 @@ public class GameServer extends Thread {
 					case SENDMOVE:				sendMove(data, address, port);
 												break;
 					case SENDCHAT:				sendChat(data, address, port);
+												break;
+					case ONGAME:				onGame(data, address, port);
 					default:					break;
 				}
 			}
@@ -248,8 +250,11 @@ public class GameServer extends Thread {
 		
 		for (int i = 0; i < onlinePlayers.size(); i++)
 			if (onlinePlayers.get(i).getIpAddress().equals(address)
-					&& onlinePlayers.get(i).getUser_key().equals(packet.getSenderKey()))
+					&& onlinePlayers.get(i).getUser_key().equals(packet.getSenderKey())) {
+				sendOnGame(onlinePlayers.get(i).getGame_key(), onlinePlayers.get(i).getUsername(), false);
 				onlinePlayers.remove(i);
+			}
+
 	}
 
 	/**
@@ -723,8 +728,10 @@ public class GameServer extends Thread {
 			
 			// first handle resignation case
 			if (packet.getMoveTo() == -2) {
+				// if game ends in less than 3 moves, delete the game
 				if (moves < 2) {
-					// TODO delete game from database
+					deleteGame(packet.getGameKey(), packet.getGameType());
+					return;
 				}
 				if (packet.getSenderKey().equals(player1Key))
 					winner = 4;
@@ -779,6 +786,12 @@ public class GameServer extends Thread {
 				
 				// if the user passed, it is end of game if last move was a pass too
 				if (packet.getMoveTo() == -1 && lastMove == -1) {
+					// if game ends in less than 3 moves, delete the game
+					if (moves < 2) {
+						deleteGame(packet.getGameKey(), packet.getGameType());
+						return;
+					}
+					
 					// get player scores
 					int[] territoryScores = Go.calculateTerritory(oldBoard);
 					p1Score = territoryScores[0] + p1StonesCaptured;
@@ -869,6 +882,20 @@ public class GameServer extends Thread {
 	}
 
 	/**
+	 * Updates sender's gameKey on server, sends 11 update by effect
+	 * ***This does not use database***
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void onGame(byte[] data, InetAddress address, int port) {
+		Packet11OnGame packet = new Packet11OnGame(data);
+		
+		updateSender(packet);
+		setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
+	}
+
+	/**
 	 * Returns the table name of a given game type
 	 * @param gameType
 	 * @return
@@ -908,13 +935,36 @@ public class GameServer extends Thread {
 
 	/**
 	 * Sets the sender's current game to gameKey
+	 * Sends 11 packet to other clients in past game
 	 * @param senderKey
 	 * @param gameKey
 	 */
 	private void setSenderGameKey(String senderKey, String gameKey) {
 		for (Player p : onlinePlayers)
-			if (p.getUser_key().equals(senderKey))
+			if (p.getUser_key().equals(senderKey)) {
+				// send player is leaving GameScreen
+				if (p.getGame_key() != null && !p.getGame_key().equals(gameKey))
+					sendOnGame(p.getGame_key(), p.getUsername(), false);
+				// send player joining GameScreen
+				if (gameKey != null && !gameKey.equals(p.getGame_key()))
+					sendOnGame(gameKey, p.getUsername(), true);
 				p.setGame_key(gameKey);
+			}
+	}
+
+	/**
+	 * Sends 11 packet to clients in given game
+	 * @param game_key
+	 * @param username
+	 * @param onGame
+	 */
+	private void sendOnGame(String game_key, String username, boolean onGame) {
+		if (game_key == null)
+			return;
+		Packet11OnGame packet = new Packet11OnGame(game_key, username, onGame, true);
+		for (Player p : onlinePlayers)
+			if (game_key.equals(p.getGame_key()) && !p.getUsername().equals(username))
+				packet.writeData(this, p.getIpAddress(), p.getPort());
 	}
 
 	/**
@@ -938,7 +988,7 @@ public class GameServer extends Thread {
 	 */
 	private boolean keyOnGame(String userKey, String gameKey) {
 		for (Player p : onlinePlayers)
-			if (p.getUser_key().equals(userKey) && p.getGame_key().equals(gameKey))
+			if (p.getUser_key().equals(userKey) && p.getGame_key() != null && p.getGame_key().equals(gameKey))
 				return true;
 		return false;
 	}
@@ -953,5 +1003,27 @@ public class GameServer extends Thread {
 			if (p.getUsername().equals(username))
 				return true;
 		return false;
+	}
+
+	/**
+	 * Deletes a given game
+	 * @param gameKey
+	 * @param gameType
+	 */
+	private void deleteGame(String gameKey, int gameType) {
+		try {
+			// delete base game data
+			PreparedStatement deleteGame = database.prepareStatement("DELETE FROM games "
+					+ " WHERE game_key = '" + gameKey + "';");
+			deleteGame.executeUpdate();
+			
+			// delete game specific data
+			deleteGame = database.prepareStatement("DELETE FROM " + getTableName(gameType)
+					+ " WHERE game_key = '" + gameKey + "';");
+			deleteGame.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

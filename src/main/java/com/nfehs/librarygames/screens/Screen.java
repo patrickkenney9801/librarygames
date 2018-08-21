@@ -50,6 +50,7 @@ public abstract class Screen {
 				public void actionPerformed(ActionEvent e) {
 					Game.setBoardGame(getLatestBoardGameUpdate());
 					Game.openGameScreen();
+					Game.sendOnGameUpdate();
 				}
 			});
 		}

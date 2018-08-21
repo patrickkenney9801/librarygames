@@ -35,7 +35,7 @@ public class GameClient extends Thread {
 	private String[][] games;
 	
 	public GameClient(byte[] ipAddress) {
-		setLastPacketKeysSent(new String[11]);
+		setLastPacketKeysSent(new String[12]);
 		try {
 			this.socket = new DatagramSocket();
 			this.ipAddress = InetAddress.getByAddress(ipAddress);
@@ -93,6 +93,8 @@ public class GameClient extends Thread {
 					case SENDMOVE:				updateBoard(packet.getData());
 												break;
 					case SENDCHAT:				updateChat(packet.getData());
+												break;
+					case ONGAME:				updateOnGame(packet.getData());
 					default:					break;
 				}
 			}
@@ -279,7 +281,7 @@ public class GameClient extends Thread {
 		
 		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen
 		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME) 
-					&& (!packet.getUuidKey().equals(getLastPacketKeysSent()[8]) || !packet.getUuidKey().equals(getLastPacketKeysSent()[6]))) {
+					&& (packet.getUuidKey().equals(getLastPacketKeysSent()[8]) || packet.getUuidKey().equals(getLastPacketKeysSent()[6]))) {
 			
 			// if so, set GameBoard and open GameScreen
 			Game.setBoardGame(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
@@ -299,7 +301,7 @@ public class GameClient extends Thread {
 				Game.getActiveGames();
 			// notify the user
 			Game.notifyUser(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
-					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isOpponentOnGame(), packet.getBoard(), packet.getExtraData()));
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), true, packet.getBoard(), packet.getExtraData()));
 		}
 	}
 
@@ -344,6 +346,28 @@ public class GameClient extends Thread {
 			Game.getBoardGame().setOpponentOnGame(packet.isOpponentOnGame());
 			Game.updateGameChat(packet.getText(), packet.getSenderKey());
 		}
+	}
+
+	/**
+	 * Handles a server onGame packet, updates opponent is on same game
+	 * @param data
+	 */
+	private void updateOnGame(byte[] data) {
+		// verify that user is on game screen, if not exit
+		if (Game.gameState != Game.PLAYING_GAME)
+			return;
+		
+		Packet11OnGame packet = new Packet11OnGame(data, true);
+		if (!packet.isValid())
+			return;
+		
+		// check that client is on correct game, if so update the opponent is on game
+		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey())) {
+			if (Game.getBoardGame().getPlayer1().equals(Security.decrypt(packet.getPlayer()))
+					|| Game.getBoardGame().getPlayer2().equals(Security.decrypt(packet.getPlayer())))
+				Game.getBoardGame().setOpponentOnGame(packet.isOnGame());
+		}
+		Game.updateOpponentOnGame();
 	}
 
 	/**
