@@ -318,7 +318,7 @@ public class GameServer extends Thread {
 				if (i != othersList.size()-1 && (usernamesAdded % 20 != 0 || usernamesAdded == 0))
 					others += ",";
 				// if 20 usernames reached, send packet, clear friends and other
-				if (usernamesAdded != 0 && usernamesAdded % 20 == 0) {
+				if (usernamesAdded % 20 == 19) {
 					System.out.println("Friends List: " + friends);
 					System.out.println("Others  List: " + others);
 					Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), packetsToSend, usernamesAdded / 20, friends, others, true);
@@ -568,13 +568,20 @@ public class GameServer extends Thread {
 			String[] gameInformation = new String[10];
 			for (int i = 0; i < gameInfo.size(); i++) {
 				gameInformation[i%10] = gameInfo.get(i);
-				if ((i % 10 == 0 && i != 0) || i == gameInfo.size()-1) {
+				if (i % 10 == 9) {
 					// send games to client, only send 10 games at a time
 					Packet07GetGames returnPacket = new Packet07GetGames(packet.getUuidKey(), packetsToSend, ++packetsSent, gameInformation, true);
 					returnPacket.writeData(this, address, port);
 					gameInformation = new String[10];
 				}
 			}
+			if (packetsToSend % 10 != 0) {
+				// send games to client, only send 10 games at a time
+				Packet07GetGames returnPacket = new Packet07GetGames(packet.getUuidKey(), packetsToSend, ++packetsSent, gameInformation, true);
+				returnPacket.writeData(this, address, port);
+				gameInformation = new String[10];
+			}
+			
 			System.out.println("ACTIVE GAMES SENT");
 			
 			updateSender(packet);
