@@ -446,6 +446,21 @@ public class GameServer extends Thread {
 				player2Key = temp;
 			}
 			
+			/*
+			 *  verify that an active game of the same type does not already exist
+			 */
+			// get all unfinished games between both players of same gameType and order
+			PreparedStatement getMatchingGames = database.prepareStatement("SELECT * FROM games WHERE winner = 0 AND game_type = "
+												+ packet.getGameType() + " AND player1_key = '" + player1Key + "' AND player2_key = '" + player2Key + "';");
+			ResultSet matchingGames = getMatchingGames.executeQuery();
+			
+			// if there is a matching unfinished game, send error to client and exit
+			if (matchingGames.next()) {
+				// TODO send error packet
+				System.out.println("DUPLICATE GAME DENIED");
+				return;
+			}
+			
 			// create the new game
 			String gameKey = "" + UUID.randomUUID();
 			PreparedStatement createGame = database.prepareStatement("INSERT INTO games VALUES ('" 
