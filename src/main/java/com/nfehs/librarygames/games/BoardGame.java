@@ -36,6 +36,7 @@ public abstract class BoardGame {
 	private String gameKey;
 	private boolean isPlayer1;
 	private String winner;
+	private boolean opponentOnGame;
 	private String scoreInfo;
 	
 	// For use only when on GameScreen
@@ -54,10 +55,12 @@ public abstract class BoardGame {
 	 * @param player1
 	 * @param player2
 	 * @param lastMove
+	 * @param winner
+	 * @param opponentOnGame
 	 * @param board
 	 */
 	public BoardGame(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int winner, String board) {
+			int penultMove, int lastMove, int winner, boolean opponentOnGame, String board) {
 		setGameKey(gameKey);
 		setGameType((byte) gameType);
 		setGameName(lookupGameName(getGameType()));
@@ -67,6 +70,7 @@ public abstract class BoardGame {
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setMoves(moves);
+		setOpponentOnGame(opponentOnGame);
 		setBoard(board);
 		setTiles();
 		setPieces();
@@ -98,12 +102,12 @@ public abstract class BoardGame {
 	 * @return
 	 */
 	public static BoardGame createGame(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int winner, String board, String extraData) {
+			int penultMove, int lastMove, int winner, boolean opponentOnGame, String board, String extraData) {
 		// determine which game to make, then make it
 		switch (gameType) {
 			case 0:
 			case 1:
-			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, board, extraData);
+			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, opponentOnGame, board, extraData);
 			default:					// handle wrong game type
 										System.out.println("ERROR WRONG GAME TYPE");
 										return null;
@@ -120,7 +124,7 @@ public abstract class BoardGame {
 	 * @param extraData
 	 * @return false if not current game
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, String extraData) {
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean opponentOnGame, String extraData) {
 		if (!getGameKey().equals(gameKey))
 			return false;
 		setPenultMove(penultMove);
@@ -132,6 +136,7 @@ public abstract class BoardGame {
 		updateWinner(winner);
 		if (winner == 0)
 			setMoves(getMoves() + 1);
+		setOpponentOnGame(opponentOnGame);
 		
 		return true;
 	}
@@ -625,5 +630,19 @@ public abstract class BoardGame {
 	 */
 	public void setScoreInfo(String scoreInfo) {
 		this.scoreInfo = scoreInfo;
+	}
+
+	/**
+	 * @return the opponentOnGame
+	 */
+	public boolean isOpponentOnGame() {
+		return opponentOnGame;
+	}
+
+	/**
+	 * @param opponentOnGame the opponentOnGame to set
+	 */
+	public void setOpponentOnGame(boolean opponentOnGame) {
+		this.opponentOnGame = opponentOnGame;
 	}
 }

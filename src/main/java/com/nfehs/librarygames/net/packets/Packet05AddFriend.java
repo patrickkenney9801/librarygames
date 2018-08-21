@@ -9,17 +9,15 @@ package com.nfehs.librarygames.net.packets;
 
 public class Packet05AddFriend extends Packet {
 	// data to send to server
-	private String userKey;
 	private String friendName;
 
 	/**
 	 * Used by client to send data to server
-	 * @param userkey
+	 * @param senderKey
 	 * @param friendName
 	 */
-	public Packet05AddFriend(String userkey, String friendName) {
-		super(05);
-		setUserKey(userkey);
+	public Packet05AddFriend(String senderKey, String friendName) {
+		super(05, senderKey);
 		setFriendName(friendName);
 	}
 	
@@ -29,28 +27,26 @@ public class Packet05AddFriend extends Packet {
 	 */
 	public Packet05AddFriend(byte[] data) {
 		super(05);
-		String[] userdata = readData(data).split(":");
-		setUuidKey(userdata[0]);
-		setUserKey(userdata[1]);
-		setFriendName(userdata[2]);
+		
+		try {
+			String[] userdata = readData(data).split(":");
+			setUuidKey(userdata[0]);
+			setSenderKey(userdata[1]);
+			setFriendName(userdata[2]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			setValid(false);
+		}
 	}
 
 	@Override
 	public byte[] getData() {
-		return ("05" + getUuidKey() + ":" + getUserKey() + ":" + getFriendName()).getBytes();
+		return ("05" + getUuidKey() + ":" + getSenderKey() + ":" + getFriendName()).getBytes();
 	}
 
 	@Override
 	public byte[] getDataServer() {
 		return ("05" + getUuidKey()).getBytes();
-	}
-
-	public String getUserKey() {
-		return userKey;
-	}
-
-	public void setUserKey(String userKey) {
-		this.userKey = userKey;
 	}
 
 	public String getFriendName() {

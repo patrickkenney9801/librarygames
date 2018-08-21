@@ -8,13 +8,11 @@ package com.nfehs.librarygames.net.packets;
 
 public class Packet08GetBoard extends Packet {
 	// data to send to server
-	private String userKey;
 	private String username;
 	private String gameKey;
 	private int gameType;
 	
 	// data to send to client
-	// userKey
 	// gameKey
 	// gameType;
 	private String player1;
@@ -23,18 +21,19 @@ public class Packet08GetBoard extends Packet {
 	private int penultMove;
 	private int lastMove;
 	private int winner;
+	private boolean opponentOnGame;
 	private String board;
 	private String extraData;
 
 	/**
 	 * Used by client to send data to server
-	 * @param userkey
+	 * @param senderKey
 	 * @param username
 	 * @param gameKey
+	 * @param gameType
 	 */
-	public Packet08GetBoard(String userkey, String username, String gameKey, int gameType) {
-		super(8);
-		setUserKey(userkey);
+	public Packet08GetBoard(String senderKey, String username, String gameKey, int gameType) {
+		super(8, senderKey);
 		setUsername(username);
 		setGameKey(gameKey);
 		setGameType(gameType);
@@ -46,22 +45,24 @@ public class Packet08GetBoard extends Packet {
 	 */
 	public Packet08GetBoard(byte[] data) {
 		super(8);
-		String[] userdata = readData(data).split(":");
-		setUuidKey(userdata[0]);
-		setUserKey(userdata[1]);
-		setUsername(userdata[2]);
-		setGameKey(userdata[3]);
+		
 		try {
+			String[] userdata = readData(data).split(":");
+			setUuidKey(userdata[0]);
+			setSenderKey(userdata[1]);
+			setUsername(userdata[2]);
+			setGameKey(userdata[3]);
 			setGameType(Integer.parseInt(userdata[4]));
-		} catch (NumberFormatException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			setValid(false);
 		}
 	}
 	
 	/**
 	 * Used by server to send data to client
 	 * @param packetKey
-	 * @param userKey
+	 * @param senderKey
 	 * @param gameKey
 	 * @param gameType
 	 * @param player1
@@ -70,16 +71,17 @@ public class Packet08GetBoard extends Packet {
 	 * @param penultMove
 	 * @param lastMove
 	 * @param winner
+	 * @param opponentOnGame
 	 * @param board
 	 * @param extraData
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
-	public Packet08GetBoard(String packetKey, String userKey, String gameKey, int gameType, 
+	public Packet08GetBoard(String packetKey, String senderKey, String gameKey, int gameType, 
 							String player1, String player2, int moves, int penultMove, int lastMove,
-							int winner, String board, String extraData, boolean serverUse) {
+							int winner, boolean opponentOnGame, String board, String extraData, boolean serverUse) {
 		super(8);
 		setUuidKey(packetKey);
-		setUserKey(userKey);
+		setSenderKey(senderKey);
 		setGameKey(gameKey);
 		setGameType(gameType);
 		setPlayer1(player1);
@@ -88,6 +90,7 @@ public class Packet08GetBoard extends Packet {
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setWinner(winner);
+		setOpponentOnGame(opponentOnGame);
 		setBoard(board);
 		setExtraData(extraData);
 	}
@@ -99,49 +102,38 @@ public class Packet08GetBoard extends Packet {
 	 */
 	public Packet08GetBoard(byte[] data, boolean serverUse) {
 		super(8);
-		String[] userdata = readData(data).split(":");
-		setUuidKey(userdata[0]);
-		setUserKey(userdata[1]);
-		setGameKey(userdata[2]);
-		setPlayer1(userdata[4]);
-		setPlayer2(userdata[5]);
-		setBoard(userdata[10]);
-		setExtraData(userdata[11]);
+		
 		try {
+			String[] userdata = readData(data).split(":");
+			setUuidKey(userdata[0]);
+			setSenderKey(userdata[1]);
+			setGameKey(userdata[2]);
+			setPlayer1(userdata[4]);
+			setPlayer2(userdata[5]);
+			setBoard(userdata[11]);
+			setExtraData(userdata[12]);
 			setGameType(Integer.parseInt(userdata[3]));
 			setMoves(Integer.parseInt(userdata[6]));
 			setPenultMove(Integer.parseInt(userdata[7]));
 			setLastMove(Integer.parseInt(userdata[8]));
 			setWinner(Integer.parseInt(userdata[9]));
-		} catch (NumberFormatException e) {
+			setOpponentOnGame(Boolean.parseBoolean(userdata[10]));
+		} catch (Exception e) {
 			e.printStackTrace();
+			setValid(false);
 		}
 	}
 
 	@Override
 	public byte[] getData() {
-		return ("08" + getUuidKey() + ":" + getUserKey() + ":" + getUsername() + ":" + getGameKey() + ":" + getGameType()).getBytes();
+		return ("08" + getUuidKey() + ":" + getSenderKey() + ":" + getUsername() + ":" + getGameKey() + ":" + getGameType()).getBytes();
 	}
 
 	@Override
 	public byte[] getDataServer() {
-		return ("08" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey() + ":" + getGameType()
+		return ("08" + getUuidKey() + ":" + getSenderKey() + ":" + getGameKey() + ":" + getGameType()
 		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + getMoves() + ":" + getPenultMove() + ":" + getLastMove()
-		 		+ ":" + getWinner() + ":" + getBoard() + ":" + getExtraData()).getBytes();
-	}
-
-	/**
-	 * @return the userKey
-	 */
-	public String getUserKey() {
-		return userKey;
-	}
-
-	/**
-	 * @param userKey the userKey to set
-	 */
-	public void setUserKey(String userKey) {
-		this.userKey = userKey;
+		 		+ ":" + getWinner() + ":" + isOpponentOnGame() + ":" + getBoard() + ":" + getExtraData()).getBytes();
 	}
 
 	/**
@@ -284,5 +276,19 @@ public class Packet08GetBoard extends Packet {
 	 */
 	public void setExtraData(String extraData) {
 		this.extraData = extraData;
+	}
+
+	/**
+	 * @return the opponentOnGame
+	 */
+	public boolean isOpponentOnGame() {
+		return opponentOnGame;
+	}
+
+	/**
+	 * @param opponentOnGame the opponentOnGame to set
+	 */
+	public void setOpponentOnGame(boolean opponentOnGame) {
+		this.opponentOnGame = opponentOnGame;
 	}
 }

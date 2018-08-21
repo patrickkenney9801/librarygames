@@ -35,11 +35,17 @@ public class Packet01CreateAcc extends Packet {
 	 */
 	public Packet01CreateAcc(byte[] data) {
 		super(01);
-		String[] userpass = readData(data).split(":");
-		setUuidKey(userpass[0]);
-		setEmail(userpass[1]);
-		setUsername(userpass[2]);
-		setPassword(userpass[3]);
+		
+		try {
+			String[] userpass = readData(data).split(":");
+			setUuidKey(userpass[0]);
+			setEmail(userpass[1]);
+			setUsername(userpass[2]);
+			setPassword(userpass[3]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			setValid(false);
+		}
 	}
 	
 	/**
@@ -63,10 +69,16 @@ public class Packet01CreateAcc extends Packet {
 	 */
 	public Packet01CreateAcc(byte[] data, boolean serverUse) {
 		super(01);
-		String[] userdata = readData(data).split(":");
-		setUuidKey(userdata[0]);
-		setUsername(userdata[1]);
-		setUserKey(userdata[2]);
+		
+		try {
+			String[] userdata = readData(data).split(":");
+			setUuidKey(userdata[0]);
+			setUsername(userdata[1]);
+			setUserKey(userdata[2]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			setValid(false);
+		}
 	}
 
 	@Override

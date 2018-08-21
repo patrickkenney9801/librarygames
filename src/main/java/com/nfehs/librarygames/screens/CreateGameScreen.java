@@ -1,5 +1,6 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -174,9 +175,10 @@ public class CreateGameScreen extends Screen {
 		Game.mainWindow.add(friendsTab);
 		
 		for (int i = 0; i < friends.length; i++) {
-			friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i]);
+			friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i].split("~")[0]);
 			players.add(friends[i]);
 			friends[i].setBounds(5, 5 + i*30, friendsPanel.getWidth() - 10, 30);
+			friends[i].setForeground(Boolean.parseBoolean(Game.getPlayer().getFriends()[i].split("~")[1]) ? Color.GREEN : Color.RED);
 			friendsPanel.add(friends[i]);
 		}
 		
@@ -192,9 +194,10 @@ public class CreateGameScreen extends Screen {
 		Game.mainWindow.add(randomPlayersTab);
 		
 		for (int i = 0; i < randomPlayers.length; i++) {
-			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i]);
+			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i].split("~")[0]);
 			players.add(randomPlayers[i]);
 			randomPlayers[i].setBounds(5, 5 + i*30, randomPlayersPanel.getWidth() - 85, 30);
+			randomPlayers[i].setForeground(Boolean.parseBoolean(Game.getPlayer().getOtherPlayers()[i].split("~")[1]) ? Color.GREEN : Color.RED);
 			randomPlayersPanel.add(randomPlayers[i]);
 		}
 		

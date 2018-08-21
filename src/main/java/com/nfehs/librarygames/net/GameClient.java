@@ -25,7 +25,17 @@ public class GameClient extends Thread {
 	private DatagramSocket socket;
 	public static final int PORT = 19602;
 	
+	private String[] lastPacketKeysSent;
+	
+	private int packetsToReceiveGetPlayers;
+	private String[] friends;
+	private String[] others;
+	
+	private int packetsToReceiveGetGames;
+	private String[][] games;
+	
 	public GameClient(byte[] ipAddress) {
+		setLastPacketKeysSent(new String[11]);
 		try {
 			this.socket = new DatagramSocket();
 			this.ipAddress = InetAddress.getByAddress(ipAddress);
@@ -113,6 +123,11 @@ public class GameClient extends Thread {
 		if (Game.gameState != Game.LOGIN)
 			return;
 		Packet00Login packet = new Packet00Login(data, true);
+		if (!packet.isValid())
+			return;
+		// verify that this packet is responding to the last one sent
+		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[0]))
+			return;
 		
 		// create player from packet
 		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey()));
@@ -131,6 +146,11 @@ public class GameClient extends Thread {
 			return;
 		
 		Packet01CreateAcc packet = new Packet01CreateAcc(data, true);
+		if (!packet.isValid())
+			return;
+		// verify that this packet is responding to the last one sent
+		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[1]))
+			return;
 		
 		// create player from packet
 		Game.setPlayer(new Player(Security.decrypt(packet.getUsername()), packet.getUserKey()));
@@ -149,13 +169,45 @@ public class GameClient extends Thread {
 			return;
 		
 		Packet04GetPlayers packet = new Packet04GetPlayers(data, true);
+		if (!packet.isValid())
+			return;
+		// verify that this packet is responding to the last one sent
+		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[4]))
+			return;
 		
-		// set friends and other players lists in Player
-		Game.getPlayer().setFriends(packet.getFriends());
-		Game.getPlayer().setOtherPlayers(packet.getOtherPlayers());
+		if (getFriends() == null || getFriends().length != packet.getPacketsSent()) {
+			setPacketsToReceiveGetPlayers(packet.getPacketsSent());
+			setFriends(new String[packet.getPacketsSent()]);
+			setOthers(new String[packet.getPacketsSent()]);
+		}
 		
-		// refresh friends and players on create game screen
-		Game.updatePlayersList();
+		// set friends and other players lists in class in right row
+		getFriends()[packet.getPacketNumber()-1] = packet.getFriends();
+		getOthers()[packet.getPacketNumber()-1] = packet.getOtherPlayers();
+		
+		// when all packets have been received, 
+		if (listIsFull(getFriends())) {
+			// build strings for friends and others
+			String friends = "";
+			String others = "";
+			
+			for (int i = 0; i < getPacketsToReceiveGetPlayers(); i++) {
+				friends += getFriends()[i];
+				others += getOthers()[i];
+			}
+			
+			if (friends.length() < 1)
+				friends = null;
+			if (others.length() < 1)
+				others = null;
+			Game.getPlayer().setFriends(friends);
+			Game.getPlayer().setOtherPlayers(others);
+			
+			// refresh friends and players on create game screen
+			Game.updatePlayersList();
+			
+			setFriends(null);
+		}
 	}
 
 	/**
@@ -168,31 +220,50 @@ public class GameClient extends Thread {
 			return;
 		
 		Packet07GetGames packet = new Packet07GetGames(data, true);
+		if (!packet.isValid())
+			return;
+		// verify that this packet is responding to the last one sent
+		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[7]))
+			return;
 		
-		// set your and opponent turn board games
-		String[] gameInfo = packet.getGameInfo();
-		ArrayList<String> finished = new ArrayList<String>();
-		ArrayList<String> userTurn = new ArrayList<String>();
-		ArrayList<String> opponentTurn = new ArrayList<String>();
-		
-		for (String info : gameInfo) {
-			String gameData = BoardGame.getGameInfo(info.split(","));
-			
-			if (info.split(",").length == 6)
-				finished.add(gameData);
-			else if (Boolean.parseBoolean(gameData.split("~")[2]))
-				userTurn.add(gameData);
-			else
-				opponentTurn.add(gameData);
+		if (getGames() == null || getGames().length != packet.getPacketsSent()) {
+			setPacketsToReceiveGetGames(packet.getPacketsSent());
+			setGames(new String[packet.getPacketsSent()][]);
 		}
 		
-		// set board game Strings in Player
-		Game.getPlayer().setFinishedBoardGames(finished);
-		Game.getPlayer().setYourTurnBoardGames(userTurn);
-		Game.getPlayer().setOpponentTurnBoardGames(opponentTurn);
+		// set games lists in class in right row
+		getGames()[packet.getPacketNumber()-1] = packet.getGameInfo();
 		
-		// refresh games list on ActiveGamesScreen
-		Game.updateActiveGamesList();
+		// when all packets have been received, 
+		if (listIsFull(getGames())) {
+			ArrayList<String> finished = new ArrayList<String>();
+			ArrayList<String> userTurn = new ArrayList<String>();
+			ArrayList<String> opponentTurn = new ArrayList<String>();
+			
+			for (String[] packetData : getGames())
+				for (String info : packetData) {
+					if (info != null) {
+						String gameData = BoardGame.getGameInfo(info.split(","));
+						
+						if (info.split(",").length == 6)
+							finished.add(gameData);
+						else if (Boolean.parseBoolean(gameData.split("~")[2]))
+							userTurn.add(gameData);
+						else
+							opponentTurn.add(gameData);
+					}
+				}
+			
+			// set board game Strings in Player
+			Game.getPlayer().setFinishedBoardGames(finished);
+			Game.getPlayer().setYourTurnBoardGames(userTurn);
+			Game.getPlayer().setOpponentTurnBoardGames(opponentTurn);
+			
+			// refresh games list on ActiveGamesScreen
+			Game.updateActiveGamesList();
+			
+			setGames(null);
+		}
 	}
 
 	/**
@@ -203,21 +274,23 @@ public class GameClient extends Thread {
 	 */
 	private void getBoard(byte[] data) {
 		Packet08GetBoard packet = new Packet08GetBoard(data, true);
+		if (!packet.isValid())
+			return;
 		
 		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen
 		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME) 
-					&& packet.getUserKey().equals(Game.getPlayer().getUser_key())) {
+					&& (!packet.getUuidKey().equals(getLastPacketKeysSent()[8]) || !packet.getUuidKey().equals(getLastPacketKeysSent()[6]))) {
 			
 			// if so, set GameBoard and open GameScreen
 			Game.setBoardGame(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
-					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getBoard(), packet.getExtraData()));
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isOpponentOnGame(), packet.getBoard(), packet.getExtraData()));
 			
 			// open GameScreen
 			Game.openGameScreen();
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
 		else if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
-				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getExtraData()))
+				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isOpponentOnGame(), packet.getExtraData()))
 			Game.updateGameBoard();
 		// if none of the above, notify the client
 		else {
@@ -226,7 +299,7 @@ public class GameClient extends Thread {
 				Game.getActiveGames();
 			// notify the user
 			Game.notifyUser(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
-					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.getBoard(), packet.getExtraData()));
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isOpponentOnGame(), packet.getBoard(), packet.getExtraData()));
 		}
 	}
 
@@ -240,11 +313,16 @@ public class GameClient extends Thread {
 			return;
 		
 		Packet09SendMove packet = new Packet09SendMove(data, true);
+		if (!packet.isValid())
+			return;
+		// verify that this packet is responding to the last one sent
+		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[9]))
+			return;
 		
 		// update current board game, returns false if wrong game
 		// if successful update, update the game board
 		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(),
-										packet.getWinner(), packet.getExtraData()))
+										packet.getWinner(), packet.isOpponentOnGame(), packet.getExtraData()))
 			Game.updateGameBoard();
 	}
 
@@ -258,9 +336,91 @@ public class GameClient extends Thread {
 			return;
 		
 		Packet10SendChat packet = new Packet10SendChat(data, true);
+		if (!packet.isValid())
+			return;
 		
 		// check that client is on correct game, if so update the chat
-		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey()))
-			Game.updateGameChat(packet.getText(), packet.getUserKey());
+		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey())) {
+			Game.getBoardGame().setOpponentOnGame(packet.isOpponentOnGame());
+			Game.updateGameChat(packet.getText(), packet.getSenderKey());
+		}
+	}
+
+	/**
+	 * Returns true if a given string array has no null values
+	 * @param array
+	 * @return
+	 */
+	private boolean listIsFull(String[] array) {
+		for (String s : array)
+			if (s == null)
+				return false;
+		return true;
+	}
+
+	/**
+	 * Returns true if a given 2d string array has no null values
+	 * @param array
+	 * @return
+	 */
+	private boolean listIsFull(String[][] array) {
+		for (String[] s : array)
+			if (s == null)
+				return false;
+		return true;
+	}
+
+	/**
+	 * @return the lastPacketKeysSent
+	 */
+	public String[] getLastPacketKeysSent() {
+		return lastPacketKeysSent;
+	}
+
+	/**
+	 * @param lastPacketKeysSent the lastPacketKeysSent to set
+	 */
+	public void setLastPacketKeysSent(String[] lastPacketKeysSent) {
+		this.lastPacketKeysSent = lastPacketKeysSent;
+	}
+
+	public int getPacketsToReceiveGetPlayers() {
+		return packetsToReceiveGetPlayers;
+	}
+
+	public void setPacketsToReceiveGetPlayers(int packetsToReceiveGetPlayers) {
+		this.packetsToReceiveGetPlayers = packetsToReceiveGetPlayers;
+	}
+
+	public String[] getFriends() {
+		return friends;
+	}
+
+	public void setFriends(String[] friends) {
+		this.friends = friends;
+	}
+
+	public String[] getOthers() {
+		return others;
+	}
+
+	public void setOthers(String[] others) {
+		this.others = others;
+	}
+
+	public int getPacketsToReceiveGetGames() {
+		return packetsToReceiveGetGames;
+	}
+
+	public void setPacketsToReceiveGetGames(int packetsToReceiveGetGames) {
+		this.packetsToReceiveGetGames = packetsToReceiveGetGames;
+	}
+
+	public String[][] getGames() {
+		return games;
+	}
+
+	public void setGames(String[][] games) {
+		this.games = games;
 	}
 }

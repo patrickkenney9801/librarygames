@@ -8,7 +8,6 @@ package com.nfehs.librarygames.net.packets;
 
 public class Packet06CreateGame extends Packet {
 	// data to send to server
-	private String userKey;
 	private String username;
 	private String otherUser;
 	private boolean creatorGoesFirst;
@@ -19,15 +18,14 @@ public class Packet06CreateGame extends Packet {
 
 	/**
 	 * Used by client to send data to server
-	 * @param userKey
+	 * @param senderKey
 	 * @param username
 	 * @param otherUser
 	 * @param creatorGoesFirst
 	 * @param gameType
 	 */
-	public Packet06CreateGame(String userKey, String username, String otherUser, boolean creatorGoesFirst, int gameType) {
-		super(06);
-		setUserKey(userKey);
+	public Packet06CreateGame(String senderKey, String username, String otherUser, boolean creatorGoesFirst, int gameType) {
+		super(06, senderKey);
 		setUsername(username);
 		setOtherUser(otherUser);
 		setCreatorGoesFirst(creatorGoesFirst);
@@ -40,29 +38,31 @@ public class Packet06CreateGame extends Packet {
 	 */
 	public Packet06CreateGame(byte[] data) {
 		super(06);
-		String[] userpass = readData(data).split(":");
-		setUuidKey(userpass[0]);
-		setUserKey(userpass[1]);
-		setUsername(userpass[2]);
-		setOtherUser(userpass[3]);
-		setCreatorGoesFirst(Boolean.parseBoolean(userpass[4]));
+		
 		try {
+			String[] userpass = readData(data).split(":");
+			setUuidKey(userpass[0]);
+			setSenderKey(userpass[1]);
+			setUsername(userpass[2]);
+			setOtherUser(userpass[3]);
+			setCreatorGoesFirst(Boolean.parseBoolean(userpass[4]));
 			setGameType(Integer.parseInt(userpass[5]));
-		} catch (NumberFormatException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			setValid(false);
 		}
 	}
 	
 	/**
 	 * Used by server to send data to client
 	 * @param packetKey
+	 * @param senderKey
 	 * @param gameKey
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
-	public Packet06CreateGame(String packetKey, String userKey, String gameKey, boolean serverUse) {
-		super(06);
+	public Packet06CreateGame(String packetKey, String senderKey, String gameKey, boolean serverUse) {
+		super(06, senderKey);
 		setUuidKey(packetKey);
-		setUserKey(userKey);
 		setGameKey(gameKey);
 	}
 	
@@ -73,35 +73,27 @@ public class Packet06CreateGame extends Packet {
 	 */
 	public Packet06CreateGame(byte[] data, boolean serverUse) {
 		super(06);
-		String[] userdata = readData(data).split(":");
-		setUuidKey(userdata[0]);
-		setUserKey(userdata[1]);
-		setGameKey(userdata[2]);
+		
+		try {
+			String[] userdata = readData(data).split(":");
+			setUuidKey(userdata[0]);
+			setSenderKey(userdata[1]);
+			setGameKey(userdata[2]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			setValid(false);
+		}
 	}
 
 	@Override
 	public byte[] getData() {
-		return ("06" + getUuidKey() + ":" + getUserKey() + ":" + getUsername() + ":" + getOtherUser()
+		return ("06" + getUuidKey() + ":" + getSenderKey() + ":" + getUsername() + ":" + getOtherUser()
 				+ ":" + getCreatorGoesFirst() + ":" + getGameType()).getBytes();
 	}
 
 	@Override
 	public byte[] getDataServer() {
-		return ("06" + getUuidKey() + ":" + getUserKey() + ":" + getGameKey()).getBytes();
-	}
-
-	/**
-	 * @return the userKey
-	 */
-	public String getUserKey() {
-		return userKey;
-	}
-
-	/**
-	 * @param userKey the userKey to set
-	 */
-	public void setUserKey(String userKey) {
-		this.userKey = userKey;
+		return ("06" + getUuidKey() + ":" + getSenderKey() + ":" + getGameKey()).getBytes();
 	}
 
 	/**

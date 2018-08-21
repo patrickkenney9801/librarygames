@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class Player {
 	private String username;
 	private String user_key;
+	private String game_key;
 	private InetAddress ipAddress;
 	private int port;
 	
@@ -168,5 +169,19 @@ public class Player {
 		for (int i = 0; i < finBoardGames.length; i++)
 			finBoardGames[i] = finishedBoardGames.get(i);
 		this.finishedBoardGames = finBoardGames;
+	}
+
+	/**
+	 * @return the game_key
+	 */
+	public String getGame_key() {
+		return game_key;
+	}
+
+	/**
+	 * @param game_key the game_key to set
+	 */
+	public void setGame_key(String game_key) {
+		this.game_key = game_key;
 	}
 }

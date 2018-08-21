@@ -76,7 +76,9 @@ public class Game {
 		password = Security.encrypt(password);
 		
 		// send login packet to server
-		new Packet00Login(username, password).writeData(client);
+		Packet packet = new Packet00Login(username, password);
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[0] = packet.getUuidKey();
 	}
 
 	/**
@@ -122,7 +124,9 @@ public class Game {
 		password = Security.encrypt(password);
 		
 		// send create account packet to server
-		new Packet01CreateAcc(email, username, password).writeData(client);
+		Packet packet = new Packet01CreateAcc(email, username, password);
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[1] = packet.getUuidKey();
 	}
 	
 	/**
@@ -130,7 +134,9 @@ public class Game {
 	 */
 	public static void logout() {
 		// send logout packet to server
-		new Packet03Logout().writeData(client);
+		Packet packet = new Packet03Logout(getPlayer() == null ? null : getPlayer().getUser_key());
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[3] = packet.getUuidKey();
 	}
 	
 	/**
@@ -138,7 +144,9 @@ public class Game {
 	 */
 	public static void getOtherPlayers() {
 		// send get players packet to server
-		new Packet04GetPlayers(getPlayer().getUser_key()).writeData(client);
+		Packet packet = new Packet04GetPlayers(getPlayer().getUser_key());
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[4] = packet.getUuidKey();
 	}
 
 	/**
@@ -147,7 +155,9 @@ public class Game {
 	 */
 	public static void addFriend(String friend) {
 		// send addFriend packet to server
-		new Packet05AddFriend(getPlayer().getUser_key(), friend).writeData(client);
+		Packet packet = new Packet05AddFriend(getPlayer().getUser_key(), friend);
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[5] = packet.getUuidKey();
 	}
 	
 	/**
@@ -158,7 +168,9 @@ public class Game {
 	 */
 	public static void createGame(String otherUser, boolean creatorGoesFirst, int gameType) {
 		// send create game packet to server
-		new Packet06CreateGame(getPlayer().getUser_key(), getPlayer().getUsername(), otherUser, creatorGoesFirst, gameType).writeData(client);
+		Packet packet = new Packet06CreateGame(getPlayer().getUser_key(), getPlayer().getUsername(), otherUser, creatorGoesFirst, gameType);
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[6] = packet.getUuidKey();
 	}
 	
 	/**
@@ -166,7 +178,9 @@ public class Game {
 	 */
 	public static void getActiveGames() {
 		// sends get games packet to server
-		new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername()).writeData(client);
+		Packet packet = new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername());
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[7] = packet.getUuidKey();
 	}
 	
 	/**
@@ -176,7 +190,9 @@ public class Game {
 	 */
 	public static void getBoard(String gameKey, int gameType) {
 		// sends get board packet to server
-		new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey, gameType).writeData(client);
+		Packet packet = new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey, gameType);
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[8] = packet.getUuidKey();
 	}
 	
 	/**
@@ -186,8 +202,10 @@ public class Game {
 	 */
 	public static void sendMove(int movingFrom, int movingTo) {
 		// sends send move packet to server
-		new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(), movingFrom, movingTo,
-							getPlayer().getUsername(), getBoardGame().getGameType()).writeData(client);
+		Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
+							movingFrom, movingTo, getPlayer().getUsername(), getBoardGame().getGameType());
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[9] = packet.getUuidKey();
 	}
 	
 	/**
@@ -196,10 +214,11 @@ public class Game {
 	 */
 	public static void sendChat(String text) {
 		// sends chat packet to server
-		new Packet10SendChat(getPlayer().getUser_key(),
-				getBoardGame().getGameKey(),
+		Packet packet = new Packet10SendChat(getPlayer().getUser_key(), getBoardGame().getGameKey(),
 				getBoardGame().getPlayer1().equals(getPlayer().getUsername()) ? getBoardGame().getPlayer2() : getBoardGame().getPlayer1(),
-				getPlayer().getUsername() + ": " + text).writeData(client);
+				getPlayer().getUsername() + ": " + text);
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[10] = packet.getUuidKey();
 	}
 
 	/**

@@ -150,6 +150,8 @@ public class GameServer extends Thread {
 	private void loginUser(byte[] data, InetAddress address, int port) {
 		try {
 			Packet00Login packet = new Packet00Login(data);
+			if (!packet.isValid())
+				return;
 			
 			// search for account with the given username and password
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users WHERE username = '"
@@ -172,6 +174,8 @@ public class GameServer extends Thread {
 																	result.getString("user_key"), true);
 			returnPacket.writeData(this, address, port);
 			System.out.println("RETURN LOGIN PACKET SENT");
+			
+			updateSender(result.getString("user_key"));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -186,6 +190,8 @@ public class GameServer extends Thread {
 	private void createAccount(byte[] data, InetAddress address, int port) {
 		try {
 			Packet01CreateAcc packet = new Packet01CreateAcc(data);
+			if (!packet.isValid())
+				return;
 			
 			// verify that the username is not already in use
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users WHERE username = '" + packet.getUsername() + "';");
@@ -202,7 +208,7 @@ public class GameServer extends Thread {
 			String userKey = "" + UUID.randomUUID();
 			PreparedStatement createUser = database.prepareStatement("INSERT INTO users VALUES ("
 										+ "'" + packet.getUsername() + "', " + "'" +  packet.getPassword() 	+ "', " 
-										+ "'" + packet.getEmail()	 + "', " + "'" +  userKey			 	+ "');");
+										+ "'" + packet.getEmail()	 + "', " + "'" +  userKey			 	+ "', NOW());");
 			createUser.executeUpdate();
 			
 			System.out.println("ACCOUNT CREATED");
@@ -222,6 +228,8 @@ public class GameServer extends Thread {
 			
 			// add player to online players list
 			onlinePlayers.add(new Player(packet.getUsername(), userKey, address, port));
+			
+			updateSender(userKey);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -234,8 +242,13 @@ public class GameServer extends Thread {
 	 * @param port
 	 */
 	private void logout(byte[] data, InetAddress address, int port) {
+		Packet03Logout packet = new Packet03Logout(data);
+		if (!packet.isValid())
+			return;
+		
 		for (int i = 0; i < onlinePlayers.size(); i++)
-			if (onlinePlayers.get(i).getIpAddress().equals(address))
+			if (onlinePlayers.get(i).getIpAddress().equals(address)
+					&& onlinePlayers.get(i).getUser_key().equals(packet.getSenderKey()))
 				onlinePlayers.remove(i);
 	}
 
@@ -248,47 +261,78 @@ public class GameServer extends Thread {
 	private void getPlayers(byte[] data, InetAddress address, int port) {
 		try {
 			Packet04GetPlayers packet = new Packet04GetPlayers(data);
+			if (!packet.isValid())
+				return;
 			
 			// find friends list
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN friends ON users.user_key = friends.userkey2"
-																+ " WHERE userkey1 = '" + packet.getUserKey() + "';");
+																+ " WHERE userkey1 = '" + packet.getSenderKey() + "' ORDER BY last_action_date DESC;");
 			ResultSet result = statement.executeQuery();
 			
 			// get friends usernames and put into array
 			ArrayList<String> friendsList = new ArrayList<String>();
 			while (result.next())
-				friendsList.add(Security.decrypt(result.getString("username")));
+				friendsList.add(Security.decrypt(result.getString("username")) + "~" + (userOnline(result.getString("username")) ? true : false));
 			
 			// find all other users
-			statement = database.prepareStatement("SELECT * FROM users WHERE user_key != '" + packet.getUserKey() + "';");
+			statement = database.prepareStatement("SELECT * FROM users WHERE user_key != '" + packet.getSenderKey() + "' ORDER BY last_action_date DESC;");
 			result = statement.executeQuery();
 			
 			// get other usernames and put into array
 			ArrayList<String> othersList = new ArrayList<String>();
 			while (result.next())
 				if (!friendsList.contains(Security.decrypt(result.getString("username"))))
-					othersList.add(Security.decrypt(result.getString("username")));
+					othersList.add(Security.decrypt(result.getString("username")) + "~" + (userOnline(result.getString("username")) ? true : false));
 			
 			// build Strings for friends and other users
+			// only send 20 usernames at a time, tell the client how many packets to expect
+			int packetsToSend = (friendsList.size() + othersList.size()) / 20;
+			if ((friendsList.size() + othersList.size()) % 20 != 0 || packetsToSend == 0)
+				packetsToSend++;
+			int usernamesAdded = 0;
+			
 			String friends = "";
-			for (int i = 0; i < friendsList.size(); i++) {
-				friends += friendsList.get(i);
-				if (i != friendsList.size()-1)
+			
+			for (; usernamesAdded < friendsList.size(); usernamesAdded++) {
+				friends += friendsList.get(usernamesAdded);
+				if (usernamesAdded != friendsList.size()-1 && usernamesAdded % 20 != 0)
 					friends += ",";
+				// if 20 usernames reached, send packet and clear friends
+				if (usernamesAdded != 0 && usernamesAdded % 20 == 0) {
+					System.out.println("Friends List: " + friends);
+					Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), packetsToSend, usernamesAdded / 20, friends, "", true);
+					returnPacket.writeData(this, address, port);
+					friends = "";
+				}
 			}
 			String others = "";
 			for (int i = 0; i < othersList.size(); i++) {
+				usernamesAdded++;
 				others += othersList.get(i);
-				if (i != othersList.size()-1)
+				if (i != othersList.size()-1 && usernamesAdded % 20 != 0)
 					others += ",";
+				// if 20 usernames reached, send packet, clear friends and other
+				if (usernamesAdded != 0 && usernamesAdded % 20 == 0) {
+					System.out.println("Friends List: " + friends);
+					System.out.println("Others  List: " + others);
+					Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), packetsToSend, usernamesAdded / 20, friends, others, true);
+					returnPacket.writeData(this, address, port);
+					friends = "";
+					others = "";
+				}
 			}
+			
+			if (usernamesAdded % 20 != 0) {
+				Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), packetsToSend, usernamesAdded / 20 + 1, friends, others, true);
+				returnPacket.writeData(this, address, port);
+			}
+			
 			System.out.println("Friends List: " + friends);
 			System.out.println("Others  List: " + others);
-			
-			// send users to client
-			Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), friends, others, true);
-			returnPacket.writeData(this, address, port);
 			System.out.println("RETURN GET PLAYERS SENT");
+			
+			updateSender(packet);
+			setSenderGameKey(packet.getSenderKey(), null);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -304,6 +348,8 @@ public class GameServer extends Thread {
 	private void addFriend(byte[] data, InetAddress address, int port) {
 		try {
 			Packet05AddFriend packet = new Packet05AddFriend(data);
+			if (!packet.isValid())
+				return;
 			
 			// get other user's key
 			PreparedStatement getKey = database.prepareStatement("SELECT * FROM users WHERE username = '"
@@ -318,7 +364,7 @@ public class GameServer extends Thread {
 			String otherKey = result.getString("user_key");
 			
 			// verify that player is not already friends with other
-			PreparedStatement statement = database.prepareStatement("SELECT * FROM friends WHERE userkey1 = '" + packet.getUserKey()
+			PreparedStatement statement = database.prepareStatement("SELECT * FROM friends WHERE userkey1 = '" + packet.getSenderKey()
 																	+ "' AND userkey2 = '" + otherKey + "';");
 			result = statement.executeQuery();
 			
@@ -330,15 +376,18 @@ public class GameServer extends Thread {
 			}
 
 			// add friend set to database
-			PreparedStatement add = database.prepareStatement("INSERT INTO friends VALUES ('" + packet.getUserKey() 
+			PreparedStatement add = database.prepareStatement("INSERT INTO friends VALUES ('" + packet.getSenderKey() 
 															+ "', '" + otherKey + "' , null);");
 			add.executeUpdate();
 			
 			System.out.println("FRIEND CONNECTION CREATED");
 			// refresh players by sending a 04 packet
-			Packet04GetPlayers temp = new Packet04GetPlayers(packet.getUserKey());
+			Packet04GetPlayers temp = new Packet04GetPlayers(packet.getSenderKey());
 			temp.setUuidKey(packet.getUuidKey());
 			getPlayers(temp.getData(), address, port);
+			
+			updateSender(packet);
+			setSenderGameKey(packet.getSenderKey(), null);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -346,8 +395,8 @@ public class GameServer extends Thread {
 
 	/**
 	 * Attempts to create a new game
-	 * If successful returns a 06 packet with new game key
-	 * Also sends notification to opponent if online via 07 packet
+	 * If successful returns a 8 packet with new game key
+	 * Also sends notification to opponent if online via 8 packet
 	 * @param data
 	 * @param address
 	 * @param port
@@ -355,6 +404,8 @@ public class GameServer extends Thread {
 	private void createGame(byte[] data, InetAddress address, int port) {
 		try {
 			Packet06CreateGame packet = new Packet06CreateGame(data);
+			if (!packet.isValid())
+				return;
 			
 			// build game board from game type
 			String board = BoardGame.createNewBoard(packet.getGameType());
@@ -380,7 +431,7 @@ public class GameServer extends Thread {
 			String opponentKey = result.getString("user_key");
 			
 			// set player1Key and player2Key based on who goes first
-			String player1Key = packet.getUserKey();
+			String player1Key = packet.getSenderKey();
 			String player2Key = opponentKey;
 			
 			if (!packet.getCreatorGoesFirst()) {
@@ -408,7 +459,7 @@ public class GameServer extends Thread {
 			System.out.println("GAME CREATED");
 			
 			// Send new game data to creator via 8 packet so opens game screen
-			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), gameKey, packet.getGameType());
+			Packet08GetBoard temp = new Packet08GetBoard(packet.getSenderKey(), packet.getUsername(), gameKey, packet.getGameType());
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			getBoard(temp.getData(), address, port);
 			
@@ -416,6 +467,8 @@ public class GameServer extends Thread {
 			for (Player p : onlinePlayers)
 				if (p.getUser_key().equals(opponentKey))
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
+			
+			updateSender(packet);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -430,10 +483,12 @@ public class GameServer extends Thread {
 	private void getGames(byte[] data, InetAddress address, int port) {
 		try {
 			Packet07GetGames packet = new Packet07GetGames(data);
+			if (!packet.isValid())
+				return;
 			
 			// find games list
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
-																+ " WHERE games.player1_key = '" + packet.getUserKey() + "' ORDER BY last_action_date DESC;");
+																+ " WHERE games.player1_key = '" + packet.getSenderKey() + "' ORDER BY games.last_action_date DESC;");
 			ResultSet result = statement.executeQuery();
 			
 			// get game info and put into ArrayList
@@ -454,7 +509,7 @@ public class GameServer extends Thread {
 			}
 			
 			statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
-												+ " WHERE games.player2_key = '" + packet.getUserKey() + "' ORDER BY last_action_date DESC;");
+												+ " WHERE games.player2_key = '" + packet.getSenderKey() + "' ORDER BY games.last_action_date DESC;");
 			result = statement.executeQuery();
 
 			// get game info and put into ArrayList
@@ -483,17 +538,26 @@ public class GameServer extends Thread {
 					lastMoved.add(result.getTimestamp("last_action_date"));
 				}
 			}
-			
+
 			// convert ArrayList into array
-			String[] gameInformation = new String[gameInfo.size()];
-			for (int i = 0; i < gameInformation.length; i++)
-				gameInformation[i] = gameInfo.get(i);
-			
-			// send games to client
-			Packet07GetGames returnPacket = new Packet07GetGames(packet.getUuidKey(), packet.getUserKey(), gameInformation, true);
-			returnPacket.writeData(this, address, port);
-			
+			int packetsToSend = gameInfo.size() / 10;
+			if (packetsToSend % 10 != 0 || packetsToSend == 0)
+				packetsToSend++;
+			int packetsSent = 0;
+			String[] gameInformation = new String[10];
+			for (int i = 0; i < gameInfo.size(); i++) {
+				gameInformation[i%10] = gameInfo.get(i);
+				if ((i % 10 == 0 && i != 0) || i == gameInfo.size()-1) {
+					// send games to client, only send 10 games at a time
+					Packet07GetGames returnPacket = new Packet07GetGames(packet.getUuidKey(), packetsToSend, ++packetsSent, gameInformation, true);
+					returnPacket.writeData(this, address, port);
+					gameInformation = new String[10];
+				}
+			}
 			System.out.println("ACTIVE GAMES SENT");
+			
+			updateSender(packet);
+			setSenderGameKey(packet.getSenderKey(), null);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -508,6 +572,8 @@ public class GameServer extends Thread {
 	private void getBoard(byte[] data, InetAddress address, int port) {
 		try {
 			Packet08GetBoard packet = new Packet08GetBoard(data);
+			if (!packet.isValid())
+				return;
 			
 			// find String name for gameType so tables can be joined
 			String type = getTableName(packet.getGameType());
@@ -543,8 +609,9 @@ public class GameServer extends Thread {
 			// get player usernames in proper order
 			String player1 = null;
 			String player2 = null;
+			boolean opponentOnGame = false;
 			
-			if (packet.getUserKey().equals(result.getString("player1_key"))) {
+			if (packet.getSenderKey().equals(result.getString("player1_key"))) {
 				player1 = Security.encrypt(packet.getUsername());
 				
 				// get opponent's username
@@ -553,6 +620,7 @@ public class GameServer extends Thread {
 				ResultSet opponentUser = findUsername.executeQuery();
 				opponentUser.next();
 				player2 = opponentUser.getString("username");
+				opponentOnGame = userOnGame(player2, packet.getGameKey());
 			} else  {
 				player2 = Security.encrypt(packet.getUsername());
 				
@@ -562,6 +630,7 @@ public class GameServer extends Thread {
 				ResultSet opponentUser = findUsername.executeQuery();
 				opponentUser.next();
 				player1 = opponentUser.getString("username");
+				opponentOnGame = userOnGame(player1, packet.getGameKey());
 			}
 			
 			// retrieve specific game data
@@ -575,11 +644,14 @@ public class GameServer extends Thread {
 			}
 			
 			// send requested game to client
-			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), gameType, 
-																 player1, player2, moves, penultMove, lastMove, winner, board, extraData, true);
+			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), gameType, 
+																 player1, player2, moves, penultMove, lastMove, winner, opponentOnGame, board, extraData, true);
 			returnPacket.writeData(this, address, port);
 			
 			System.out.println("GAME SENT");
+			
+			setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
+			updateSender(packet);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -594,6 +666,8 @@ public class GameServer extends Thread {
 	private void sendMove(byte[] data, InetAddress address, int port) {
 		try {
 			Packet09SendMove packet = new Packet09SendMove(data);
+			if (!packet.isValid())
+				return;
 			
 			// find String name for gameType so tables can be joined
 			String type = getTableName(packet.getGameType());
@@ -631,10 +705,14 @@ public class GameServer extends Thread {
 			boolean resigned = false;
 			
 			String playerTurnKey;
-			if (moves % 2 == 0)
+			String opponentKey;
+			if (moves % 2 == 0) {
 				playerTurnKey = player1Key;
-			else
+				opponentKey = player2Key;
+			} else {
 				playerTurnKey = player2Key;
+				opponentKey = player1Key;
+			}
 			
 			// if the game is already over, exit and send error
 			if (winner != 0) {
@@ -648,9 +726,9 @@ public class GameServer extends Thread {
 				if (moves < 2) {
 					// TODO delete game from database
 				}
-				if (packet.getUserKey().equals(player1Key))
+				if (packet.getSenderKey().equals(player1Key))
 					winner = 4;
-				else if (packet.getUserKey().equals(player2Key))
+				else if (packet.getSenderKey().equals(player2Key))
 					winner = 3;
 				else {
 					// TODO send error
@@ -661,7 +739,7 @@ public class GameServer extends Thread {
 			}
 			
 			// if it is not the sending player's turn, exit and send error
-			if (!resigned && !packet.getUserKey().equals(playerTurnKey)) {
+			if (!resigned && !packet.getSenderKey().equals(playerTurnKey)) {
 				// TODO send error package
 				System.out.println("NOT SENDING PLAYER'S TURN");
 				return;
@@ -736,20 +814,25 @@ public class GameServer extends Thread {
 			
 			System.out.println("GAME UPDATED");
 			
+			boolean opponentOnGame = keyOnGame(opponentKey, packet.getGameKey());
+			
 			// send basic update game info to player via 09 packet
-			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(),
-												lastMove, packet.getMoveTo(), winner, newBoard, extraInfo, true);
+			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getGameKey(), lastMove,
+																packet.getMoveTo(), winner, opponentOnGame, newBoard, extraInfo, true);
 			returnPacket.writeData(this, address, port);
 			
 			/*
 			 *  send a 08 packet to opponent to notify or update their client
 			 */
-			Packet08GetBoard temp = new Packet08GetBoard(packet.getUserKey(), packet.getUsername(), packet.getGameKey(), gameType);
+			Packet08GetBoard temp = new Packet08GetBoard(packet.getSenderKey(), packet.getUsername(), packet.getGameKey(), gameType);
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			
 			for (Player p : onlinePlayers)
 				if (p.getUser_key().equals(moves % 2 == 0 ? player1Key : player2Key))
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
+			
+			updateSender(packet);
+			setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -764,17 +847,25 @@ public class GameServer extends Thread {
 	 */
 	private void sendChat(byte[] data, InetAddress address, int port) {
 		Packet10SendChat packet = new Packet10SendChat(data);
+		if (!packet.isValid())
+			return;
+		
+		boolean opponentOnGame = userOnGame(Security.encrypt(packet.getOpponentUsername()), packet.getGameKey());
 		
 		// create return packet
-		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), packet.getUserKey(), packet.getGameKey(), packet.getText(), true);
+		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), opponentOnGame, packet.getText(), true);
 		
 		// send chat back to sender
 		returnPacket.writeData(this, address, port);
 		
-		// send chat to opponent
+		// send chat to opponent (the opponent must be on the game to send the chat)
+		returnPacket.setOpponentOnGame(true);
 		for (Player p : onlinePlayers)
 			if (p.getUsername().equals(Security.encrypt(packet.getOpponentUsername())))
 				returnPacket.writeData(this, p.getIpAddress(), p.getPort());
+		
+		updateSender(packet);
+		setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 	}
 
 	/**
@@ -784,10 +875,83 @@ public class GameServer extends Thread {
 	 */
 	private String getTableName(int gameType) {
 		switch (gameType) {
-		case 0:
-		case 1:
-		case 2:						return "go";
-		default:					return null;
+			case 0:
+			case 1:
+			case 2:						return "go";
+			default:					return null;
+		}
 	}
+
+	/**
+	 * Updates the last_action_date of the sender
+	 * @param packet
+	 */
+	private void updateSender(Packet packet) {
+		updateSender(packet.getSenderKey());
+	}
+
+	/**
+	 * Updates the last_action_date of the sender
+	 * @param packet
+	 */
+	private void updateSender(String senderKey) {
+		try {
+			// update sender
+			PreparedStatement updateSender = database.prepareStatement("UPDATE users SET last_action_date = NOW()"
+					+ " WHERE user_key = '" + senderKey + "';");
+			updateSender.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Sets the sender's current game to gameKey
+	 * @param senderKey
+	 * @param gameKey
+	 */
+	private void setSenderGameKey(String senderKey, String gameKey) {
+		for (Player p : onlinePlayers)
+			if (p.getUser_key().equals(senderKey))
+				p.setGame_key(gameKey);
+	}
+
+	/**
+	 * Returns true if the given username is on the given game
+	 * @param username
+	 * @param gameKey
+	 * @return
+	 */
+	private boolean userOnGame(String username, String gameKey) {
+		for (Player p : onlinePlayers)
+			if (p.getUsername().equals(username) && gameKey.equals(p.getGame_key()))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Returns true if the given user key is on the given game
+	 * @param userKey
+	 * @param gameKey
+	 * @return
+	 */
+	private boolean keyOnGame(String userKey, String gameKey) {
+		for (Player p : onlinePlayers)
+			if (p.getUser_key().equals(userKey) && p.getGame_key().equals(gameKey))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Returns true if the given username is logged into the server
+	 * @param string
+	 * @return
+	 */
+	private boolean userOnline(String username) {
+		for (Player p : onlinePlayers)
+			if (p.getUsername().equals(username))
+				return true;
+		return false;
 	}
 }

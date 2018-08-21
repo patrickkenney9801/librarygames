@@ -168,6 +168,7 @@ public class GameScreen extends Screen {
 		gameInfo.add(player1User);
 		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
 		player1User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		player1User.setForeground(Color.GREEN);
 		
 		player2Icon = new JLabel();
 		gameInfo.add(player2Icon);
@@ -177,6 +178,7 @@ public class GameScreen extends Screen {
 		gameInfo.add(player2User);
 		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
 		player2User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		player2User.setForeground(Color.GREEN);
 		
 		
 		
@@ -450,6 +452,8 @@ public class GameScreen extends Screen {
 		pane.repaint();
 		gameOverInfo.repaint();
 		gameInfo.repaint();
+		
+		updateOpponentOnGame();
 	}
 	
 	/**
@@ -473,8 +477,20 @@ public class GameScreen extends Screen {
 		
 		chatBox.repaint();
 		chatInterface.repaint();
+		
+		updateOpponentOnGame();
 	}
 	
+	/**
+	 * Sets opponent player's name green if they are online, red if not
+	 */
+	private void updateOpponentOnGame() {
+		if (Game.getPlayer().getUsername().equals(player1User.getText()))
+			player2User.setForeground(Game.getBoardGame().isOpponentOnGame() ? Color.GREEN : Color.RED);
+		else
+			player1User.setForeground(Game.getBoardGame().isOpponentOnGame() ? Color.GREEN : Color.RED);
+	}
+
 	/**
 	 * Used in Go games, this will show a shadow of where a piece would be placed on click
 	 * @param piece

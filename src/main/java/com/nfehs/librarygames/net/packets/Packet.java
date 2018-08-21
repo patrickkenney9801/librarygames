@@ -35,10 +35,20 @@ public abstract class Packet {
 	
 	private byte packetId;
 	private String uuidKey;
+	private String senderKey;
+	private boolean isValid;
 	
 	public Packet(int packetId) {
 		setPacketId((byte) packetId); 
 		setUuidKey("" + UUID.randomUUID());
+		setValid(true);
+	}
+	
+	public Packet(int packetId, String senderKey) {
+		setPacketId((byte) packetId); 
+		setUuidKey("" + UUID.randomUUID());
+		setSenderKey(senderKey);
+		setValid(true);
 	}
 	
 	/**
@@ -124,5 +134,33 @@ public abstract class Packet {
 	 */
 	public void setUuidKey(String uuidKey) {
 		this.uuidKey = uuidKey;
+	}
+
+	/**
+	 * @return the senderKey
+	 */
+	public String getSenderKey() {
+		return senderKey;
+	}
+
+	/**
+	 * @param senderKey the senderKey to set
+	 */
+	public void setSenderKey(String senderKey) {
+		this.senderKey = senderKey;
+	}
+
+	/**
+	 * @return the isValid
+	 */
+	public boolean isValid() {
+		return isValid;
+	}
+
+	/**
+	 * @param isValid the isValid to set
+	 */
+	public void setValid(boolean isValid) {
+		this.isValid = isValid;
 	}
 }

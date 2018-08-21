@@ -24,8 +24,8 @@ public class Go extends BoardGame {
 	private int player2Score;
 	
 	public Go(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int winner, String board, String extraData) {
-		super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, board);
+			int penultMove, int lastMove, int winner, boolean opponentOnGame, String board, String extraData) {
+		super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, opponentOnGame, board);
 		String[] goData = extraData.split(",");
 		
 		try {
@@ -248,8 +248,8 @@ public class Go extends BoardGame {
 	 * Returns false if not current game
 	 * @Override
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, String extraData) {
-		if (!super.update(gameKey, board, penultMove, lastMove, winner, extraData))
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean opponentOnGame, String extraData) {
+		if (!super.update(gameKey, board, penultMove, lastMove, winner, opponentOnGame, extraData))
 			return false;
 		String[] goData = extraData.split(",");
 		
