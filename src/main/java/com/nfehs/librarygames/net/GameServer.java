@@ -286,7 +286,8 @@ public class GameServer extends Thread {
 			// get other usernames and put into array
 			ArrayList<String> othersList = new ArrayList<String>();
 			while (result.next())
-				if (!friendsList.contains(Security.decrypt(result.getString("username"))))
+				if (!friendsList.contains(Security.decrypt(result.getString("username")) + "~true")
+						&& !friendsList.contains(Security.decrypt(result.getString("username")) + "~false"))
 					othersList.add(Security.decrypt(result.getString("username")) + "~" + (userOnline(result.getString("username")) ? true : false));
 			
 			// build Strings for friends and other users
@@ -300,7 +301,7 @@ public class GameServer extends Thread {
 			
 			for (; usernamesAdded < friendsList.size(); usernamesAdded++) {
 				friends += friendsList.get(usernamesAdded);
-				if (usernamesAdded != friendsList.size()-1 && usernamesAdded % 20 != 0)
+				if (usernamesAdded != friendsList.size()-1 && (usernamesAdded % 20 != 0 || usernamesAdded == 0))
 					friends += ",";
 				// if 20 usernames reached, send packet and clear friends
 				if (usernamesAdded != 0 && usernamesAdded % 20 == 0) {
@@ -314,7 +315,7 @@ public class GameServer extends Thread {
 			for (int i = 0; i < othersList.size(); i++) {
 				usernamesAdded++;
 				others += othersList.get(i);
-				if (i != othersList.size()-1 && usernamesAdded % 20 != 0)
+				if (i != othersList.size()-1 && (usernamesAdded % 20 != 0 || usernamesAdded == 0))
 					others += ",";
 				// if 20 usernames reached, send packet, clear friends and other
 				if (usernamesAdded != 0 && usernamesAdded % 20 == 0) {
@@ -1021,6 +1022,8 @@ public class GameServer extends Thread {
 			deleteGame = database.prepareStatement("DELETE FROM " + getTableName(gameType)
 					+ " WHERE game_key = '" + gameKey + "';");
 			deleteGame.executeUpdate();
+			
+			System.out.println("GAME DELETED");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
