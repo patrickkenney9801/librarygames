@@ -34,8 +34,11 @@ public class GameClient extends Thread {
 	private int packetsToReceiveGetGames;
 	private String[][] games;
 	
+	private int packetsToReceiveGetSpectates;
+	private String[][] spectates;
+	
 	public GameClient(byte[] ipAddress) {
-		setLastPacketKeysSent(new String[12]);
+		setLastPacketKeysSent(new String[13]);
 		try {
 			this.socket = new DatagramSocket();
 			this.ipAddress = InetAddress.getByAddress(ipAddress);
@@ -95,6 +98,8 @@ public class GameClient extends Thread {
 					case SENDCHAT:				updateChat(packet.getData());
 												break;
 					case ONGAME:				updateOnGame(packet.getData());
+												break;
+					case GETSPECTATES:			getSpectates(packet.getData());
 					default:					break;
 				}
 			}
@@ -113,8 +118,6 @@ public class GameClient extends Thread {
 			e.printStackTrace();
 		}
 	}
-
-	// TODO use uuid keys for packages to keep things organized
 	
 	/**
 	 * Handles a user successfully logging to server
@@ -285,14 +288,14 @@ public class GameClient extends Thread {
 			
 			// if so, set GameBoard and open GameScreen
 			Game.setBoardGame(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
-					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isOpponentOnGame(), packet.getBoard(), packet.getExtraData()));
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getBoard(), packet.getExtraData()));
 			
 			// open GameScreen
 			Game.openGameScreen();
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
 		else if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
-				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isOpponentOnGame(), packet.getExtraData()))
+				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData()))
 			Game.updateGameBoard();
 		// if none of the above, notify the client
 		else {
@@ -301,7 +304,7 @@ public class GameClient extends Thread {
 				Game.getActiveGames();
 			// notify the user
 			Game.notifyUser(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
-					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), true, packet.getBoard(), packet.getExtraData()));
+					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), true, true, packet.getBoard(), packet.getExtraData()));
 		}
 	}
 
@@ -324,7 +327,7 @@ public class GameClient extends Thread {
 		// update current board game, returns false if wrong game
 		// if successful update, update the game board
 		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(),
-										packet.getWinner(), packet.isOpponentOnGame(), packet.getExtraData()))
+										packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData()))
 			Game.updateGameBoard();
 	}
 
@@ -343,7 +346,8 @@ public class GameClient extends Thread {
 		
 		// check that client is on correct game, if so update the chat
 		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey())) {
-			Game.getBoardGame().setOpponentOnGame(packet.isOpponentOnGame());
+			Game.getBoardGame().setPlayer1OnGame(packet.isPlayer1OnGame());
+			Game.getBoardGame().setPlayer2OnGame(packet.isPlayer2OnGame());
 			Game.updateGameChat(packet.getText(), packet.getSenderKey());
 		}
 	}
@@ -363,11 +367,58 @@ public class GameClient extends Thread {
 		
 		// check that client is on correct game, if so update the opponent is on game
 		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey())) {
-			if (Game.getBoardGame().getPlayer1().equals(Security.decrypt(packet.getPlayer()))
-					|| Game.getBoardGame().getPlayer2().equals(Security.decrypt(packet.getPlayer())))
-				Game.getBoardGame().setOpponentOnGame(packet.isOnGame());
+			if (Game.getBoardGame().getPlayer1().equals(Security.decrypt(packet.getPlayer())))
+				Game.getBoardGame().setPlayer1OnGame(packet.isOnGame());
+			else if (Game.getBoardGame().getPlayer2().equals(Security.decrypt(packet.getPlayer())))
+				Game.getBoardGame().setPlayer2OnGame(packet.isOnGame());
 		}
-		Game.updateOpponentOnGame();
+		Game.updatePlayersOnGame();
+	}
+
+	/**
+	 * Handles a successful request for spectator games
+	 * @param data
+	 */
+	private void getSpectates(byte[] data) {
+		// verify that user is still on the spectator games screen, if not exit
+		if (Game.gameState != Game.SPECTATOR_GAMES)
+			return;
+		
+		Packet12GetSpectates packet = new Packet12GetSpectates(data, true);
+		if (!packet.isValid())
+			return;
+		// verify that this packet is responding to the last one sent
+		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[12]))
+			return;
+		
+		if (getSpectates() == null || getSpectates().length != packet.getPacketsSent()) {
+			setPacketsToReceiveGetSpectates(packet.getPacketsSent());
+			setSpectates(new String[packet.getPacketsSent()][]);
+		}
+		
+		// set spectates lists in class in right row
+		getSpectates()[packet.getPacketNumber()-1] = packet.getGameInfo();
+		
+		// when all packets have been received, 
+		if (listIsFull(getSpectates())) {
+			ArrayList<String> spectates = new ArrayList<String>();
+			
+			for (String[] packetData : getGames())
+				for (String info : packetData) {
+					if (info != null) {
+						String gameData = BoardGame.getGameInfo(info.split(","));
+						spectates.add(gameData);
+					}
+				}
+			
+			// set board game Strings in Player
+			Game.getPlayer().setSpectatorBoardGames(spectates);
+			
+			// refresh games list on SpectatorGamesScreen
+			Game.updateSpectatorGamesList();
+			
+			setSpectates(null);
+		}
 	}
 
 	/**
@@ -446,5 +497,21 @@ public class GameClient extends Thread {
 
 	public void setGames(String[][] games) {
 		this.games = games;
+	}
+
+	public int getPacketsToReceiveGetSpectates() {
+		return packetsToReceiveGetSpectates;
+	}
+
+	public void setPacketsToReceiveGetSpectates(int packetsToReceiveGetSpectates) {
+		this.packetsToReceiveGetSpectates = packetsToReceiveGetSpectates;
+	}
+
+	public String[][] getSpectates() {
+		return spectates;
+	}
+
+	public void setSpectates(String[][] spectates) {
+		this.spectates = spectates;
 	}
 }

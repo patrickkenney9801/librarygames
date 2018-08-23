@@ -31,6 +31,7 @@ public class CreateGameScreen extends Screen {
 	private JRadioButton opponentGoesFirst;
 	private JButton createGame;
 	private JButton back;
+	private JButton refresh;
 	
 	private JLabel chooseOpponent;
 	private JLabel chooseFriend;
@@ -101,6 +102,17 @@ public class CreateGameScreen extends Screen {
 		friends = new JRadioButton[0];
 		randomPlayers = new JRadioButton[0];
 		addFriends = new JButton[0];
+
+		refresh = new JButton("REFRESH");
+		Game.mainWindow.add(refresh);
+		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 - 40, 150, 30);
+		refresh.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// goes back to active games list
+				System.out.println("Refresh clicked from create game");
+				Game.getOtherPlayers();
+			}
+		});
 		
 		createGame = new JButton("CREATE GAME");
 		Game.mainWindow.add(createGame);
@@ -263,6 +275,7 @@ public class CreateGameScreen extends Screen {
 		Game.mainWindow.remove(chooseFriend);
 		Game.mainWindow.remove(chooseRandomPlayer);
 		Game.mainWindow.remove(back);
+		Game.mainWindow.remove(refresh);
 		
 		gameChoices = null;
 		userGoesFirst = null;
@@ -273,6 +286,7 @@ public class CreateGameScreen extends Screen {
 		chooseFriend = null;
 		chooseRandomPlayer = null;
 		back = null;
+		refresh = null;
 		
 		removeAndNullPlayers();
 		players = null;

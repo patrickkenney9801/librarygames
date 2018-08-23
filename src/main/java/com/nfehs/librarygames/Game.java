@@ -37,6 +37,7 @@ public class Game {
 	public static final int ACTIVE_GAMES = 2;
 	public static final int CREATE_GAME = 3;
 	public static final int PLAYING_GAME = 4;
+	public static final int SPECTATOR_GAMES = 5;
 	public static final int OVER = 10;
 	
 	public static int gameState = Game.LOGIN;
@@ -210,13 +211,13 @@ public class Game {
 	
 	/**
 	 * This method attempts to send a line of text to their opponent
+	 * @param sendToSpectators
 	 * @param text
 	 */
-	public static void sendChat(String text) {
+	public static void sendChat(boolean sendToSpectators, String text) {
 		// sends chat packet to server
 		Packet packet = new Packet10SendChat(getPlayer().getUser_key(), getBoardGame().getGameKey(),
-				getBoardGame().getPlayer1().equals(getPlayer().getUsername()) ? getBoardGame().getPlayer2() : getBoardGame().getPlayer1(),
-				getPlayer().getUsername() + ": " + text);
+				getBoardGame().getPlayer1(), getBoardGame().getPlayer2(), sendToSpectators, getPlayer().getUsername() + ": " + text);
 		packet.writeData(client);
 		client.getLastPacketKeysSent()[10] = packet.getUuidKey();
 	}
@@ -229,6 +230,16 @@ public class Game {
 		Packet packet = new Packet11OnGame(getPlayer().getUser_key(), getBoardGame().getGameKey());
 		packet.writeData(client);
 		client.getLastPacketKeysSent()[11] = packet.getUuidKey();
+	}
+	
+	/**
+	 * This method attempts to retrieve games for SpectatorGamesScreen
+	 */
+	public static void getSpectatorGames() {
+		// sends get games packet to server
+		Packet packet = new Packet12GetSpectates(getPlayer().getUser_key());
+		packet.writeData(client);
+		client.getLastPacketKeysSent()[12] = packet.getUuidKey();
 	}
 
 	/**
@@ -287,6 +298,16 @@ public class Game {
 	}
 	
 	/**
+	 * This method opens up the spectator games screen for user
+	 */
+	public static void openSpectatorGamesScreen() {
+		exitCurrentScreen();
+		screen = new SpectatorGamesScreen();
+		gameState = SPECTATOR_GAMES;
+		getSpectatorGames();
+	}
+	
+	/**
 	 * This method refreshes the current screen, used when screen resized
 	 */
 	public static void refresh() {
@@ -304,6 +325,8 @@ public class Game {
 			case CREATE_GAME:			openCreateGameScreen();
 										break;
 			case PLAYING_GAME:			openGameScreen();
+										break;
+			case SPECTATOR_GAMES:		openSpectatorGamesScreen();
 										break;
 		}
 	}
@@ -357,12 +380,23 @@ public class Game {
 	/**
 	 * This method updates the color of the opponent on the GameScreen by whether they are on the game or not
 	 */
-	public static void updateOpponentOnGame() {
+	public static void updatePlayersOnGame() {
 		if (!(screen instanceof GameScreen)) {
-			System.out.println("GAMESTATE ERROR update game chat called on wrong screen");
+			System.out.println("GAMESTATE ERROR update opponent on game called on wrong screen");
 			return;
 		}
-		((GameScreen) screen).updateOpponentOnGame();
+		((GameScreen) screen).updatePlayersOnGame();
+	}
+	
+	/**
+	 * This method updates the spectator games list on the SpectatorGamesScreen
+	 */
+	public static void updateSpectatorGamesList() {
+		if (!(screen instanceof SpectatorGamesScreen)) {
+			System.out.println("GAMESTATE ERROR update spectator games list called on wrong screen");
+			return;
+		}
+		((SpectatorGamesScreen) screen).loadSpectatorGames();
 	}
 	
 	/**

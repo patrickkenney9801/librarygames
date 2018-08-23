@@ -22,6 +22,7 @@ public class Player {
 	private String[] opponentTurnBoardGames;
 	private String[] friends;
 	private String[] otherPlayers;
+	private String[] spectatorBoardGames;
 	
 	/**
 	 * For use by client
@@ -183,5 +184,16 @@ public class Player {
 	 */
 	public void setGame_key(String game_key) {
 		this.game_key = game_key;
+	}
+
+	public String[] getSpectatorBoardGames() {
+		return spectatorBoardGames;
+	}
+
+	public void setSpectatorBoardGames(ArrayList<String> spectatorBoardGames) {
+		String[] specBoardGames = new String[spectatorBoardGames.size()];
+		for (int i = 0; i < specBoardGames.length; i++)
+			specBoardGames[i] = spectatorBoardGames.get(i);
+		this.spectatorBoardGames = specBoardGames;
 	}
 }

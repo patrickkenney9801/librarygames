@@ -20,7 +20,8 @@ public class Packet09SendMove extends Packet {
 	private int lastMove;
 	private String board;
 	private int winner;
-	private boolean opponentOnGame;
+	private boolean player1OnGame;
+	private boolean player2OnGame;
 	private String extraData;
 
 	/**
@@ -70,20 +71,22 @@ public class Packet09SendMove extends Packet {
 	 * @param penultMove
 	 * @param lastMove
 	 * @param winner
-	 * @param opponentOnGame
+	 * @param player1OnGame
+	 * @param player2OnGame
 	 * @param board
 	 * @param extraData
 	 * @param serverUse boolean that serves no purpose other than to distinguish constructors
 	 */
 	public Packet09SendMove(String packetKey, String gameKey, int penultMove, int lastMove, int winner, 
-							boolean opponentOnGame, String board, String extraData, boolean serverUse) {
+							boolean player1OnGame, boolean player2OnGame, String board, String extraData, boolean serverUse) {
 		super(9);
 		setUuidKey(packetKey);
 		setGameKey(gameKey);
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setWinner(winner);
-		setOpponentOnGame(opponentOnGame);
+		setPlayer1OnGame(player1OnGame);
+		setPlayer2OnGame(player2OnGame);
 		setBoard(board);
 		setExtraData(extraData);
 	}
@@ -100,12 +103,13 @@ public class Packet09SendMove extends Packet {
 			String[] userdata = readData(data).split(":");
 			setUuidKey(userdata[0]);
 			setGameKey(userdata[1]);
-			setBoard(userdata[6]);
-			setExtraData(userdata[7]);
+			setBoard(userdata[7]);
+			setExtraData(userdata[8]);
 			setPenultMove(Integer.parseInt(userdata[2]));
 			setLastMove(Integer.parseInt(userdata[3]));
 			setWinner(Integer.parseInt(userdata[4]));
-			setOpponentOnGame(Boolean.parseBoolean(userdata[5]));
+			setPlayer1OnGame(Boolean.parseBoolean(userdata[5]));
+			setPlayer2OnGame(Boolean.parseBoolean(userdata[6]));
 		} catch (Exception e) {
 			e.printStackTrace();
 			setValid(false);
@@ -120,8 +124,8 @@ public class Packet09SendMove extends Packet {
 	
 	@Override
 	public byte[] getDataServer() {
-		return ("09" + getUuidKey() + ":" + getGameKey() + ":" + getPenultMove() + ":" + getLastMove()
-		 		+ ":" + getWinner() + ":" + isOpponentOnGame() + ":" + getBoard() + ":" + getExtraData()).getBytes();
+		return ("09" + getUuidKey() + ":" + getGameKey() + ":" + getPenultMove() + ":" + getLastMove() + ":" + getWinner()
+				+ ":" + isPlayer1OnGame() + ":" + isPlayer2OnGame() + ":" + getBoard() + ":" + getExtraData()).getBytes();
 	}
 
 	public String getGameKey() {
@@ -228,17 +232,19 @@ public class Packet09SendMove extends Packet {
 		this.extraData = extraData;
 	}
 
-	/**
-	 * @return the opponentOnGame
-	 */
-	public boolean isOpponentOnGame() {
-		return opponentOnGame;
+	public boolean isPlayer1OnGame() {
+		return player1OnGame;
 	}
 
-	/**
-	 * @param opponentOnGame the opponentOnGame to set
-	 */
-	public void setOpponentOnGame(boolean opponentOnGame) {
-		this.opponentOnGame = opponentOnGame;
+	public void setPlayer1OnGame(boolean player1OnGame) {
+		this.player1OnGame = player1OnGame;
+	}
+
+	public boolean isPlayer2OnGame() {
+		return player2OnGame;
+	}
+
+	public void setPlayer2OnGame(boolean player2OnGame) {
+		this.player2OnGame = player2OnGame;
 	}
 }

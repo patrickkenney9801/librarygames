@@ -87,6 +87,8 @@ public class GameFrame extends JFrame {
 		UIManager.put("TextPane.background", textBackground);
 		UIManager.put("ScrollPane.background", background);
 		UIManager.put("ScrollBar.background", textBackground);
+		UIManager.put("CheckBox.foreground", Color.WHITE);
+		UIManager.put("CheckBox.background", background);
 		
 		// load images here
 		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));

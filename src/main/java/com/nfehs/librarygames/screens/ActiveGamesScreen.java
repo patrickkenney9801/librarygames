@@ -59,7 +59,7 @@ public class ActiveGamesScreen extends Screen {
 		spectatorGames.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Spectator games clicked");
-				// TODO
+				Game.openSpectatorGamesScreen();
 			}
 		});
 		

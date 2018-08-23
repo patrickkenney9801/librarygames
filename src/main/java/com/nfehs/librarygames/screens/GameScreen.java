@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -77,6 +78,7 @@ public class GameScreen extends Screen {
 	private JPanel chatInterface;
 	private JTextPane chatBox;
 	private JTextField chat;
+	private JCheckBox allowSpectatorsInChat;
 
 	public GameScreen() {
 		super(false);
@@ -264,10 +266,22 @@ public class GameScreen extends Screen {
 			public void keyReleased(KeyEvent e) {}
 			public void keyTyped(KeyEvent e) {
 				if (e.getKeyChar() == '\n' && ((JTextField) e.getSource()).getText().length() > 0)
-					Game.sendChat(chat.getText());
+					Game.sendChat(allowSpectatorsInChat.isSelected(), chat.getText());
 			}
 		});
 		chat.requestFocus();
+		
+		allowSpectatorsInChat = new JCheckBox("Allow spectators in chat");
+		// if the user is a spectator do not include check box on screen but set it true
+		if (Game.getBoardGame().isPlayerIsSpectating())
+			allowSpectatorsInChat.setSelected(true);
+		else {
+			// if the user isn't a spectator set not allowed by default
+			allowSpectatorsInChat.setSelected(false);
+			allowSpectatorsInChat.setBounds(panelWidth * 11 / 20 - 150, getTopLeftY() + chatInterface.getHeight() + 50, 300, 50);
+			allowSpectatorsInChat.setHorizontalTextPosition(SwingConstants.CENTER);
+			Game.mainWindow.add(allowSpectatorsInChat);
+		}
 		
 		
 		
@@ -456,7 +470,7 @@ public class GameScreen extends Screen {
 		gameOverInfo.repaint();
 		gameInfo.repaint();
 		
-		updateOpponentOnGame();
+		updatePlayersOnGame();
 	}
 	
 	/**
@@ -469,29 +483,36 @@ public class GameScreen extends Screen {
 		chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 		int textStart = newText.indexOf(":") + 1;
 		
-		// if the user sent the text and make user text green, delete the users current text, otherwise set user red
+		// if the user sent the text make user text green, delete the users current text
+		// if opponent sent the text make opponent text red
+		// if a spectator sent the text, verify that user wants to receive, if so set cyan
 		if (senderKey.equals(Game.getPlayer().getUser_key())) {
 			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
 			chat.setText("");
-		} else
+			appendText(chatBox, newText.substring(textStart), Color.WHITE);
+		} else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
+				|| newText.split(":")[0].equals(Game.getBoardGame().getPlayer2())) {
 			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
-		appendText(chatBox, newText.substring(textStart), Color.WHITE);
+			appendText(chatBox, newText.substring(textStart), Color.WHITE);
+		} else if (allowSpectatorsInChat.isSelected()) {
+			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
+			appendText(chatBox, newText.substring(textStart), Color.WHITE);
+		}
+		
 		chat.requestFocus();
 		
 		chatBox.repaint();
 		chatInterface.repaint();
 		
-		updateOpponentOnGame();
+		updatePlayersOnGame();
 	}
 	
 	/**
-	 * Sets opponent player's name green if they are online, red if not
+	 * Sets players' name green if they are online, red if not
 	 */
-	public void updateOpponentOnGame() {
-		if (Game.getPlayer().getUsername().equals(player1User.getText()))
-			player2User.setForeground(Game.getBoardGame().isOpponentOnGame() ? Color.GREEN : Color.RED);
-		else
-			player1User.setForeground(Game.getBoardGame().isOpponentOnGame() ? Color.GREEN : Color.RED);
+	public void updatePlayersOnGame() {
+		player1User.setForeground(Game.getBoardGame().isPlayer1OnGame() ? Color.GREEN : Color.RED);
+		player2User.setForeground(Game.getBoardGame().isPlayer2OnGame() ? Color.GREEN : Color.RED);
 	}
 
 	/**
@@ -530,6 +551,7 @@ public class GameScreen extends Screen {
 		Game.mainWindow.remove(gameInfo);
 		Game.mainWindow.remove(capturedPieces);
 		Game.mainWindow.remove(chatInterface);
+		Game.mainWindow.remove(allowSpectatorsInChat);
 		
 		back = null;
 		title = null;
@@ -542,6 +564,7 @@ public class GameScreen extends Screen {
 		gameInfo = null;
 		capturedPieces = null;
 		chatInterface = null;
+		allowSpectatorsInChat = null;
 		
 		Game.mainWindow.repaint();
 	}

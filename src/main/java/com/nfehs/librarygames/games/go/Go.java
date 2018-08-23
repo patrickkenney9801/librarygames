@@ -23,9 +23,24 @@ public class Go extends BoardGame {
 	private int player1Score;
 	private int player2Score;
 	
+	/**
+	 * Constructor for a game of Go
+	 * @param gameKey
+	 * @param gameType
+	 * @param player1
+	 * @param player2
+	 * @param moves
+	 * @param penultMove
+	 * @param lastMove
+	 * @param winner
+	 * @param player1OnGame
+	 * @param player2OnGame
+	 * @param board
+	 * @param extraData
+	 */
 	public Go(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int winner, boolean opponentOnGame, String board, String extraData) {
-		super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, opponentOnGame, board);
+			int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board, String extraData) {
+		super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board);
 		String[] goData = extraData.split(",");
 		
 		try {
@@ -248,8 +263,8 @@ public class Go extends BoardGame {
 	 * Returns false if not current game
 	 * @Override
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean opponentOnGame, String extraData) {
-		if (!super.update(gameKey, board, penultMove, lastMove, winner, opponentOnGame, extraData))
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
+		if (!super.update(gameKey, board, penultMove, lastMove, winner, player1OnGame, player2OnGame, extraData))
 			return false;
 		String[] goData = extraData.split(",");
 		
@@ -310,6 +325,8 @@ public class Go extends BoardGame {
 			return;
 		if (!isPlayerTurn())
 			return;
+		if (isPlayerIsSpectating())
+			return;
 		if (!validMove(coordinates[0], coordinates[1]))
 			return;
 		if (Game.screen instanceof GameScreen)
@@ -322,6 +339,8 @@ public class Go extends BoardGame {
 			return;
 		if (!isPlayerTurn())
 			return;
+		if (isPlayerIsSpectating())
+			return;
 		if (Game.screen instanceof GameScreen)
 			((GameScreen) Game.screen).removePieceShadow();
 	}
@@ -331,6 +350,8 @@ public class Go extends BoardGame {
 		if (getWinner() != null)
 			return;
 		if (!isPlayerTurn())
+			return;
+		if (isPlayerIsSpectating())
 			return;
 		if (!validMove(coordinates[0], coordinates[1]))
 			return;

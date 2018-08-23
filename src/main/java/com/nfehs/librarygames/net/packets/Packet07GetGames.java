@@ -18,7 +18,6 @@ public class Packet07GetGames extends Packet {
 	/**
 	 * Used by client to send data to server
 	 * @param senderKey
-	 * @param userkey
 	 * @param username
 	 */
 	public Packet07GetGames(String senderKey, String username) {

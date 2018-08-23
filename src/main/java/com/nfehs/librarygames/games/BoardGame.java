@@ -36,7 +36,6 @@ public abstract class BoardGame {
 	private String gameKey;
 	private boolean isPlayer1;
 	private String winner;
-	private boolean opponentOnGame;
 	private String scoreInfo;
 	
 	// For use only when on GameScreen
@@ -47,6 +46,9 @@ public abstract class BoardGame {
 	private int lastMove;
 	private int moves;
 	private boolean isPlayer1Turn;
+	private boolean player1OnGame;
+	private boolean player2OnGame;
+	private boolean playerIsSpectating;
 	
 	/**
 	 * Sets basic board game information
@@ -56,11 +58,12 @@ public abstract class BoardGame {
 	 * @param player2
 	 * @param lastMove
 	 * @param winner
-	 * @param opponentOnGame
+	 * @param player1OnGame
+	 * @param player2OnGame
 	 * @param board
 	 */
 	public BoardGame(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int winner, boolean opponentOnGame, String board) {
+			int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board) {
 		setGameKey(gameKey);
 		setGameType((byte) gameType);
 		setGameName(lookupGameName(getGameType()));
@@ -70,7 +73,8 @@ public abstract class BoardGame {
 		setPenultMove(penultMove);
 		setLastMove(lastMove);
 		setMoves(moves);
-		setOpponentOnGame(opponentOnGame);
+		setPlayer1OnGame(player1OnGame);
+		setPlayer2OnGame(player2OnGame);
 		setBoard(board);
 		setTiles();
 		setPieces();
@@ -78,10 +82,13 @@ public abstract class BoardGame {
 		// if the game has a winner, set it to the winner's username, check if opponent resigned
 		updateWinner(winner);
 		
+		// check if user is spectating
+		setPlayerIsSpectating(!getPlayer1().equals(Game.getPlayer().getUsername()) && !getPlayer2().equals(Game.getPlayer().getUsername()));
+		
 		// determine whether it is the logged players turn or not
 		setPlayer1Turn(moves % 2 == 0);
 		setPlayerTurn(false);
-		if ((getPlayer1().equals(Game.getPlayer().getUsername()) && isPlayer1Turn()) 
+		if (!isPlayerIsSpectating() && (getPlayer1().equals(Game.getPlayer().getUsername()) && isPlayer1Turn()) 
 				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !isPlayer1Turn()))
 			setPlayerTurn(true);
 		setPlayer1((isPlayer1Turn() && isPlayerTurn()) || (!isPlayer1Turn() && !isPlayerTurn()));
@@ -97,17 +104,19 @@ public abstract class BoardGame {
 	 * @param penultMove
 	 * @param lastMove
 	 * @param winner
+	 * @param player1OnGame
+	 * @param player2OnGame
 	 * @param board
 	 * @param extraData
 	 * @return
 	 */
 	public static BoardGame createGame(String gameKey, int gameType, String player1, String player2, int moves,
-			int penultMove, int lastMove, int winner, boolean opponentOnGame, String board, String extraData) {
+			int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board, String extraData) {
 		// determine which game to make, then make it
 		switch (gameType) {
 			case 0:
 			case 1:
-			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, opponentOnGame, board, extraData);
+			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData);
 			default:					// handle wrong game type
 										System.out.println("ERROR WRONG GAME TYPE");
 										return null;
@@ -121,10 +130,12 @@ public abstract class BoardGame {
 	 * @param penultMove
 	 * @param lastMove
 	 * @param winner
+	 * @param player1OnGame
+	 * @param player2OnGame
 	 * @param extraData
 	 * @return false if not current game
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean opponentOnGame, String extraData) {
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
 		if (!getGameKey().equals(gameKey))
 			return false;
 		setPenultMove(penultMove);
@@ -136,7 +147,8 @@ public abstract class BoardGame {
 		updateWinner(winner);
 		if (winner == 0)
 			setMoves(getMoves() + 1);
-		setOpponentOnGame(opponentOnGame);
+		setPlayer1OnGame(player1OnGame);
+		setPlayer2OnGame(player2OnGame);
 		
 		return true;
 	}
@@ -632,17 +644,27 @@ public abstract class BoardGame {
 		this.scoreInfo = scoreInfo;
 	}
 
-	/**
-	 * @return the opponentOnGame
-	 */
-	public boolean isOpponentOnGame() {
-		return opponentOnGame;
+	public boolean isPlayer1OnGame() {
+		return player1OnGame;
 	}
 
-	/**
-	 * @param opponentOnGame the opponentOnGame to set
-	 */
-	public void setOpponentOnGame(boolean opponentOnGame) {
-		this.opponentOnGame = opponentOnGame;
+	public void setPlayer1OnGame(boolean player1OnGame) {
+		this.player1OnGame = player1OnGame;
+	}
+
+	public boolean isPlayer2OnGame() {
+		return player2OnGame;
+	}
+
+	public void setPlayer2OnGame(boolean player2OnGame) {
+		this.player2OnGame = player2OnGame;
+	}
+
+	public boolean isPlayerIsSpectating() {
+		return playerIsSpectating;
+	}
+
+	public void setPlayerIsSpectating(boolean playerIsSpectating) {
+		this.playerIsSpectating = playerIsSpectating;
 	}
 }
