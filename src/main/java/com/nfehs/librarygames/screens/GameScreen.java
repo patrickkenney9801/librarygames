@@ -285,7 +285,7 @@ public class GameScreen extends Screen {
 			// if the user isn't a spectator set not allowed by default
 			allowSpectatorsInChat.setSelected(false);
 			allowSpectatorsInChat.setBounds(panelWidth * 11 / 20 - 150, getTopLeftY() + chatInterface.getHeight() + 50, 300, 50);
-			allowSpectatorsInChat.setHorizontalTextPosition(SwingConstants.CENTER);
+			allowSpectatorsInChat.setHorizontalAlignment(JCheckBox.CENTER);
 			Game.mainWindow.add(allowSpectatorsInChat);
 		}
 		

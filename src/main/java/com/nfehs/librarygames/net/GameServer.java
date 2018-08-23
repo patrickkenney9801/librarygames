@@ -673,6 +673,7 @@ public class GameServer extends Thread {
 						player2 = user.getString("username");
 				}
 			}
+			setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 			player1OnGame = userOnGame(player1, packet.getGameKey());
 			player2OnGame = userOnGame(player2, packet.getGameKey());
 			
@@ -693,7 +694,6 @@ public class GameServer extends Thread {
 			
 			System.out.println("GAME SENT");
 			
-			setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 			updateSender(packet);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -860,7 +860,8 @@ public class GameServer extends Thread {
 			updateGame.executeUpdate();
 			
 			System.out.println("GAME UPDATED");
-			
+
+			setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 			boolean player1OnGame = keyOnGame(player1Key, packet.getGameKey());
 			boolean player2OnGame = keyOnGame(player2Key, packet.getGameKey());
 			
@@ -880,7 +881,6 @@ public class GameServer extends Thread {
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
 			
 			updateSender(packet);
-			setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -897,7 +897,8 @@ public class GameServer extends Thread {
 		Packet10SendChat packet = new Packet10SendChat(data);
 		if (!packet.isValid())
 			return;
-		
+
+		setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 		boolean player1OnGame = userOnGame(Security.encrypt(packet.getPlayer1Username()), packet.getGameKey());
 		boolean player2OnGame = userOnGame(Security.encrypt(packet.getPlayer2Username()), packet.getGameKey());
 		
@@ -916,7 +917,6 @@ public class GameServer extends Thread {
 					returnPacket.writeData(this, p.getIpAddress(), p.getPort());
 		
 		updateSender(packet);
-		setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
 	}
 
 	/**
