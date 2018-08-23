@@ -118,6 +118,9 @@ public class GameScreen extends Screen {
 				}
 			}
 		});
+		// if the user is a spectator disable this button
+		if (Game.getBoardGame().isPlayerIsSpectating())
+			resign.setEnabled(false);
 
 		shadowPiece = new JLabel();
 		pass = new JButton("PASS");
@@ -135,6 +138,9 @@ public class GameScreen extends Screen {
 					Game.sendMove(-1, -1);
 				}
 			});
+			// if the user is a spectator disable this button
+			if (Game.getBoardGame().isPlayerIsSpectating())
+				pass.setEnabled(false);
 		}
 
 		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
@@ -483,19 +489,35 @@ public class GameScreen extends Screen {
 		chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 		int textStart = newText.indexOf(":") + 1;
 		
-		// if the user sent the text make user text green, delete the users current text
-		// if opponent sent the text make opponent text red
-		// if a spectator sent the text, verify that user wants to receive, if so set cyan
-		if (senderKey.equals(Game.getPlayer().getUser_key())) {
-			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
-			chat.setText("");
-			appendText(chatBox, newText.substring(textStart), Color.WHITE);
-		} else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
-				|| newText.split(":")[0].equals(Game.getBoardGame().getPlayer2())) {
-			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
-			appendText(chatBox, newText.substring(textStart), Color.WHITE);
-		} else if (allowSpectatorsInChat.isSelected()) {
-			appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
+		// if user is not a spectator
+		if (!Game.getBoardGame().isPlayerIsSpectating()) {
+			// if the user sent the text make user text green, delete the users current text
+			// if opponent sent the text make opponent text red
+			// if a spectator sent the text, verify that user wants to receive, if so set cyan
+			if (senderKey.equals(Game.getPlayer().getUser_key())) {
+				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
+				chat.setText("");
+				appendText(chatBox, newText.substring(textStart), Color.WHITE);
+			} else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
+					|| newText.split(":")[0].equals(Game.getBoardGame().getPlayer2())) {
+				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
+				appendText(chatBox, newText.substring(textStart), Color.WHITE);
+			} else if (allowSpectatorsInChat.isSelected()) {
+				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
+				appendText(chatBox, newText.substring(textStart), Color.WHITE);
+			}
+		} else {
+			// if the user sent the text make user text green, delete the users current text
+			// if a player sent the text make player text red
+			// if a spectator sent the text, verify that user wants to receive, if so set cyan
+			if (senderKey.equals(Game.getPlayer().getUser_key())) {
+				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
+				chat.setText("");
+			} else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
+					|| newText.split(":")[0].equals(Game.getBoardGame().getPlayer2()))
+				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
+			else
+				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
 			appendText(chatBox, newText.substring(textStart), Color.WHITE);
 		}
 		

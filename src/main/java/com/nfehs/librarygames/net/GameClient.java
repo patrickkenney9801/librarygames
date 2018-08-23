@@ -282,9 +282,10 @@ public class GameClient extends Thread {
 		if (!packet.isValid())
 			return;
 		
-		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen
-		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME) 
-					&& (packet.getUuidKey().equals(getLastPacketKeysSent()[8]) || packet.getUuidKey().equals(getLastPacketKeysSent()[6]))) {
+		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen or SpectatorGamesScreen
+		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME || Game.gameState == Game.SPECTATOR_GAMES) 
+					&& (packet.getUuidKey().equals(getLastPacketKeysSent()[8]) || packet.getUuidKey().equals(getLastPacketKeysSent()[6]))
+						|| packet.getUuidKey().equals(getLastPacketKeysSent()[12])) {
 			
 			// if so, set GameBoard and open GameScreen
 			Game.setBoardGame(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
@@ -403,7 +404,7 @@ public class GameClient extends Thread {
 		if (listIsFull(getSpectates())) {
 			ArrayList<String> spectates = new ArrayList<String>();
 			
-			for (String[] packetData : getGames())
+			for (String[] packetData : getSpectates())
 				for (String info : packetData) {
 					if (info != null) {
 						String gameData = BoardGame.getGameInfo(info.split(","));
