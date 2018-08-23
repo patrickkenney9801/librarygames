@@ -137,7 +137,7 @@ public class Packet08GetBoard extends Packet {
 	public byte[] getDataServer() {
 		return ("08" + getUuidKey() + ":" + getSenderKey() + ":" + getGameKey() + ":" + getGameType()
 		 		+ ":" + getPlayer1() + ":" + getPlayer2() + ":" + getMoves() + ":" + getPenultMove() + ":" + getLastMove()
-		 		+ ":" + getWinner() + ":" + isPlayer1OnGame() + ":" + isPlayer1OnGame() + ":" + getBoard() + ":" + getExtraData()).getBytes();
+		 		+ ":" + getWinner() + ":" + isPlayer1OnGame() + ":" + isPlayer2OnGame() + ":" + getBoard() + ":" + getExtraData()).getBytes();
 	}
 
 	/**
