@@ -486,7 +486,6 @@ public class GameScreen extends Screen {
 	 */
 	public void updateChat(String newText, String senderKey) {
 		// update chat text
-		chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 		int textStart = newText.indexOf(":") + 1;
 		
 		// if user is not a spectator
@@ -495,14 +494,17 @@ public class GameScreen extends Screen {
 			// if opponent sent the text make opponent text red
 			// if a spectator sent the text, verify that user wants to receive, if so set cyan
 			if (senderKey.equals(Game.getPlayer().getUser_key())) {
+				chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
 				chat.setText("");
 				appendText(chatBox, newText.substring(textStart), Color.WHITE);
 			} else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
 					|| newText.split(":")[0].equals(Game.getBoardGame().getPlayer2())) {
+				chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
 				appendText(chatBox, newText.substring(textStart), Color.WHITE);
 			} else if (allowSpectatorsInChat.isSelected()) {
+				chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
 				appendText(chatBox, newText.substring(textStart), Color.WHITE);
 			}
@@ -510,6 +512,7 @@ public class GameScreen extends Screen {
 			// if the user sent the text make user text green, delete the users current text
 			// if a player sent the text make player text red
 			// if a spectator sent the text, verify that user wants to receive, if so set cyan
+			chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 			if (senderKey.equals(Game.getPlayer().getUser_key())) {
 				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
 				chat.setText("");
