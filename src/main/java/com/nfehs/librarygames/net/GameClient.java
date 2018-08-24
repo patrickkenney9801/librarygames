@@ -37,6 +37,8 @@ public class GameClient extends Thread {
 	private int packetsToReceiveGetSpectates;
 	private String[][] spectates;
 	
+	private boolean lastMoveReceived;
+	
 	public GameClient(byte[] ipAddress) {
 		setLastPacketKeysSent(new String[13]);
 		try {
@@ -281,6 +283,9 @@ public class GameClient extends Thread {
 		Packet08GetBoard packet = new Packet08GetBoard(data, true);
 		if (!packet.isValid())
 			return;
+		// send receipt
+		Packet13Receipt receipt = new Packet13Receipt(packet.getUuidKey());
+		receipt.writeData(this);
 		
 		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen or SpectatorGamesScreen
 		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME || Game.gameState == Game.SPECTATOR_GAMES) 
@@ -321,9 +326,15 @@ public class GameClient extends Thread {
 		Packet09SendMove packet = new Packet09SendMove(data, true);
 		if (!packet.isValid())
 			return;
+		// send receipt
+		Packet13Receipt receipt = new Packet13Receipt(packet.getUuidKey());
+		receipt.writeData(this);
 		// verify that this packet is responding to the last one sent
 		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[9]))
 			return;
+		
+		// set last move receipt true
+		setLastMoveReceived(true);
 		
 		// update current board game, returns false if wrong game
 		// if successful update, update the game board
@@ -344,6 +355,9 @@ public class GameClient extends Thread {
 		Packet10SendChat packet = new Packet10SendChat(data, true);
 		if (!packet.isValid())
 			return;
+		// send receipt
+		Packet13Receipt receipt = new Packet13Receipt(packet.getUuidKey());
+		receipt.writeData(this);
 		
 		// check that client is on correct game, if so update the chat
 		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey())) {
@@ -514,5 +528,13 @@ public class GameClient extends Thread {
 
 	public void setSpectates(String[][] spectates) {
 		this.spectates = spectates;
+	}
+
+	public boolean isLastMoveReceived() {
+		return lastMoveReceived;
+	}
+
+	public void setLastMoveReceived(boolean lastMoveReceived) {
+		this.lastMoveReceived = lastMoveReceived;
 	}
 }

@@ -203,10 +203,51 @@ public class Game {
 	 */
 	public static void sendMove(int movingFrom, int movingTo) {
 		// sends send move packet to server
-		Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
+		final Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
 							movingFrom, movingTo, getPlayer().getUsername(), getBoardGame().getGameType());
-		packet.writeData(client);
 		client.getLastPacketKeysSent()[9] = packet.getUuidKey();
+		// set last move received false
+		client.setLastMoveReceived(false);
+		
+		// send move, expect a 09 packet response
+		// send up to 5 times, if no response received display disconnect error
+		new Thread(new Runnable() {
+			public void run() {
+				// send packet, wait 100ms before checking for response
+				if (sendMove(packet, 100))
+					return;
+				if (sendMove(packet, 500))
+					return;
+				if (sendMove(packet, 750))
+					return;
+				if (sendMove(packet, 1000))
+					return;
+				if (sendMove(packet, 5000))
+					return;
+				// TODO put error connecting to server
+			}
+		}).run();
+	}
+	
+	/**
+	 * Sends the client's move to server, returns true if the client received a response from server
+	 * @param packet
+	 * @param waitTime
+	 * @return
+	 */
+	private static boolean sendMove(Packet packet, int waitTime) {
+		try {
+			// send packet and wait for waitTime
+			packet.writeData(client);
+			Thread.sleep(waitTime);
+			
+			// check for receipt, if one, exit and remove packet, if none return false
+			if (client.isLastMoveReceived())
+				return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	/**

@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 import com.nfehs.librarygames.Player;
@@ -35,6 +36,7 @@ public class GameServer extends Thread {
 	private final String DATABASE_PASS = "98011089";
 	
 	private ArrayList<Player> onlinePlayers;
+	private HashMap<String, Boolean> sentPackets;
 	
 	public GameServer() {
 		try {
@@ -43,6 +45,7 @@ public class GameServer extends Thread {
 			this.socket = new DatagramSocket(PORT);
 			System.out.println("Connected to UDP");
 			this.onlinePlayers = new ArrayList<Player>();
+			setSentPackets(new HashMap<String, Boolean>());
 		} catch (SocketException e) {
 			e.printStackTrace();
 	} catch (SQLException e) {
@@ -118,7 +121,7 @@ public class GameServer extends Thread {
 												break;
 					case CREATEACCOUNT:			createAccount(data, address, port);
 												break;
-					case ERROR:					// TODO, probably will not be used by server
+					case ERROR:					// probably will not be used by server
 												break;
 					case LOGOUT:				logout(data, address, port);
 												break;
@@ -139,6 +142,8 @@ public class GameServer extends Thread {
 					case ONGAME:				onGame(data, address, port);
 												break;
 					case GETSPECTATES:			getSpectates(data, address, port);
+												break;
+					case RECEIPT:				handleReceipt(data, address, port);
 					default:					break;
 				}
 			}
@@ -158,7 +163,7 @@ public class GameServer extends Thread {
 				return;
 			
 			// search for account with the given username and password
-			PreparedStatement statement = database.prepareStatement("SELECT * FROM users WHERE username = '"
+			PreparedStatement statement = database.prepareStatement("SELECT user_key FROM users WHERE username = '"
 																	+ packet.getUsername() + "' AND password = '"
 																	+ packet.getPassword() + "';");
 			ResultSet result = statement.executeQuery();
@@ -272,7 +277,7 @@ public class GameServer extends Thread {
 				return;
 			
 			// find friends list
-			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN friends ON users.user_key = friends.userkey2"
+			PreparedStatement statement = database.prepareStatement("SELECT users.username FROM users RIGHT JOIN friends ON users.user_key = friends.userkey2"
 																+ " WHERE userkey1 = '" + packet.getSenderKey() + "' ORDER BY last_action_date DESC;");
 			ResultSet result = statement.executeQuery();
 			
@@ -282,7 +287,7 @@ public class GameServer extends Thread {
 				friendsList.add(Security.decrypt(result.getString("username")) + "~" + (userOnline(result.getString("username")) ? true : false));
 			
 			// find all other users
-			statement = database.prepareStatement("SELECT * FROM users WHERE user_key != '" + packet.getSenderKey() + "' ORDER BY last_action_date DESC;");
+			statement = database.prepareStatement("SELECT username FROM users WHERE user_key != '" + packet.getSenderKey() + "' ORDER BY last_action_date DESC;");
 			result = statement.executeQuery();
 			
 			// get other usernames and put into array
@@ -360,7 +365,7 @@ public class GameServer extends Thread {
 				return;
 			
 			// get other user's key
-			PreparedStatement getKey = database.prepareStatement("SELECT * FROM users WHERE username = '"
+			PreparedStatement getKey = database.prepareStatement("SELECT user_key FROM users WHERE username = '"
 																+ Security.encrypt(packet.getFriendName()) + "';");
 			ResultSet result = getKey.executeQuery();
 
@@ -427,7 +432,7 @@ public class GameServer extends Thread {
 			/*
 			 *  get other user's key
 			 */
-			PreparedStatement getKey = database.prepareStatement("SELECT * FROM users WHERE username = '"
+			PreparedStatement getKey = database.prepareStatement("SELECT user_key FROM users WHERE username = '"
 																+ Security.encrypt(packet.getOtherUser()) + "';");
 			ResultSet result = getKey.executeQuery();
 
@@ -452,7 +457,7 @@ public class GameServer extends Thread {
 			 *  verify that an active game of the same type does not already exist
 			 */
 			// get all unfinished games between both players of same gameType and order
-			PreparedStatement getMatchingGames = database.prepareStatement("SELECT * FROM games WHERE winner = 0 AND game_type = "
+			PreparedStatement getMatchingGames = database.prepareStatement("SELECT game_key FROM games WHERE winner = 0 AND game_type = "
 												+ packet.getGameType() + " AND player1_key = '" + player1Key + "' AND player2_key = '" + player2Key + "';");
 			ResultSet matchingGames = getMatchingGames.executeQuery();
 			
@@ -510,7 +515,7 @@ public class GameServer extends Thread {
 				return;
 			
 			// find games list
-			PreparedStatement statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
+			PreparedStatement statement = database.prepareStatement("SELECT game_key, game_type, moves, winner, last_action_date, username FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
 																+ " WHERE games.player1_key = '" + packet.getSenderKey() + "' ORDER BY games.last_action_date DESC;");
 			ResultSet result = statement.executeQuery();
 			
@@ -531,7 +536,7 @@ public class GameServer extends Thread {
 				lastMoved.add(result.getTimestamp("last_action_date"));
 			}
 			
-			statement = database.prepareStatement("SELECT * FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
+			statement = database.prepareStatement("SELECT game_key, game_type, moves, winner, last_action_date, username FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
 												+ " WHERE games.player2_key = '" + packet.getSenderKey() + "' ORDER BY games.last_action_date DESC;");
 			result = statement.executeQuery();
 
@@ -687,10 +692,10 @@ public class GameServer extends Thread {
 				extraData += "," + result.getInt("p2_score");
 			}
 			
-			// send requested game to client
+			// send requested game to client, expect receipt
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), gameType, 
 							player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData, true);
-			returnPacket.writeData(this, address, port);
+			sendPacket(returnPacket, address, port);
 			
 			System.out.println("GAME SENT");
 			
@@ -865,10 +870,10 @@ public class GameServer extends Thread {
 			boolean player1OnGame = keyOnGame(player1Key, packet.getGameKey());
 			boolean player2OnGame = keyOnGame(player2Key, packet.getGameKey());
 			
-			// send basic update game info to player via 09 packet
+			// send basic update game info to player via 09 packet, expect receipt response
 			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getGameKey(), lastMove, packet.getMoveTo(),
 																	winner, player1OnGame, player2OnGame, newBoard, extraInfo, true);
-			returnPacket.writeData(this, address, port);
+			sendPacket(returnPacket, address, port);
 			
 			/*
 			 *  send a 08 packet to opponent to notify or update their client
@@ -905,16 +910,16 @@ public class GameServer extends Thread {
 		// create return packet
 		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), player1OnGame, player2OnGame, packet.getText(), true);
 		
-		// send chat to players (the opponent must be on the game to send the chat)
+		// send chat to players (the opponent must be on the game to send the chat), expect receipts
 		// also send chat to spectators if option is on
 		boolean sendToSpectators = packet.isSendToSpectators();
 		for (Player p : onlinePlayers)
 			if (packet.getGameKey().equals(p.getGame_key()))
 				if (sendToSpectators)
-					returnPacket.writeData(this, p.getIpAddress(), p.getPort());
+					sendPacket(returnPacket, p.getIpAddress(), p.getPort());
 				else if (p.getUsername().equals(Security.encrypt(packet.getPlayer1Username()))
 						|| p.getUsername().equals(Security.encrypt(packet.getPlayer2Username())))
-					returnPacket.writeData(this, p.getIpAddress(), p.getPort());
+					sendPacket(returnPacket, p.getIpAddress(), p.getPort());
 		
 		updateSender(packet);
 	}
@@ -1031,7 +1036,7 @@ public class GameServer extends Thread {
 			}
 			
 			// find spectator games list
-			PreparedStatement games = database.prepareStatement("SELECT * FROM games WHERE player1_key != '" + packet.getSenderKey()
+			PreparedStatement games = database.prepareStatement("SELECT game_key, game_type, player1_key, player2_key, moves FROM games WHERE player1_key != '" + packet.getSenderKey()
 							+ "' AND player2_key != '" + packet.getSenderKey() + "' AND winner = 0 ORDER BY games.last_action_date DESC;");
 			ResultSet gamesResult = games.executeQuery();
 			
@@ -1085,6 +1090,82 @@ public class GameServer extends Thread {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Handles a receipt by setting the HashMap value with the packet identifier true
+	 * @param data
+	 * @param address
+	 * @param port
+	 */
+	private void handleReceipt(byte[] data, InetAddress address, int port) {
+		Packet13Receipt packet = new Packet13Receipt(data);
+		if (!packet.isValid())
+			return;
+		// if the HashMap has the packetIdentifier, set it true
+		String packetIdentifier = packet.getUuidKey() + address.toString();
+		if (getSentPackets().containsKey(packetIdentifier))
+			getSentPackets().put(packetIdentifier, true);
+	}
+	
+	/**
+	 * Sends a packet to the given address and port, expecting a response
+	 * Attempts up to 5 times, if failure removes the address from onlinePlayers
+	 * @param packet
+	 * @param address
+	 * @param port
+	 */
+	private void sendPacket(final Packet packet, final InetAddress address, final int port) {
+		// add packet identifier to HashMap
+		final String packetIdentifier = packet.getUuidKey() + address.toString();
+		getSentPackets().put(packetIdentifier, false);
+		new Thread(new Runnable() {
+			public void run() {
+				// send packet and then check for receipt 100ms later, if receipt received exit
+				if (sendPacket(packet, address, port, packetIdentifier, 100))
+					return;
+				if (sendPacket(packet, address, port, packetIdentifier, 500))
+					return;
+				if (sendPacket(packet, address, port, packetIdentifier, 750))
+					return;
+				if (sendPacket(packet, address, port, packetIdentifier, 1000))
+					return;
+				if (sendPacket(packet, address, port, packetIdentifier, 5000))
+					return;
+				// if a response is not receives after 5 tries, remove players with address from onlinePlayers
+				for (int i = 0; i < onlinePlayers.size(); i++)
+					if (onlinePlayers.get(i).getIpAddress().equals(address)) {
+						sendOnGame(onlinePlayers.get(i).getGame_key(), onlinePlayers.get(i).getUsername(), false);
+						onlinePlayers.remove(i);
+					}
+			}
+		}).run();
+	}
+	
+	/**
+	 * Actually sends packet to address, waits waitTime to check for receipt, handles removal of packetIdentifier
+	 * Returns true if the packet got a receipt
+	 * @param packet
+	 * @param address
+	 * @param port
+	 * @param packetIdentifier
+	 * @param waitTime
+	 */
+	private boolean sendPacket(Packet packet, InetAddress address, int port, String packetIdentifier, int waitTime) {
+		try {
+			// send packet and wait for waitTime
+			packet.writeData(this, address, port);
+			sleep(waitTime);
+			
+			// check for receipt, if one, exit and remove packet, if none send again
+			if (getSentPackets().get(packetIdentifier)) {
+				getSentPackets().remove(packetIdentifier);
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
@@ -1147,5 +1228,13 @@ public class GameServer extends Thread {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public HashMap<String, Boolean> getSentPackets() {
+		return sentPackets;
+	}
+
+	public void setSentPackets(HashMap<String, Boolean> sentPackets) {
+		this.sentPackets = sentPackets;
 	}
 }

@@ -53,7 +53,7 @@ public class Go extends BoardGame {
 		}
 		
 		if (winner == 1 || winner == 2)
-			setScoreInfo("Score: " + getPlayer1Score() + " - " + getPlayer2Score());
+			setScoreInfo("Score: " + getPlayer1Score() + " - " + getPlayer2Score() + ".5");
 	}
 
 	/**
