@@ -1121,8 +1121,8 @@ public class GameServer extends Thread {
 		getSentPackets().put(packetIdentifier, false);
 		new Thread(new Runnable() {
 			public void run() {
-				// send packet and then check for receipt 250ms later, if receipt received exit
-				if (sendPacket(packet, address, port, packetIdentifier, 250))
+				// send packet and then check for receipt 500ms later, if receipt received exit
+				if (sendPacket(packet, address, port, packetIdentifier, 500))
 					return;
 				if (sendPacket(packet, address, port, packetIdentifier, 500))
 					return;

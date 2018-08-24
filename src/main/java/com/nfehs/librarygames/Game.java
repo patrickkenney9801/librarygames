@@ -213,8 +213,8 @@ public class Game {
 		// send up to 5 times, if no response received display disconnect error
 		new Thread(new Runnable() {
 			public void run() {
-				// send packet, wait 250ms before checking for response
-				if (sendMove(packet, 250))
+				// send packet, wait 500ms before checking for response
+				if (sendMove(packet, 500))
 					return;
 				if (sendMove(packet, 500))
 					return;
