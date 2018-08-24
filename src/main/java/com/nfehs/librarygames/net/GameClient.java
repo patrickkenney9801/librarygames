@@ -301,7 +301,7 @@ public class GameClient extends Thread {
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
 		else if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
-				packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData()))
+				packet.getPenultMove(), packet.getLastMove(), packet.getMoves(), packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData()))
 			Game.updateGameBoard();
 		// if none of the above, notify the client
 		else {
@@ -338,7 +338,7 @@ public class GameClient extends Thread {
 		
 		// update current board game, returns false if wrong game
 		// if successful update, update the game board
-		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(),
+		if (Game.getBoardGame().update(	packet.getGameKey(), packet.getBoard(), packet.getPenultMove(), packet.getLastMove(), packet.getMoves(),
 										packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData()))
 			Game.updateGameBoard();
 	}

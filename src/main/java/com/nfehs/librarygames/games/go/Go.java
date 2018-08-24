@@ -263,8 +263,8 @@ public class Go extends BoardGame {
 	 * Returns false if not current game
 	 * @Override
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
-		if (!super.update(gameKey, board, penultMove, lastMove, winner, player1OnGame, player2OnGame, extraData))
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int moves, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
+		if (!super.update(gameKey, board, penultMove, lastMove, moves, winner, player1OnGame, player2OnGame, extraData))
 			return false;
 		String[] goData = extraData.split(",");
 		

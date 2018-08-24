@@ -129,13 +129,14 @@ public abstract class BoardGame {
 	 * @param board
 	 * @param penultMove
 	 * @param lastMove
+	 * @param moves
 	 * @param winner
 	 * @param player1OnGame
 	 * @param player2OnGame
 	 * @param extraData
 	 * @return false if not current game
 	 */
-	public boolean update(String gameKey, String board, int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
+	public boolean update(String gameKey, String board, int penultMove, int lastMove, int moves, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
 		if (!getGameKey().equals(gameKey))
 			return false;
 		setPenultMove(penultMove);
@@ -145,8 +146,9 @@ public abstract class BoardGame {
 		setPlayerTurn(!isPlayerTurn());
 		setPlayer1Turn(!isPlayer1Turn());
 		updateWinner(winner);
+		setMoves(moves);
 		if (winner == 0)
-			setMoves(getMoves() + 1);
+			setMoves(moves + 1);
 		setPlayer1OnGame(player1OnGame);
 		setPlayer2OnGame(player2OnGame);
 		

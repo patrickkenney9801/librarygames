@@ -784,9 +784,11 @@ public class GameServer extends Thread {
 				resigned = true;
 			}
 			
-			// if it is not the sending player's turn, exit and send error
+			// if it is not the sending player's turn, send 08 packet to update board and exit
 			if (!resigned && !packet.getSenderKey().equals(playerTurnKey)) {
-				// TODO send error package
+				Packet08GetBoard temp = new Packet08GetBoard(packet.getSenderKey(), packet.getUsername(), packet.getGameKey(), gameType);
+				temp.setUuidKey(packet.getUuidKey());		// preserve packet id
+				getBoard(temp.getData(), address, port);
 				System.out.println("NOT SENDING PLAYER'S TURN");
 				return;
 			}
@@ -872,7 +874,7 @@ public class GameServer extends Thread {
 			
 			// send basic update game info to player via 09 packet, expect receipt response
 			Packet09SendMove returnPacket = new Packet09SendMove(packet.getUuidKey(), packet.getGameKey(), lastMove, packet.getMoveTo(),
-																	winner, player1OnGame, player2OnGame, newBoard, extraInfo, true);
+																	moves, winner, player1OnGame, player2OnGame, newBoard, extraInfo, true);
 			sendPacket(returnPacket, address, port);
 			
 			/*
