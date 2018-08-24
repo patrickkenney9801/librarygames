@@ -105,7 +105,7 @@ public class GameClient extends Thread {
 					default:					break;
 				}
 			}
-		}).run();
+		}).start();
 	}
 
 	/**

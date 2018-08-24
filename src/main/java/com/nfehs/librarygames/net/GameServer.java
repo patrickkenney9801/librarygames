@@ -147,7 +147,7 @@ public class GameServer extends Thread {
 					default:					break;
 				}
 			}
-		}).run();
+		}).start();
 	}
 
 	/**
@@ -515,7 +515,7 @@ public class GameServer extends Thread {
 				return;
 			
 			// find games list
-			PreparedStatement statement = database.prepareStatement("SELECT game_key, game_type, moves, winner, last_action_date, username FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
+			PreparedStatement statement = database.prepareStatement("SELECT game_key, game_type, moves, winner, games.last_action_date, username FROM users RIGHT JOIN games ON users.user_key = games.player2_key"
 																+ " WHERE games.player1_key = '" + packet.getSenderKey() + "' ORDER BY games.last_action_date DESC;");
 			ResultSet result = statement.executeQuery();
 			
@@ -536,7 +536,7 @@ public class GameServer extends Thread {
 				lastMoved.add(result.getTimestamp("last_action_date"));
 			}
 			
-			statement = database.prepareStatement("SELECT game_key, game_type, moves, winner, last_action_date, username FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
+			statement = database.prepareStatement("SELECT game_key, game_type, moves, winner, games.last_action_date, username FROM users RIGHT JOIN games ON users.user_key = games.player1_key"
 												+ " WHERE games.player2_key = '" + packet.getSenderKey() + "' ORDER BY games.last_action_date DESC;");
 			result = statement.executeQuery();
 
@@ -1121,8 +1121,8 @@ public class GameServer extends Thread {
 		getSentPackets().put(packetIdentifier, false);
 		new Thread(new Runnable() {
 			public void run() {
-				// send packet and then check for receipt 100ms later, if receipt received exit
-				if (sendPacket(packet, address, port, packetIdentifier, 100))
+				// send packet and then check for receipt 250ms later, if receipt received exit
+				if (sendPacket(packet, address, port, packetIdentifier, 250))
 					return;
 				if (sendPacket(packet, address, port, packetIdentifier, 500))
 					return;
@@ -1138,8 +1138,9 @@ public class GameServer extends Thread {
 						sendOnGame(onlinePlayers.get(i).getGame_key(), onlinePlayers.get(i).getUsername(), false);
 						onlinePlayers.remove(i);
 					}
+				getSentPackets().remove(packetIdentifier);
 			}
-		}).run();
+		}).start();
 	}
 	
 	/**
@@ -1162,10 +1163,11 @@ public class GameServer extends Thread {
 				getSentPackets().remove(packetIdentifier);
 				return true;
 			}
+			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 
 	/**
