@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
 
@@ -76,11 +77,11 @@ public class LoginScreen extends Screen {
 			}
 		});
 		
-		//error = new JLabel("ERROR: WRONG CREDENTIALS");
-		//Game.mainWindow.add(error);
-		//error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 20, 300, 20);
-		//error.setForeground(Color.RED);
-		//error.setVerticalTextPosition(JLabel.CENTER);
+		error = new JLabel();
+		Game.mainWindow.add(error);
+		error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 20, 300, 20);
+		error.setForeground(Color.RED);
+		error.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		createAccount = new JButton("CREATE ACCOUNT");
 		Game.mainWindow.add(createAccount);
@@ -93,6 +94,14 @@ public class LoginScreen extends Screen {
 		});
 
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets error text to the errorMessage
+	 * @param errorMessage
+	 */
+	public void setError(String errorMessage) {
+		error.setText(errorMessage);
 	}
 	
 	/**
@@ -111,6 +120,7 @@ public class LoginScreen extends Screen {
 		Game.mainWindow.remove(username);
 		Game.mainWindow.remove(password);
 		Game.mainWindow.remove(login);
+		Game.mainWindow.remove(error);
 		Game.mainWindow.remove(createAccount);
 		
 		user			= null;
@@ -118,6 +128,7 @@ public class LoginScreen extends Screen {
 		username		= null;
 		password		= null;
 		login			= null;
+		error			= null;
 		createAccount	= null;
 		
 		Game.mainWindow.repaint();

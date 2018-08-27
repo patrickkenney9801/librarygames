@@ -1,5 +1,6 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -9,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
 
@@ -29,6 +31,7 @@ public class CreateAccountScreen extends Screen {
 	private JPasswordField	password;
 	private JPasswordField	passwordConfirm;
 	private JButton			createAccount;
+	private JLabel			error;
 	private JButton			back;
 	
 	public CreateAccountScreen() {
@@ -109,6 +112,12 @@ public class CreateAccountScreen extends Screen {
 			}
 		});
 		
+		error = new JLabel();
+		Game.mainWindow.add(error);
+		error.setBounds((int) Game.screenSize.getWidth() / 2 - 200, (int) Game.screenSize.getHeight() / 2 + 40, 400, 20);
+		error.setForeground(Color.RED);
+		error.setHorizontalAlignment(SwingConstants.CENTER);
+		
 		back = new JButton("BACK");
 		Game.mainWindow.add(back);
 		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 60, 150, 30);
@@ -121,6 +130,14 @@ public class CreateAccountScreen extends Screen {
 		});
 
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets error text to the errorMessage
+	 * @param errorMessage
+	 */
+	public void setError(String errorMessage) {
+		error.setText(errorMessage);
 	}
 	
 	/**
@@ -143,6 +160,7 @@ public class CreateAccountScreen extends Screen {
 		Game.mainWindow.remove(password);
 		Game.mainWindow.remove(passwordConfirm);
 		Game.mainWindow.remove(createAccount);
+		Game.mainWindow.remove(error);
 		Game.mainWindow.remove(back);
 		
 		user			= null;
@@ -154,6 +172,7 @@ public class CreateAccountScreen extends Screen {
 		password		= null;
 		passwordConfirm	= null;
 		createAccount	= null;
+		error			= null;
 		back			= null;
 		
 		Game.mainWindow.repaint();

@@ -174,24 +174,36 @@ public class GameClient extends Thread {
 		if (!errorPacket.isValid())
 			return;
 		
+		// verify error first, then set it on screen through Game class
+		// errors left not handled are errors that do not show up when using the client
 		switch (errorPacket.getErrorType()) {
-			case INVALID_CREDENTIALS:
-			case INVALID_USERNAME:
-			case INVALID_ENCRYPTION:
-			case USERNAME_IN_USE:
-			case FRIEND_DOES_NOT_EXIST:
-			case ALREADY_FRIENDS:
-			case INVALID_GAMETYPE_PACKET06:
-			case OPPONENT_DOES_NOT_EXIST:
-			case DUPLICATE_GAME:
-			case INVALID_GAME_TYPE_PACKET08:
-			case INVALID_GAME_KEY_PACKET08:
-			case INVALID_GAME_TYPE_PACKET09:
-			case INVALID_GAME_KEY_PACKET09:
-			case GAME_ALREADY_OVER:
-			case SENDER_NOT_IN_GAME:
-			case ILLEGAL_MOVE:
-			default:								break;
+			case PACKET00_INVALID_CREDENTIALS:			if (errorPacket.getUuidKey().equals(getLastPacketKeysSent()[0]))
+															Game.setErrorLoginScreen("ERROR: INCORRECT USERNAME OR PASSWORD");
+														break;
+			case PACKET01_INVALID_USERNAME:				if (errorPacket.getUuidKey().equals(getLastPacketKeysSent()[1]))
+															Game.setErrorCreateAccountScreen("ERROR: USERNAMES CANNOT USE :, or ~");
+														break;
+			case PACKET01_INVALID_ENCRYPTION:			if (errorPacket.getUuidKey().equals(getLastPacketKeysSent()[1]))
+															Game.setErrorCreateAccountScreen("ERROR: PASSWORD ENCRYPTED IMPROPERLY");
+														break;
+			case PACKET01_USERNAME_IN_USE:				if (errorPacket.getUuidKey().equals(getLastPacketKeysSent()[1]))
+															Game.setErrorCreateAccountScreen("ERROR: USERNAME IS ALREADY IN USE");
+														break;
+			case PACKET05_FRIEND_DOES_NOT_EXIST:
+			case PACKET05_ALREADY_FRIENDS:
+			case PACKET06_INVALID_GAMETYPE:
+			case PACKET06_OPPONENT_DOES_NOT_EXIST:		break;
+			case PACKET06_DUPLICATE_GAME:				if (errorPacket.getUuidKey().equals(getLastPacketKeysSent()[6]))
+															Game.setErrorCreateGameScreen("ERROR: A GAME OF THIS TYPE ALREADY EXISTS");
+														break;
+			case PACKET08_INVALID_GAME_TYPE:
+			case PACKET08_INVALID_GAME_KEY:
+			case PACKET09_INVALID_GAME_TYPE:
+			case PACKET09_INVALID_GAME_KEY:
+			case PACKET09_GAME_ALREADY_OVER:
+			case PACKET09_SENDER_NOT_IN_GAME:
+			case PACKET09_ILLEGAL_MOVE:
+			default:									break;
 		}
 	}
 

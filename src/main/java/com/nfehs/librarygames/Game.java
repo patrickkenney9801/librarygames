@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.net.GameClient;
@@ -56,16 +57,16 @@ public class Game {
 	public static void login(String user, char[] pass) {
 		// verify that valid data is given
 		if (user == null || user.length() < 1) {
-			// TODO error user empty
+			setErrorLoginScreen("ERROR: NO USERNAME PROVIDED");
 			return;
 		} else if (pass == null || pass.length < 1) {
-			// TODO error pass empty
+			setErrorLoginScreen("ERROR: NO PASSWORD PROVIDED");
 			return;
 		} else if (user.length() > 20) {
-			// TODO error user too long
+			setErrorLoginScreen("ERROR: USERNAMES ARE 20 CHARACTERS OR LESS");
 			return;
 		} else if (pass.length > 20) {
-			// TODO error pass too long
+			setErrorLoginScreen("ERROR: PASSWORDS ARE 20 CHARACTERS OR LESS");
 			return;
 		}
 		
@@ -88,36 +89,41 @@ public class Game {
 	 * @param email
 	 * @param password
 	 * @param password2
-	 * TODO ban special characters like :,~
 	 */
 	public static void createAccount(String user, String email, char[] pass, char[] pass2) {
 		// verify that data given is valid
 		if (user == null || user.length() < 1) {
-			// TODO error user empty
+			setErrorCreateAccountScreen("ERROR: PLEASE PROVIDE A USERNAME");
 			return;
 		} else if (pass == null || pass.length < 1) {
-			// TODO error pass empty
+			setErrorCreateAccountScreen("ERROR: PLEASE PROVIDE A PASSWORD");
 			return;
 		} else if (user.length() > 20) {
-			// TODO error user too long
+			setErrorCreateAccountScreen("ERROR: USERNAMES CANNOT EXCEED 20 CHARACTERS");
 			return;
 		} else if (pass.length > 20) {
-			// TODO error pass too long
+			setErrorCreateAccountScreen("ERROR: PASSWORDS CANNOT EXCEED 20 CHARACTERS");
 			return;
 		} else if (pass.length != pass2.length) {
-			// TODO error passwords do not match
+			setErrorCreateAccountScreen("ERROR: PASSWORDS DO NOT MATCH");
 			return;
 		} else if (email.contains(":")) {
-			// TODO error invalid email
+			setErrorCreateAccountScreen("ERROR: EMAILS MAY NOT CONTAIN ':'");
 			return;
 		}
+		// if the user contains a ,: or ~ set error and exit
+		for (char c : user.toCharArray())
+			if (c == '~' || c == ',' || c == ':') {
+				setErrorCreateAccountScreen("ERROR: USERNAMES MAY NOT CONTAIN ,: or ~");
+				return;
+			}
 		
 		// encrypt username and password
 		String username = Security.encrypt(user);
 		String password = "";
 		for (int i = 0; i < pass.length; i++) {
 			if (pass[i] != pass2[i]) {
-				// TODO error passwords do not match
+				setErrorCreateAccountScreen("ERROR: PASSWORDS DO NOT MATCH");
 				return;
 			}
 			password += (pass[i] + 15);
@@ -224,7 +230,8 @@ public class Game {
 					return;
 				if (sendMove(packet, 5000))
 					return;
-				// TODO put error connecting to server
+				JOptionPane.showConfirmDialog(null, "Cannot contact the server, the game will quit", "Connection Error", JOptionPane.CANCEL_OPTION);
+				System.exit(0);
 			}
 		}).start();
 	}
@@ -447,6 +454,40 @@ public class Game {
 	public static void notifyUser(BoardGame boardGame) {
 		screen.notifyUser(boardGame);
 	}
+	
+	/**
+	 * Verifies that the client is on LoginScreen and then sets the error to errorMessage
+	 * Called by Game and GameClient classes
+	 * @param errorMessage
+	 */
+	public static void setErrorLoginScreen(String errorMessage) {
+		if (!(screen instanceof LoginScreen))
+			return;
+		((LoginScreen) screen).setError(errorMessage);
+	}
+	
+	/**
+	 * Verifies that the client is on CreateAccountScreen and then sets the error to errorMessage
+	 * Called by Game and GameClient classes
+	 * @param errorMessage
+	 */
+	public static void setErrorCreateAccountScreen(String errorMessage) {
+		if (!(screen instanceof CreateAccountScreen))
+			return;
+		((CreateAccountScreen) screen).setError(errorMessage);
+	}
+	
+	/**
+	 * Verifies that the client is on CreateGameScreen and then sets the error to errorMessage
+	 * Called by Game and GameClient classes
+	 * @param errorMessage
+	 */
+	public static void setErrorCreateGameScreen(String errorMessage) {
+		if (!(screen instanceof CreateGameScreen))
+			return;
+		((CreateGameScreen) screen).setError(errorMessage);
+	}
+
 
 	/**
 	 * @return the player

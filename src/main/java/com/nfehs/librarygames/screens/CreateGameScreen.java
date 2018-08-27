@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.GameFrame;
@@ -30,6 +31,7 @@ public class CreateGameScreen extends Screen {
 	private JRadioButton userGoesFirst;
 	private JRadioButton opponentGoesFirst;
 	private JButton createGame;
+	private JLabel error;
 	private JButton back;
 	private JButton refresh;
 	
@@ -133,7 +135,7 @@ public class CreateGameScreen extends Screen {
 				
 				// if no opponent is selected to play against, exit and send error to screen
 				if (otherUser == null) {
-					// TODO put error message
+					setError("ERROR: NO OPPONENT SELECTED");
 					System.out.println("No opponent selected");
 					return;
 				}
@@ -148,13 +150,19 @@ public class CreateGameScreen extends Screen {
 				
 				// if the no gameType is selected or there is some other error, exit and send message to screen
 				if (gameType < 0) {
-					// TODO put error message
+					setError("ERROR: NO GAME TYPE SELECTED");
 					System.out.println("No game type selected");
 					return;
 				}
 				Game.createGame(otherUser, creatorGoesFirst, gameType);
 			}
 		});
+		
+		error = new JLabel();
+		Game.mainWindow.add(error);
+		error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 5 * 4 + 30, 300, 20);
+		error.setForeground(Color.RED);
+		error.setHorizontalAlignment(SwingConstants.CENTER);
 
 		back = new JButton("BACK");
 		Game.mainWindow.add(back);
@@ -240,6 +248,15 @@ public class CreateGameScreen extends Screen {
 	}
 	
 	/**
+	 * Sets error text to the errorMessage
+	 * called locally and by Game class
+	 * @param errorMessage
+	 */
+	public void setError(String errorMessage) {
+		error.setText(errorMessage);
+	}
+	
+	/**
 	 * Removes and nulls all current players in JRadioButtons
 	 */
 	private void removeAndNullPlayers() {
@@ -276,6 +293,7 @@ public class CreateGameScreen extends Screen {
 		Game.mainWindow.remove(chooseRandomPlayer);
 		Game.mainWindow.remove(back);
 		Game.mainWindow.remove(refresh);
+		Game.mainWindow.remove(error);
 		
 		gameChoices = null;
 		userGoesFirst = null;
@@ -287,6 +305,7 @@ public class CreateGameScreen extends Screen {
 		chooseRandomPlayer = null;
 		back = null;
 		refresh = null;
+		error = null;
 		
 		removeAndNullPlayers();
 		players = null;

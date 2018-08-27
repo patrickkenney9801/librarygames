@@ -84,7 +84,11 @@ public class GameServer extends Thread {
 				e.printStackTrace();
 			}
 			System.out.println();
-			System.out.println("CLIENT > " + new String(packet.getData()));
+			// do not output messages
+			if (new String(packet.getData()).substring(0, 2).equals("10"))
+				System.out.println("CLIENT > PACKET 10 RECEIVED");
+			else
+				System.out.println("CLIENT > " + new String(packet.getData()));
 			
 			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
 		}
@@ -171,7 +175,7 @@ public class GameServer extends Thread {
 			
 			// if there is not a result, send error incorrect credentials
 			if (!result.next()) {
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_CREDENTIALS, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET00_INVALID_CREDENTIALS, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("Incorrect credentials with username: " + Security.decrypt(packet.getUsername()));
 				return;
@@ -204,6 +208,11 @@ public class GameServer extends Thread {
 			if (!packet.isValid())
 				return;
 			
+			// make sure that username, password, email are the right length, if not exit
+			if (packet.getUsername().length() > 100 || packet.getPassword().length() > 100 || packet.getEmail().length() > 30
+					|| packet.getUsername().length() == 0 || packet.getPassword().length() == 0)
+				return;
+			
 			try {
 				// verify that both username and password are Base64 encrypted
 				String rawUsername = Security.decrypt(packet.getUsername());
@@ -213,14 +222,14 @@ public class GameServer extends Thread {
 				for (char c : rawUsername.toCharArray())
 					if (c == '~' || c == ',' || c == ':') {
 						// send error invalid username back
-						Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_USERNAME, true);
+						Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET01_INVALID_USERNAME, true);
 						errorPacket.writeData(this, address, port);
 						System.out.println("Invalid username: " + rawUsername);
 						return;
 					}
 			} catch (Exception e) {
 				// send error invalid encryption back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_ENCRYPTION, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET01_INVALID_ENCRYPTION, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("Invalid encryption");
 				e.printStackTrace();
@@ -233,7 +242,7 @@ public class GameServer extends Thread {
 			
 			// if the username is already in use, do not create new account and send back error package
 			if (result.next()) {
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.USERNAME_IN_USE, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET01_USERNAME_IN_USE, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("user: " + result.getString("username") + " already in use");
 				return;
@@ -398,7 +407,7 @@ public class GameServer extends Thread {
 			// verify that other user exists
 			if (!result.next()) {
 				// send error other user does not exist back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.FRIEND_DOES_NOT_EXIST, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET05_FRIEND_DOES_NOT_EXIST, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("Other user does not exist");
 				return;
@@ -413,7 +422,7 @@ public class GameServer extends Thread {
 			// if friend set already exists, send error and exit
 			if (result.next()) {
 				// send user is already friends with other user error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.ALREADY_FRIENDS, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET05_ALREADY_FRIENDS, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("DUPLICATE FRIEND REQUEST ERROR");
 				return;
@@ -456,7 +465,7 @@ public class GameServer extends Thread {
 			// if it is null, send error wrong game type and exit
 			if (board == null) {
 				// send invalid gameType error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_GAMETYPE_PACKET06, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET06_INVALID_GAMETYPE, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("ERROR gameType: " + packet.getGameType());
 				return;
@@ -472,7 +481,7 @@ public class GameServer extends Thread {
 			// verify that other user exists
 			if (!result.next()) {
 				// send invalid opponent error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.OPPONENT_DOES_NOT_EXIST, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET06_OPPONENT_DOES_NOT_EXIST, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("OPPONENT DOES NOT EXIST");
 				return;
@@ -500,7 +509,7 @@ public class GameServer extends Thread {
 			// if there is a matching unfinished game, send error to client and exit
 			if (matchingGames.next()) {
 				// send game already exists error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.DUPLICATE_GAME, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET06_DUPLICATE_GAME, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("DUPLICATE GAME DENIED");
 				return;
@@ -654,7 +663,7 @@ public class GameServer extends Thread {
 			// if no game name is found
 			if (type == null) {
 				// send invalid gameType error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_GAME_TYPE_PACKET08, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET08_INVALID_GAME_TYPE, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("ERROR IMPROPER GAME TYPE SENT");
 			}
@@ -670,7 +679,7 @@ public class GameServer extends Thread {
 			// if there are no results, exit print error and send error wrong game key
 			if (!result.next()) {
 				// send invalid game key error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_GAME_KEY_PACKET08, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET08_INVALID_GAME_KEY, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("ERROR IMPROPER GAME KEY SENT");
 				return;
@@ -765,7 +774,7 @@ public class GameServer extends Thread {
 			// if no game name is found
 			if (type == null) {
 				// send invalid game key error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_GAME_TYPE_PACKET09, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET09_INVALID_GAME_TYPE, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("ERROR IMPROPER GAME TYPE SENT");
 				return;
@@ -782,7 +791,7 @@ public class GameServer extends Thread {
 			// if there are no results, exit print error and send error wrong game key
 			if (!result.next()) {
 				// send invalid game key error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.INVALID_GAME_KEY_PACKET09, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET09_INVALID_GAME_KEY, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("ERROR IMPROPER GAME KEY SENT");
 				return;
@@ -808,7 +817,7 @@ public class GameServer extends Thread {
 			// if the game is already over, exit and send error
 			if (winner != 0) {
 				// send game already over error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.GAME_ALREADY_OVER, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET09_GAME_ALREADY_OVER, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("GAME IS ALREADY OVER");
 				return;
@@ -827,7 +836,7 @@ public class GameServer extends Thread {
 					winner = 3;
 				else {
 					// send sender not in game error back
-					Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.SENDER_NOT_IN_GAME, true);
+					Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET09_SENDER_NOT_IN_GAME, true);
 					errorPacket.writeData(this, address, port);
 					System.out.println("USER KEY NOT IN GAME RESIGNED");
 					return;
@@ -850,7 +859,7 @@ public class GameServer extends Thread {
 			// if newBoard is null then an improper move was sent, send error and exit
 			if (newBoard == null) {
 				// send illegal move error back
-				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.ILLEGAL_MOVE, true);
+				Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET09_ILLEGAL_MOVE, true);
 				errorPacket.writeData(this, address, port);
 				System.out.println("ILLEGAL MOVE SENT");
 				return;
