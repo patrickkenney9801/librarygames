@@ -84,10 +84,9 @@ public class GameClient extends Thread {
 												break;
 					case CREATEACCOUNT:			createAccountLogin(packet.getData());
 												break;
-					case ERROR:					// TODO will handle all errors
+					case ERROR:					handleError(packet.getData());
 												break;
-					case LOGOUT:				// TODO probably will not be used
-												break;
+					case LOGOUT:				break;
 					case GETPLAYERS:			getPlayers(packet.getData());
 												break;
 					case CREATEGAME:			break;
@@ -164,6 +163,36 @@ public class GameClient extends Thread {
 		
 		// open active games screen
 		Game.openActiveGamesScreen();
+	}
+
+	/**
+	 * Handles an error sent by the server
+	 * @param data
+	 */
+	protected void handleError(byte[] data) {
+		Packet02Error errorPacket = new Packet02Error(data, true);
+		if (!errorPacket.isValid())
+			return;
+		
+		switch (errorPacket.getErrorType()) {
+			case INVALID_CREDENTIALS:
+			case INVALID_USERNAME:
+			case INVALID_ENCRYPTION:
+			case USERNAME_IN_USE:
+			case FRIEND_DOES_NOT_EXIST:
+			case ALREADY_FRIENDS:
+			case INVALID_GAMETYPE_PACKET06:
+			case OPPONENT_DOES_NOT_EXIST:
+			case DUPLICATE_GAME:
+			case INVALID_GAME_TYPE_PACKET08:
+			case INVALID_GAME_KEY_PACKET08:
+			case INVALID_GAME_TYPE_PACKET09:
+			case INVALID_GAME_KEY_PACKET09:
+			case GAME_ALREADY_OVER:
+			case SENDER_NOT_IN_GAME:
+			case ILLEGAL_MOVE:
+			default:								break;
+		}
 	}
 
 	/**

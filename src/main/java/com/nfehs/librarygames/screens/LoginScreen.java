@@ -1,5 +1,6 @@
 package com.nfehs.librarygames.screens;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -25,6 +26,7 @@ public class LoginScreen extends Screen {
 	private JTextField		username;
 	private JPasswordField	password;
 	private JButton			login;
+	private JLabel			error;
 	private JButton			createAccount;
 	
 	public LoginScreen() {
@@ -73,6 +75,12 @@ public class LoginScreen extends Screen {
 				login();
 			}
 		});
+		
+		//error = new JLabel("ERROR: WRONG CREDENTIALS");
+		//Game.mainWindow.add(error);
+		//error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 20, 300, 20);
+		//error.setForeground(Color.RED);
+		//error.setVerticalTextPosition(JLabel.CENTER);
 		
 		createAccount = new JButton("CREATE ACCOUNT");
 		Game.mainWindow.add(createAccount);
