@@ -243,6 +243,7 @@ public class ActiveGamesScreen extends Screen {
 	 * Removes all active games from main window and sets the null
 	 */
 	private void removeAndNullActiveGames() {
+		try {
 		for (JButton finishedGame : finishedGames) {
 			finishedGamesPanel.remove(finishedGame);
 			finishedGame = null;
@@ -266,6 +267,9 @@ public class ActiveGamesScreen extends Screen {
 		finished = null;
 		userTurn = null;
 		opponentTurn = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void exit() {

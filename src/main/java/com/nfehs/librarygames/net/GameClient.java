@@ -327,6 +327,7 @@ public class GameClient extends Thread {
 		// send receipt
 		Packet13Receipt receipt = new Packet13Receipt(packet.getUuidKey());
 		receipt.writeData(this);
+		System.out.println(new String(receipt.getData()));
 		
 		// check to see if user is trying to access game from ActiveGamesScreen or CreateGameScreen or SpectatorGamesScreen
 		if ((Game.gameState == Game.ACTIVE_GAMES || Game.gameState == Game.CREATE_GAME || Game.gameState == Game.SPECTATOR_GAMES) 
@@ -370,6 +371,7 @@ public class GameClient extends Thread {
 		// send receipt
 		Packet13Receipt receipt = new Packet13Receipt(packet.getUuidKey());
 		receipt.writeData(this);
+		System.out.println(new String(receipt.getData()));
 		// verify that this packet is responding to the last one sent
 		if (!packet.getUuidKey().equals(getLastPacketKeysSent()[9]))
 			return;

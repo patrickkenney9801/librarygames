@@ -33,8 +33,8 @@ public class GameServer extends Thread {
 	private DatagramSocket socket;
 	private Connection database;
 	private static final int PORT = 19602;
-	private final String DATABASE_USER = "root";
-	private final String DATABASE_PASS = "98011089";
+	private final String DATABASE_USER = "pkenney";
+	private final String DATABASE_PASS = "9801";
 	
 	private ArrayList<Player> onlinePlayers;
 	private HashMap<String, Boolean> sentPackets;
@@ -1015,31 +1015,6 @@ public class GameServer extends Thread {
 			default:					return null;
 		}
 	}
-
-	/**
-	 * Updates the last_action_date of the sender
-	 * @param packet
-	 */
-	private void updateSender(Packet packet) {
-		updateSender(packet.getSenderKey());
-	}
-
-	/**
-	 * Updates the last_action_date of the sender
-	 * @param packet
-	 */
-	private void updateSender(String senderKey) {
-		try {
-			// update sender
-			PreparedStatement updateSender = database.prepareStatement("UPDATE users SET last_action_date = NOW()"
-					+ " WHERE user_key = '" + senderKey + "';");
-			updateSender.executeUpdate();
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * Sets the sender's current game to gameKey
 	 * Sends 11 packet to other clients in past game
@@ -1171,6 +1146,31 @@ public class GameServer extends Thread {
 		if (getSentPackets().containsKey(packetIdentifier))
 			getSentPackets().put(packetIdentifier, true);
 	}
+
+	/**
+	 * Updates the last_action_date of the sender
+	 * @param packet
+	 */
+	private void updateSender(Packet packet) {
+		updateSender(packet.getSenderKey());
+	}
+
+	/**
+	 * Updates the last_action_date of the sender
+	 * @param packet
+	 */
+	private void updateSender(String senderKey) {
+		try {
+			// update sender
+			PreparedStatement updateSender = database.prepareStatement("UPDATE users SET last_action_date = NOW()"
+					+ " WHERE user_key = '" + senderKey + "';");
+			updateSender.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	
 	/**
 	 * Sends a packet to the given address and port, expecting a response
@@ -1222,6 +1222,9 @@ public class GameServer extends Thread {
 			packet.writeData(this, address, port);
 			sleep(waitTime);
 			
+			// check if sent packet still exists
+			if (!getSentPackets().containsKey(packetIdentifier))
+				return true;
 			// check for receipt, if one, exit and remove packet, if none send again
 			if (getSentPackets().get(packetIdentifier)) {
 				getSentPackets().remove(packetIdentifier);
