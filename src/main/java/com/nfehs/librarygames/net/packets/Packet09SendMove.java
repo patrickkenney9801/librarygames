@@ -106,8 +106,8 @@ public class Packet09SendMove extends Packet {
 			String[] userdata = readData(data).split(":");
 			setUuidKey(userdata[0]);
 			setGameKey(userdata[1]);
-			setBoard(userdata[7]);
-			setExtraData(userdata[8]);
+			setBoard(userdata[8]);
+			setExtraData(userdata[9]);
 			setPenultMove(Integer.parseInt(userdata[2]));
 			setLastMove(Integer.parseInt(userdata[3]));
 			setMoves(Integer.parseInt(userdata[4]));

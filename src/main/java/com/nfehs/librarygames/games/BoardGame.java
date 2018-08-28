@@ -143,8 +143,9 @@ public abstract class BoardGame {
 		setLastMove(lastMove);
 		setBoard(board);
 		setPieces();
-		setPlayerTurn(!isPlayerTurn());
-		setPlayer1Turn(!isPlayer1Turn());
+		setPlayer1Turn(moves % 2 == 0);
+		setPlayerTurn(!isPlayerIsSpectating() && (getPlayer1().equals(Game.getPlayer().getUsername()) && isPlayer1Turn()) 
+				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !isPlayer1Turn()));
 		updateWinner(winner);
 		setMoves(moves);
 		if (winner == 0)
