@@ -39,10 +39,12 @@ public class Game {
 	public static final int CREATE_GAME = 3;
 	public static final int PLAYING_GAME = 4;
 	public static final int SPECTATOR_GAMES = 5;
+	public static final int CREATE_OFFLINE_GAME = 6;
 	public static final int OVER = 10;
 	
 	public static int gameState = Game.LOGIN;
 	public static boolean gamePlaying = true;
+	public static boolean online = false;
 
 	public Game() throws UnknownHostException {
 		client = new GameClient(SERVER_IP_ADDRESS);
@@ -208,32 +210,38 @@ public class Game {
 	 * @param movingTo
 	 */
 	public static void sendMove(int movingFrom, int movingTo) {
-		// sends send move packet to server
-		final Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
-							movingFrom, movingTo, getPlayer().getUsername(), getBoardGame().getGameType());
-		client.getLastPacketKeysSent()[9] = packet.getUuidKey();
-		// set last move received false
-		client.setLastMoveReceived(false);
-		
-		// send move, expect a 09 packet response
-		// send up to 5 times, if no response received display disconnect error
-		new Thread(new Runnable() {
-			public void run() {
-				// send packet, wait 500ms before checking for response
-				if (sendMove(packet, 500))
-					return;
-				if (sendMove(packet, 500))
-					return;
-				if (sendMove(packet, 750))
-					return;
-				if (sendMove(packet, 1000))
-					return;
-				if (sendMove(packet, 5000))
-					return;
-				JOptionPane.showConfirmDialog(null, "Cannot contact the server, the game will quit", "Connection Error", JOptionPane.CANCEL_OPTION);
-				System.exit(0);
-			}
-		}).start();
+		// if the user is online, send move to server, else offline server
+		if (isOnline()) {
+			// sends send move packet to server
+			final Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
+								movingFrom, movingTo, getPlayer().getUsername(), getBoardGame().getGameType());
+			client.getLastPacketKeysSent()[9] = packet.getUuidKey();
+			// set last move received false
+			client.setLastMoveReceived(false);
+			
+			// send move, expect a 09 packet response
+			// send up to 5 times, if no response received display disconnect error
+			new Thread(new Runnable() {
+				public void run() {
+					// send packet, wait 500ms before checking for response
+					if (sendMove(packet, 500))
+						return;
+					if (sendMove(packet, 500))
+						return;
+					if (sendMove(packet, 750))
+						return;
+					if (sendMove(packet, 1000))
+						return;
+					if (sendMove(packet, 5000))
+						return;
+					JOptionPane.showConfirmDialog(null, "Cannot contact the server, the game will quit", "Connection Error", JOptionPane.CANCEL_OPTION);
+					System.exit(0);
+				}
+			}).start();
+		} else {
+			getBoardGame().makeMoveOffline(movingFrom, movingTo);
+			updateGameBoard();
+		}
 	}
 	
 	/**
@@ -305,6 +313,7 @@ public class Game {
 		exitCurrentScreen();
 		screen = new LoginScreen();
 		gameState = LOGIN;
+		setOnline(true);
 	}
 
 	/**
@@ -314,6 +323,7 @@ public class Game {
 		exitCurrentScreen();
 		screen = new CreateAccountScreen();
 		gameState = CREATE_ACCOUNT;
+		setOnline(true);
 	}
 
 	/**
@@ -356,6 +366,16 @@ public class Game {
 	}
 	
 	/**
+	 * This method opens up the create offline game screen for user
+	 */
+	public static void openCreateOfflineGameScreen() {
+		exitCurrentScreen();
+		screen = new CreateOfflineGameScreen();
+		gameState = CREATE_OFFLINE_GAME;
+		setOnline(false);
+	}
+	
+	/**
 	 * This method refreshes the current screen, used when screen resized
 	 */
 	public static void refresh() {
@@ -376,6 +396,7 @@ public class Game {
 										break;
 			case SPECTATOR_GAMES:		openSpectatorGamesScreen();
 										break;
+			case CREATE_OFFLINE_GAME:	openCreateOfflineGameScreen();
 		}
 	}
 	
@@ -515,5 +536,13 @@ public class Game {
 	 */
 	public static void setBoardGame(BoardGame boardGame) {
 		Game.boardGame = boardGame;
+	}
+
+	public static boolean isOnline() {
+		return online;
+	}
+
+	public static void setOnline(boolean online) {
+		Game.online = online;
 	}
 }

@@ -81,7 +81,7 @@ public class GameScreen extends Screen {
 	private JCheckBox allowSpectatorsInChat;
 
 	public GameScreen() {
-		super(false);
+		super(!Game.isOnline());
 		
 		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
 		int rowLength = Game.getBoardGame().getBoard().length;
@@ -101,7 +101,11 @@ public class GameScreen extends Screen {
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("RETURN TO GAMES LIST CLICKED");
-				Game.openActiveGamesScreen();
+				// if online player, return to active games, otherwise create offline game screen
+				if (Game.isOnline())
+					Game.openActiveGamesScreen();
+				else
+					Game.openCreateOfflineGameScreen();
 			}
 		});
 		
@@ -116,6 +120,7 @@ public class GameScreen extends Screen {
 					if (Game.getBoardGame().getMoves() < 3)
 						Game.openActiveGamesScreen();
 				}
+				chat.requestFocus();
 			}
 		});
 		// if the user is a spectator disable this button
@@ -125,10 +130,8 @@ public class GameScreen extends Screen {
 		shadowPiece = new JLabel();
 		pass = new JButton("PASS");
 		
-		// if playing go, set the icon for shadow piece and define the pass button
+		// if playing go define the pass button
 		if (Game.getBoardGame().getGameType() < 3) {
-			shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getPiece(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
-			
 			Game.mainWindow.add(pass);
 			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
 			pass.addActionListener(new ActionListener() {
@@ -136,6 +139,7 @@ public class GameScreen extends Screen {
 					System.out.println("PASS CLICKED");
 					// send move pass to server
 					Game.sendMove(-1, -1);
+					chat.requestFocus();
 				}
 			});
 			// if the user is a spectator disable this button
@@ -193,7 +197,7 @@ public class GameScreen extends Screen {
 		
 		
 		
-		capturedPieces= new JLayeredPane();
+		capturedPieces = new JLayeredPane();
 		Game.mainWindow.add(capturedPieces);
 		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
 							getTopLeftY() + getInfoTextSize() * 8, panelWidth, getInfoTextSize() * 6);
@@ -276,10 +280,12 @@ public class GameScreen extends Screen {
 			}
 		});
 		chat.requestFocus();
+		if (!Game.isOnline())
+			chat.setEnabled(false);
 		
 		allowSpectatorsInChat = new JCheckBox("Allow spectators in chat");
-		// if the user is a spectator do not include check box on screen but set it true
-		if (Game.getBoardGame().isPlayerIsSpectating())
+		// if the user is a spectator or offline do not include check box on screen but set it true
+		if (Game.getBoardGame().isPlayerIsSpectating() || !Game.isOnline())
 			allowSpectatorsInChat.setSelected(true);
 		else {
 			// if the user isn't a spectator set not allowed by default
@@ -548,6 +554,7 @@ public class GameScreen extends Screen {
 	 */
 	public void displayPieceShadow(int x, int y) {
 		// adds shadow piece to screen
+		shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getPiece(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
 		pane.add(shadowPiece, JLayeredPane.PALETTE_LAYER);
 		
 		shadowPiece.setBounds((int) (y*getScreenTileSize()), (int) (x*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
@@ -565,7 +572,8 @@ public class GameScreen extends Screen {
 
 	@Override
 	public void exit() {
-		exitParentGUI();
+		if (Game.isOnline())
+			exitParentGUI();
 		
 		Game.mainWindow.remove(back);
 		Game.mainWindow.remove(title);

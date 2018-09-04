@@ -79,19 +79,29 @@ public abstract class BoardGame {
 		setTiles();
 		setPieces();
 		
-		// if the game has a winner, set it to the winner's username, check if opponent resigned
-		updateWinner(winner);
-		
-		// check if user is spectating
-		setPlayerIsSpectating(!getPlayer1().equals(Game.getPlayer().getUsername()) && !getPlayer2().equals(Game.getPlayer().getUsername()));
-		
-		// determine whether it is the logged players turn or not
-		setPlayer1Turn(moves % 2 == 0);
-		setPlayerTurn(false);
-		if (!isPlayerIsSpectating() && (getPlayer1().equals(Game.getPlayer().getUsername()) && isPlayer1Turn()) 
-				|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !isPlayer1Turn()))
+		// if online, update game info
+		if (Game.isOnline()) {
+			// if the game has a winner, set it to the winner's username, check if opponent resigned
+			updateWinner(winner);
+			
+			// check if user is spectating
+			setPlayerIsSpectating(!getPlayer1().equals(Game.getPlayer().getUsername()) && !getPlayer2().equals(Game.getPlayer().getUsername()));
+			
+			// determine whether it is the logged players turn or not
+			setPlayer1Turn(moves % 2 == 0);
+			setPlayerTurn(false);
+			if (!isPlayerIsSpectating() && (getPlayer1().equals(Game.getPlayer().getUsername()) && isPlayer1Turn()) 
+					|| (getPlayer2().equals(Game.getPlayer().getUsername()) && !isPlayer1Turn()))
+				setPlayerTurn(true);
+			setPlayer1((isPlayer1Turn() && isPlayerTurn()) || (!isPlayer1Turn() && !isPlayerTurn()));
+		} else {
+			// if offline set basic info
+			updateWinner(0);
+			setPlayerIsSpectating(false);
+			setPlayer1Turn(true);
 			setPlayerTurn(true);
-		setPlayer1((isPlayer1Turn() && isPlayerTurn()) || (!isPlayer1Turn() && !isPlayerTurn()));
+			setPlayer1(true);
+		}
 	}
 	
 	/**
@@ -225,6 +235,68 @@ public abstract class BoardGame {
 	}
 	
 	/**
+	 * Handles all offline moves
+	 * @param movingFrom
+	 * @param movingTo
+	 */
+	public void makeMoveOffline(int movingFrom,  int movingTo) {
+		// first handle resignation case
+		if (movingTo == -2)
+			if (isPlayer1Turn())
+				updateWinner(4);
+			else
+				updateWinner(3);
+		
+		// get new move
+		String oldBoard = getBoardAsString();
+		String newBoard = BoardGame.makeMove(gameType, oldBoard, moves % 2 == 0, penultMove, lastMove, movingFrom, movingTo);
+		setBoard(newBoard);
+
+		// if the game is go
+		if (getGameType() < 3) {
+			// if the user did not pass, calculate score
+			if (movingTo > -1) {
+				int capturedPieces = -1;	// for use in go games
+				// calculate number of captured pieces in a go game
+				for (int i = 0; i < oldBoard.length(); i++)
+					if (oldBoard.charAt(i) != newBoard.charAt(i))
+						capturedPieces++;
+				if (getMoves() % 2 == 0)
+					((Go) this).setWhiteStonesCaptured(((Go) this).getWhiteStonesCaptured() + capturedPieces);
+				else
+					((Go) this).setBlackStonesCaptured(((Go) this).getBlackStonesCaptured() + capturedPieces);
+			}
+			
+			// if the user passed, it is end of game if last move was a pass too
+			if (movingTo == -1 && getLastMove() == -1) {
+				// get player scores
+				int[] territoryScores = Go.calculateTerritory(oldBoard);
+				((Go) this).setPlayer1Score(territoryScores[0] + ((Go) this).getWhiteStonesCaptured());
+				
+				// apply Komi
+				switch (getGameType()) {
+					case 2:				((Go) this).setPlayer2Score(territoryScores[0] + ((Go) this).getBlackStonesCaptured() + 6);
+										break;
+					case 1:				((Go) this).setPlayer2Score(territoryScores[0] + ((Go) this).getBlackStonesCaptured() + 3);
+										break;
+					default: 			((Go) this).setPlayer2Score(territoryScores[0] + ((Go) this).getBlackStonesCaptured() + 1);
+				}
+				updateWinner(1);
+				if (((Go) this).getPlayer2Score() >= ((Go) this).getPlayer1Score())
+					updateWinner(2);
+				setScoreInfo("Score: " + ((Go) this).getPlayer1Score() + " - " + ((Go) this).getPlayer2Score() + ".5");
+			}
+		}
+
+		setPieces();
+		setPlayer1Turn(!isPlayer1Turn());
+		setMoves(getMoves() + 1);
+		setPlayer1(!isPlayer1());
+		setPenultMove(getLastMove());
+		setLastMove(movingTo);
+	}
+
+	/**
 	 * Converts 2D coordinates into 1D
 	 * @param x
 	 * @param y
@@ -348,6 +420,26 @@ public abstract class BoardGame {
 		}
 		return board;
 	}
+	
+	/**
+	 * Generates brand new extra game info
+	 * @param gameType
+	 * @return
+	 */
+	public static String createExtraGameInfo(int gameType) {
+		String board = "";
+		switch (gameType) {
+			case 0:							
+			case 1:							
+			case 2:							// generates new extra game info for go games
+											board = "0,0,0,0";
+											break;
+			default:						// error no valid game type, return null
+											return null;
+		}
+		return board;
+	}
+	
 	/**
 	 * Returns a String with 5 parts delimited by ~
 	 * Part 1 is the game key, 2 is game title, 3 is bool for user goes first, 4 is gameType, 5 is bool for if user won the game
@@ -543,6 +635,17 @@ public abstract class BoardGame {
 		for (int i = 0; i < board2D.length; i++)
 			board2D[i] = board.substring(i*arrayLength, (i+1)*arrayLength).toCharArray();
 		this.board = board2D;
+	}
+	
+	/**
+	 * @return
+	 */
+	public String getBoardAsString() {
+		String board = "";
+		for (char[] row : getBoard())
+			for (char piece : row)
+				board += piece;
+		return board;
 	}
 
 	/**

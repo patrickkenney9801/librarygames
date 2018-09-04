@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import com.nfehs.librarygames.Game;
 
 /**
- * This class handles the user's login creating accounts
+ * This class handles the user's login, creating accounts
  * 
  * @author Patrick Kenney, Syed Quadri
  * @date 6/13/2018
@@ -29,6 +29,7 @@ public class LoginScreen extends Screen {
 	private JButton			login;
 	private JLabel			error;
 	private JButton			createAccount;
+	private JButton			offline;
 	
 	public LoginScreen() {
 		super(true);
@@ -92,6 +93,16 @@ public class LoginScreen extends Screen {
 				Game.openCreateAccountScreen();
 			}
 		});
+		
+		offline = new JButton("PLAY OFFLINE");
+		Game.mainWindow.add(offline);
+		offline.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 75, 150, 30);
+		offline.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Offline play clicked");
+				Game.openCreateOfflineGameScreen();
+			}
+		});
 
 		Game.mainWindow.repaint();
 	}
@@ -122,6 +133,7 @@ public class LoginScreen extends Screen {
 		Game.mainWindow.remove(login);
 		Game.mainWindow.remove(error);
 		Game.mainWindow.remove(createAccount);
+		Game.mainWindow.remove(offline);
 		
 		user			= null;
 		pass			= null;
@@ -130,6 +142,7 @@ public class LoginScreen extends Screen {
 		login			= null;
 		error			= null;
 		createAccount	= null;
+		offline			= null;
 		
 		Game.mainWindow.repaint();
 	}
