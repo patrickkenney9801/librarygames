@@ -275,11 +275,11 @@ public abstract class BoardGame {
 				
 				// apply Komi
 				switch (getGameType()) {
-					case 2:				((Go) this).setPlayer2Score(territoryScores[0] + ((Go) this).getBlackStonesCaptured() + 6);
+					case 2:				((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 6);
 										break;
-					case 1:				((Go) this).setPlayer2Score(territoryScores[0] + ((Go) this).getBlackStonesCaptured() + 3);
+					case 1:				((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 3);
 										break;
-					default: 			((Go) this).setPlayer2Score(territoryScores[0] + ((Go) this).getBlackStonesCaptured() + 1);
+					default: 			((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 1);
 				}
 				updateWinner(1);
 				if (((Go) this).getPlayer2Score() >= ((Go) this).getPlayer1Score())
