@@ -36,11 +36,9 @@ public class LoginScreen extends Screen {
 		
 		user = new JLabel("Username:");
 		Game.mainWindow.add(user);
-		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
 		
 		username = new JTextField();
 		Game.mainWindow.add(username);
-		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
 		username.requestFocusInWindow();
 		username.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
@@ -53,11 +51,9 @@ public class LoginScreen extends Screen {
 
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
-		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
 		
 		password = new JPasswordField();
 		Game.mainWindow.add(password);
-		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
 		password.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
@@ -69,7 +65,6 @@ public class LoginScreen extends Screen {
 		
 		login = new JButton("LOGIN");
 		Game.mainWindow.add(login);
-		login.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// logs the user into the server
@@ -80,13 +75,11 @@ public class LoginScreen extends Screen {
 		
 		error = new JLabel();
 		Game.mainWindow.add(error);
-		error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 20, 300, 20);
 		error.setForeground(Color.RED);
 		error.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		createAccount = new JButton("CREATE ACCOUNT");
 		Game.mainWindow.add(createAccount);
-		createAccount.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2, 150, 30);
 		createAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create account clicked");
@@ -96,7 +89,6 @@ public class LoginScreen extends Screen {
 		
 		offline = new JButton("PLAY OFFLINE");
 		Game.mainWindow.add(offline);
-		offline.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 75, 150, 30);
 		offline.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Offline play clicked");
@@ -104,7 +96,22 @@ public class LoginScreen extends Screen {
 			}
 		});
 
+		setPositions();
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
+		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
+		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
+		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 110, 150, 30);
+		login.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
+		error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 2 - 20, 300, 20);
+		createAccount.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2, 150, 30);
+		offline.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 75, 150, 30);
 	}
 	
 	/**

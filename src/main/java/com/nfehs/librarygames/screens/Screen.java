@@ -27,6 +27,8 @@ public abstract class Screen {
 	private JButton notification;
 	private BoardGame latestBoardGameUpdate;
 	
+	private Thread alertUser;
+	
 	public Screen(boolean isNotLogged) {
 		if (!isNotLogged) {
 			loggedUser = new JLabel("Logged in as: " + Game.getPlayer().getUsername());
@@ -53,6 +55,21 @@ public abstract class Screen {
 					Game.sendOnGameUpdate();
 				}
 			});
+			
+			alertUser = new Thread (new Runnable () {
+				public void run() {
+					try {
+						Thread.sleep(5000);
+						if (notification != null)
+							Game.mainWindow.remove(notification);
+						if (Game.screen instanceof GameScreen)
+							Game.mainWindow.add(((GameScreen) Game.screen).title);
+						Game.mainWindow.repaint();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
 		}
 	}
 	
@@ -68,19 +85,7 @@ public abstract class Screen {
 		notification.setText("Action made: " + getLatestBoardGameUpdate().getGameTitle());
 		Game.mainWindow.add(notification);
 		
-		new Thread (new Runnable () {
-			public void run() {
-				try {
-					Thread.sleep(5000);
-					Game.mainWindow.remove(notification);
-					if (Game.screen instanceof GameScreen)
-						Game.mainWindow.add(((GameScreen) Game.screen).title);
-					Game.mainWindow.repaint();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
+		alertUser.start();
 		Game.mainWindow.repaint();
 	}
 	
@@ -105,7 +110,9 @@ public abstract class Screen {
 		tp.setEditable(false);
 	}
 	
-	public abstract void exit();
+	public void exit() {
+		Game.mainWindow.removeAll();
+	}
 	protected void exitParentGUI() {
 		Game.mainWindow.remove(loggedUser);
 		Game.mainWindow.remove(logout);
@@ -114,6 +121,19 @@ public abstract class Screen {
 		loggedUser = null;
 		logout = null;
 		notification = null;
+	}
+	
+	protected abstract void setPositions();
+	public void resize() {
+		resizeParentGUI();
+		setPositions();
+		Game.mainWindow.repaint();
+	}
+	private void resizeParentGUI() {
+		if (logout != null)
+			logout.setBounds((int) Game.screenSize.getWidth() - 125, 5, 100, 30);
+		if (notification != null)
+			notification.setBounds(200, 5, (int) Game.screenSize.getWidth() - 400, 30);
 	}
 
 	/**

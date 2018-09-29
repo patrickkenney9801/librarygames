@@ -45,7 +45,6 @@ public class ActiveGamesScreen extends Screen {
 		
 		createGame = new JButton("NEW GAME");
 		Game.mainWindow.add(createGame);
-		createGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10, 150, 30);
 		createGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create game clicked");
@@ -55,7 +54,6 @@ public class ActiveGamesScreen extends Screen {
 		
 		spectatorGames = new JButton("SPECTATE GAMES");
 		Game.mainWindow.add(spectatorGames);
-		spectatorGames.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 50, 150, 30);
 		spectatorGames.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Spectator games clicked");
@@ -65,13 +63,16 @@ public class ActiveGamesScreen extends Screen {
 		
 		refresh = new JButton("REFRESH");
 		Game.mainWindow.add(refresh);
-		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 160, 150, 30);
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Refresh clicked");
 				Game.getActiveGames();
 			}
 		});
+		
+		finished = new JLabel("Finished Games:");
+		Game.mainWindow.add(finished);
+		
 		finishedGamesPanel = new JPanel();
 		finishedGamesPanel.setLayout(null);
 		finishedGamesPanel.setBackground(GameFrame.background);
@@ -80,6 +81,10 @@ public class ActiveGamesScreen extends Screen {
 		finishedGamesTab.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		finishedGamesTab.setAutoscrolls(true);
 		finishedGamesTab.getVerticalScrollBar().setUnitIncrement(15);
+		Game.mainWindow.add(finishedGamesTab);
+
+		userTurn = new JLabel("Your turn:");
+		Game.mainWindow.add(userTurn);
 		
 		activeGamesUserPanel = new JPanel();
 		activeGamesUserPanel.setLayout(null);
@@ -89,6 +94,10 @@ public class ActiveGamesScreen extends Screen {
 		activeGamesUserTab.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		activeGamesUserTab.setAutoscrolls(true);
 		activeGamesUserTab.getVerticalScrollBar().setUnitIncrement(15);
+		Game.mainWindow.add(activeGamesUserTab);
+
+		opponentTurn = new JLabel("Opponent's turn:");
+		Game.mainWindow.add(opponentTurn);
 		
 		activeGamesPanel = new JPanel();
 		activeGamesPanel.setLayout(null);
@@ -98,14 +107,34 @@ public class ActiveGamesScreen extends Screen {
 		activeGamesTab.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		activeGamesTab.setAutoscrolls(true);
 		activeGamesTab.getVerticalScrollBar().setUnitIncrement(15);
-		
-		finished = new JLabel();
-		userTurn = new JLabel();
-		opponentTurn = new JLabel();
-		
-		finishedGames = new JButton[0];
-		activeGames = new JButton[0];
-		activeGamesUserTurn = new JButton[0];
+		Game.mainWindow.add(activeGamesTab);
+
+		setPositions();
+		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		createGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10, 150, 30);
+		spectatorGames.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 50, 150, 30);
+		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 160, 150, 30);
+		finished.setBounds ((int) Game.screenSize.getWidth() / 2 - 500, 
+							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
+		finishedGamesTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 500,
+				(int) Game.screenSize.getHeight() / 10 + 230, 300,
+				(int) Game.screenSize.getHeight() - ((int) Game.screenSize.getHeight() / 10 + 230) - 50);
+		userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
+				(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
+		activeGamesUserTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
+				(int) Game.screenSize.getHeight() / 10 + 230, 300,
+				(int) Game.screenSize.getHeight() - ((int) Game.screenSize.getHeight() / 10 + 230) - 50);
+		opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 + 200, 
+				(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
+		activeGamesTab.setBounds   ((int) Game.screenSize.getWidth() / 2 + 200,
+									(int) Game.screenSize.getHeight() / 10 + 230, 300,
+									(int) Game.screenSize.getHeight() - ((int) Game.screenSize.getHeight() / 10 + 230) - 50);
 	}
 	
 	/**
@@ -113,22 +142,14 @@ public class ActiveGamesScreen extends Screen {
 	 */
 	public void loadActiveGames() {
 		// remove current active games
-		removeAndNullActiveGames();
+		finishedGamesPanel.removeAll();
+		activeGamesUserPanel.removeAll();
+		activeGamesPanel.removeAll();
 		
 		// finished games
-		finished = new JLabel("Finished Games:");
-		Game.mainWindow.add(finished);
-		finished.setBounds ((int) Game.screenSize.getWidth() / 2 - 500, 
-							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
-		
 		finishedGames = new JButton[Game.getPlayer().getFinishedBoardGames().length];
 		finishedGamesPanel.setPreferredSize(new Dimension(285, finishedGames.length*50 - 10));
 		finishedGamesPanel.setBounds(5, 5, 285, finishedGames.length*50 - 10);
-		
-		finishedGamesTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 500,
-				(int) Game.screenSize.getHeight() / 10 + 230, 300,
-				(int) Game.screenSize.getHeight() - ((int) Game.screenSize.getHeight() / 10 + 230) - 50);
-		Game.mainWindow.add(finishedGamesTab);
 		
 		for (int i = 0; i < finishedGames.length; i++) {
 			finishedGames[i] = new JButton(Game.getPlayer().getFinishedBoardGames()[i].split("~")[1]);
@@ -157,19 +178,9 @@ public class ActiveGamesScreen extends Screen {
 		
 		
 		// add active games user turn
-		userTurn = new JLabel("Your turn:");
-		Game.mainWindow.add(userTurn);
-		userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
-							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
-		
 		activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().length];
 		activeGamesUserPanel.setPreferredSize(new Dimension(285, activeGamesUserTurn.length*50 - 10));
 		activeGamesUserPanel.setBounds(5, 5, 285, activeGamesUserTurn.length*50 - 10);
-		
-		activeGamesUserTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
-									(int) Game.screenSize.getHeight() / 10 + 230, 300,
-									(int) Game.screenSize.getHeight() - ((int) Game.screenSize.getHeight() / 10 + 230) - 50);
-		Game.mainWindow.add(activeGamesUserTab);
 		
 		for (int i = 0; i < activeGamesUserTurn.length; i++) {
 			activeGamesUserTurn[i] = new JButton(Game.getPlayer().getYourTurnBoardGames()[i].split("~")[1]);
@@ -197,19 +208,9 @@ public class ActiveGamesScreen extends Screen {
 		
 		
 		// add new active games, opponent's turn games
-		opponentTurn = new JLabel("Opponent's turn:");
-		Game.mainWindow.add(opponentTurn);
-		opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 + 200, 
-							(int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
-
 		activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().length];
 		activeGamesPanel.setPreferredSize(new Dimension(285, activeGames.length*50 - 10));
 		activeGamesPanel.setBounds(5, 5, 285, activeGames.length*50 - 10);
-		
-		activeGamesTab.setBounds   ((int) Game.screenSize.getWidth() / 2 + 200,
-									(int) Game.screenSize.getHeight() / 10 + 230, 300,
-									(int) Game.screenSize.getHeight() - ((int) Game.screenSize.getHeight() / 10 + 230) - 50);
-		Game.mainWindow.add(activeGamesTab);
 		
 		for (int i = 0; i < activeGames.length; i++) {
 			activeGames[i] = new JButton(Game.getPlayer().getOpponentTurnBoardGames()[i].split("~")[1]);
@@ -238,44 +239,9 @@ public class ActiveGamesScreen extends Screen {
 		activeGamesTab.revalidate();
 		Game.mainWindow.repaint();
 	}
-	
-	/**
-	 * Removes all active games from main window and sets the null
-	 */
-	private void removeAndNullActiveGames() {
-		try {
-		for (JButton finishedGame : finishedGames) {
-			finishedGamesPanel.remove(finishedGame);
-			finishedGame = null;
-		}
-		for (JButton activeGame : activeGamesUserTurn) {
-			activeGamesUserPanel.remove(activeGame);
-			activeGame = null;
-		}
-		for (JButton activeGame : activeGames) {
-			activeGamesPanel.remove(activeGame);
-			activeGame = null;
-		}
-		Game.mainWindow.remove(finished);
-		Game.mainWindow.remove(userTurn);
-		Game.mainWindow.remove(opponentTurn);
-		
-		Game.mainWindow.remove(finishedGamesTab);
-		Game.mainWindow.remove(activeGamesTab);
-		Game.mainWindow.remove(activeGamesUserTab);
-		
-		finished = null;
-		userTurn = null;
-		opponentTurn = null;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	public void exit() {
 		exitParentGUI();
-		
-		removeAndNullActiveGames();
 		
 		Game.mainWindow.remove(createGame);
 		Game.mainWindow.remove(spectatorGames);
@@ -283,6 +249,12 @@ public class ActiveGamesScreen extends Screen {
 		Game.mainWindow.remove(finishedGamesTab);
 		Game.mainWindow.remove(activeGamesUserTab);
 		Game.mainWindow.remove(activeGamesTab);
+		Game.mainWindow.remove(finished);
+		Game.mainWindow.remove(userTurn);
+		Game.mainWindow.remove(opponentTurn);
+		Game.mainWindow.remove(finishedGamesTab);
+		Game.mainWindow.remove(activeGamesTab);
+		Game.mainWindow.remove(activeGamesUserTab);
 		
 		createGame = null;
 		spectatorGames = null;
@@ -290,6 +262,9 @@ public class ActiveGamesScreen extends Screen {
 		finishedGamesTab = null;
 		activeGamesUserTab = null;
 		activeGamesTab = null;
+		finished = null;
+		userTurn = null;
+		opponentTurn = null;
 		
 		Game.mainWindow.repaint();
 	}

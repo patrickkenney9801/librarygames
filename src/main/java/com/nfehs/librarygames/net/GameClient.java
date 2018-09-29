@@ -37,6 +37,8 @@ public class GameClient extends Thread {
 	private int packetsToReceiveGetSpectates;
 	private String[][] spectates;
 	
+	private String lastChatKeyReceived;
+	
 	private boolean lastMoveReceived;
 	
 	public GameClient(byte[] ipAddress) {
@@ -402,11 +404,12 @@ public class GameClient extends Thread {
 		Packet13Receipt receipt = new Packet13Receipt(packet.getUuidKey());
 		receipt.writeData(this);
 		
-		// check that client is on correct game, if so update the chat
-		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey())) {
+		// check that client is on correct game and they haven't received the message yet, if so update the chat
+		if (packet.getGameKey().equals(Game.getBoardGame().getGameKey()) && !packet.getUuidKey().equals(getLastChatKeyReceived())) {
 			Game.getBoardGame().setPlayer1OnGame(packet.isPlayer1OnGame());
 			Game.getBoardGame().setPlayer2OnGame(packet.isPlayer2OnGame());
 			Game.updateGameChat(packet.getText(), packet.getSenderKey());
+			setLastChatKeyReceived(packet.getUuidKey());
 		}
 	}
 
@@ -579,5 +582,13 @@ public class GameClient extends Thread {
 
 	public void setLastMoveReceived(boolean lastMoveReceived) {
 		this.lastMoveReceived = lastMoveReceived;
+	}
+
+	public String getLastChatKeyReceived() {
+		return lastChatKeyReceived;
+	}
+
+	public void setLastChatKeyReceived(String lastChatKeyReceived) {
+		this.lastChatKeyReceived = lastChatKeyReceived;
 	}
 }

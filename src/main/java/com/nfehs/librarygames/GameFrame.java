@@ -57,7 +57,7 @@ public class GameFrame extends JFrame {
 				Tile.loadImages();
 				Piece.loadImages();
 				
-				Game.refresh();
+				Game.resize();
 			}
 		});
 		

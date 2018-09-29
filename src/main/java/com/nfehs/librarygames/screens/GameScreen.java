@@ -83,21 +83,11 @@ public class GameScreen extends Screen {
 	public GameScreen() {
 		super(!Game.isOnline());
 		
-		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
-		int rowLength = Game.getBoardGame().getBoard().length;
-		setScreenTileSize((int) (getBoardSize() / rowLength));
-		setScale(getScreenTileSize() / imageTileSize);
-		//System.out.println(getScale());
-		setTopLeftY((int) Game.screenSize.getHeight() / 25);
-		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
-		
 		title = new JLabel(Game.getBoardGame().getGameTitle());
 		Game.mainWindow.add(title);
-		title.setBounds(getTopLeftX(), getTopLeftY() - 20, 250, 15);
 		
 		back = new JButton("RETURN");
 		Game.mainWindow.add(back);
-		back.setBounds(getTopLeftX(), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("RETURN TO GAMES LIST CLICKED");
@@ -111,7 +101,6 @@ public class GameScreen extends Screen {
 		
 		resign = new JButton("RESIGN");
 		Game.mainWindow.add(resign);
-		resign.setBounds(getTopLeftX() + (int) getBoardSize() - 150, getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
 		resign.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("RESIGN CLICKED");
@@ -133,7 +122,6 @@ public class GameScreen extends Screen {
 		// if playing go define the pass button
 		if (Game.getBoardGame().getGameType() < 3) {
 			Game.mainWindow.add(pass);
-			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
 			pass.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("PASS CLICKED");
@@ -147,71 +135,211 @@ public class GameScreen extends Screen {
 				pass.setEnabled(false);
 		}
 
-		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
 		gameOverInfo = new JPanel();
-		gameOverInfo.setBounds(getTopLeftX() + (int) getBoardSize() + panelWidth / 20, getTopLeftY(), panelWidth, getInfoTextSize() * 7 / 2);
 		gameOverInfo.setLayout(null);
 		
 		winner = new JLabel();
 		gameOverInfo.add(winner);
-		winner.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
-		winner.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		score = new JLabel();
 		gameOverInfo.add(score);
-		score.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize(), getInfoTextSize());
-		score.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		
 		
 		gameInfo = new JPanel();
 		Game.mainWindow.add(gameInfo);
-		gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
-							getTopLeftY() + getInfoTextSize() * 2, panelWidth, getInfoTextSize() * 5);
 		gameInfo.setLayout(null);
 		
 		moveCount = new JLabel();
 		gameInfo.add(moveCount);
-		moveCount.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
-		moveCount.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
 		player1Icon = new JLabel();
 		gameInfo.add(player1Icon);
-		player1Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, getInfoTextSize(), getInfoTextSize());
 		
 		player1User = new JLabel(Game.getBoardGame().getPlayer1());
 		gameInfo.add(player1User);
-		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
-		player1User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		player1User.setForeground(Color.GREEN);
 		
 		player2Icon = new JLabel();
 		gameInfo.add(player2Icon);
-		player2Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 7 / 2, getInfoTextSize(), getInfoTextSize());
 		
 		player2User = new JLabel(Game.getBoardGame().getPlayer2());
 		gameInfo.add(player2User);
-		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
-		player2User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		player2User.setForeground(Color.GREEN);
 		
 		
 		
 		capturedPieces = new JLayeredPane();
 		Game.mainWindow.add(capturedPieces);
-		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
-							getTopLeftY() + getInfoTextSize() * 8, panelWidth, getInfoTextSize() * 6);
 		capturedPieces.setLayout(null);
 		
 		capturedPiecesBG = new JPanel();
-		capturedPiecesBG.setBounds(0, 0, capturedPieces.getWidth(), capturedPieces.getHeight());
 		capturedPieces.add(capturedPiecesBG, JLayeredPane.FRAME_CONTENT_LAYER);
 		
 		captured = new JLabel("Captured Pieces: ");
 		capturedPieces.add(captured);
-		captured.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
-		captured.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
 		
+		
+		
+		chatInterface = new JPanel();
+		Game.mainWindow.add(chatInterface);
+		chatInterface.setLayout(null);
+		
+		chatBox = new JTextPane();
+		chatInterface.add(chatBox);
+		chatBox.setEditable(false);
+		chatBox.setBounds(0, 0, 0, (int) getBoardSize() * 7 / 8 - 40);
+		chatBox.setMargin(new Insets(chatBox.getHeight() - 20, 0, 0, 0));
+		
+		chat = new JTextField();
+		chatInterface.add(chat);
+		chat.setFont(new Font("Serif", Font.PLAIN, 15));
+		chat.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {}
+			public void keyTyped(KeyEvent e) {
+				// if enter pressed, send text to server if there is some, otherwise scroll up a line
+				if (e.getKeyChar() == '\n')
+					if (((JTextField) e.getSource()).getText().length() > 0)
+						Game.sendChat(allowSpectatorsInChat.isSelected(), chat.getText());
+					else{
+						chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
+						chat.requestFocus();
+						chatBox.repaint();
+						chatInterface.repaint();
+					}
+			}
+		});
+		chat.requestFocus();
+		if (!Game.isOnline())
+			chat.setEnabled(false);
+		
+		allowSpectatorsInChat = new JCheckBox("Allow spectators in chat");
+		// if the user is a spectator or offline do not include check box on screen but set it true
+		if (Game.getBoardGame().isPlayerIsSpectating() || !Game.isOnline())
+			allowSpectatorsInChat.setSelected(true);
+		else {
+			// if the user isn't a spectator set not allowed by default
+			allowSpectatorsInChat.setSelected(false);
+			allowSpectatorsInChat.setHorizontalAlignment(JCheckBox.CENTER);
+			Game.mainWindow.add(allowSpectatorsInChat);
+		}
+		
+		
+		
+		pane = new JLayeredPane();
+		pane.setOpaque(false);
+		Game.mainWindow.add(pane);
+
+		pieces = new JLabel[0][0];
+		playerCaptured = new JLabel[0][0];
+		setPositions();
+		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
+		int rowLength = Game.getBoardGame().getBoard().length;
+		setScreenTileSize((int) (getBoardSize() / rowLength));
+		setScale(getScreenTileSize() / imageTileSize);
+		setTopLeftY((int) Game.screenSize.getHeight() / 25);
+		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
+		
+		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
+		title.setBounds(getTopLeftX(), getTopLeftY() - 20, 250, 15);
+		back.setBounds(getTopLeftX(), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+		resign.setBounds(getTopLeftX() + (int) getBoardSize() - 150, getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+		if (Game.getBoardGame().getGameType() < 3)
+			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+		gameOverInfo.setBounds(getTopLeftX() + (int) getBoardSize() + panelWidth / 20, getTopLeftY(), panelWidth, getInfoTextSize() * 7 / 2);
+		winner.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		score.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
+							getTopLeftY() + getInfoTextSize() * 2, panelWidth, getInfoTextSize() * 5);
+		moveCount.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+		player1Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, getInfoTextSize(), getInfoTextSize());
+		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
+		player2Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 7 / 2, getInfoTextSize(), getInfoTextSize());
+		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
+		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
+							getTopLeftY() + getInfoTextSize() * 8, panelWidth, getInfoTextSize() * 6);
+		capturedPiecesBG.setBounds(0, 0, capturedPieces.getWidth(), capturedPieces.getHeight());
+		captured.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
+
+		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardSize() * 7 / 8);
+		chatBox.setMargin(new Insets(chatBox.getInsets().top - (chatBox.getHeight() - (chatInterface.getHeight() - 40)), 0, 0, 0));
+		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
+		chat.setBounds(5, chatInterface.getHeight() - 35, chatInterface.getWidth() - 10, 30);
+		if (!Game.getBoardGame().isPlayerIsSpectating() && Game.isOnline())
+			allowSpectatorsInChat.setBounds(panelWidth * 11 / 20 - 150, getTopLeftY() + chatInterface.getHeight() + 50, 300, 50);
+		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
+		
+		// set text sizes
+		winner.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		score.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		moveCount.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		player1User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		player2User.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+		captured.setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
+
+		// remove old pieces and tiles as well as capturedPieces
+		pane.removeAll();
+		for (int i = 0; i < playerCaptured.length; i++)
+			for (int j = 0; j < playerCaptured[i].length; j++) {
+				capturedPieces.remove(playerCaptured[i][j]);
+				capturedPieces.remove(playerCapturedNumber[i][j]);
+			}
+		
+		// add board to screen and update pieces
+		pieces = new JLabel[rowLength][rowLength];
+		addCapturablePieces();
+		addBoard();
+		updateBoard();
+	}
+	
+	/**
+	 * This method adds tiles of board
+	 * Should only be called by constructor
+	 */
+	private void addBoard() {
+		Tile[][] tiles = Game.getBoardGame().getTiles();
+		board = new JLabel[tiles.length][tiles.length];
+		
+		for (int i = 0; i < board.length; i++)
+			for (int j = 0; j < board.length; j++) {
+				board[i][j] = new JLabel(new ImageIcon(tiles[i][j].getTile()));
+				pane.add(board[i][j], JLayeredPane.FRAME_CONTENT_LAYER);
+				
+				board[i][j].setBounds((int) (j*getScreenTileSize()), (int) (i*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
+				board[i][j].addMouseListener(new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						Game.getBoardGame().handleMouseClickTile(getCoordinates((JLabel) e.getSource()));
+					}
+					public void mouseEntered(MouseEvent e) {
+						Game.getBoardGame().handleMouseEnterTile(getCoordinates((JLabel) e.getSource()));
+					}
+					public void mouseExited(MouseEvent e) {
+						Game.getBoardGame().handleMouseLeaveTile();
+					}
+					private int[] getCoordinates (JLabel tile) {
+						int[] coordinates = new int[2];
+						for (int i = 0; i < board.length; i++)
+							for (int j = 0; j < board.length; j++)
+								if (tile.equals(board[i][j])) {
+									coordinates[0] = i;
+									coordinates[1] = j;
+								}
+						return coordinates;
+					}
+				});
+			}
+		pane.repaint();
+	}
+	
+	private void addCapturablePieces() {
 		BufferedImage[][] capturablePieces = Game.getBoardGame().getCapturablePieces();
 		playerCaptured = new JLabel[capturablePieces.length][capturablePieces[0].length];
 		playerCapturedNumber = new JLabel[capturablePieces.length][capturablePieces[0].length];
@@ -253,100 +381,6 @@ public class GameScreen extends Screen {
 					playerCapturedNumber[0][0].setForeground(Color.BLACK);
 			}
 		}
-		
-		
-		
-		chatInterface = new JPanel();
-		Game.mainWindow.add(chatInterface);
-		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardSize() * 7 / 8);
-		chatInterface.setLayout(null);
-		
-		chatBox = new JTextPane();
-		chatInterface.add(chatBox);
-		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
-		chatBox.setEditable(false);
-		chatBox.setMargin(new Insets(chatBox.getHeight()-20, 0, 0, 0));
-		
-		chat = new JTextField();
-		chatInterface.add(chat);
-		chat.setBounds(5, chatInterface.getHeight() - 35, chatInterface.getWidth() - 10, 30);
-		chat.setFont(new Font("Serif", Font.PLAIN, 15));
-		chat.addKeyListener(new KeyListener() {
-			public void keyPressed(KeyEvent e) {}
-			public void keyReleased(KeyEvent e) {}
-			public void keyTyped(KeyEvent e) {
-				if (e.getKeyChar() == '\n' && ((JTextField) e.getSource()).getText().length() > 0)
-					Game.sendChat(allowSpectatorsInChat.isSelected(), chat.getText());
-			}
-		});
-		chat.requestFocus();
-		if (!Game.isOnline())
-			chat.setEnabled(false);
-		
-		allowSpectatorsInChat = new JCheckBox("Allow spectators in chat");
-		// if the user is a spectator or offline do not include check box on screen but set it true
-		if (Game.getBoardGame().isPlayerIsSpectating() || !Game.isOnline())
-			allowSpectatorsInChat.setSelected(true);
-		else {
-			// if the user isn't a spectator set not allowed by default
-			allowSpectatorsInChat.setSelected(false);
-			allowSpectatorsInChat.setBounds(panelWidth * 11 / 20 - 150, getTopLeftY() + chatInterface.getHeight() + 50, 300, 50);
-			allowSpectatorsInChat.setHorizontalAlignment(JCheckBox.CENTER);
-			Game.mainWindow.add(allowSpectatorsInChat);
-		}
-		
-		
-		
-		pane = new JLayeredPane();
-		pane.setBounds(getTopLeftX(), getTopLeftY(), ((int) getScreenTileSize())*rowLength, ((int) getScreenTileSize())*rowLength);
-		pane.setOpaque(false);
-		Game.mainWindow.add(pane);
-		
-		// add board to screen and update pieces
-		pieces = new JLabel[rowLength][rowLength];
-		addBoard();
-		updateBoard();
-		
-		Game.mainWindow.repaint();
-	}
-	
-	/**
-	 * This method adds tiles of board
-	 * Should only be called by constructor
-	 */
-	private void addBoard() {
-		Tile[][] tiles = Game.getBoardGame().getTiles();
-		board = new JLabel[tiles.length][tiles.length];
-		
-		for (int i = 0; i < board.length; i++)
-			for (int j = 0; j < board.length; j++) {
-				board[i][j] = new JLabel(new ImageIcon(tiles[i][j].getTile()));
-				pane.add(board[i][j], JLayeredPane.FRAME_CONTENT_LAYER);
-				
-				board[i][j].setBounds((int) (j*getScreenTileSize()), (int) (i*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
-				board[i][j].addMouseListener(new MouseAdapter() {
-					public void mouseClicked(MouseEvent e) {
-						Game.getBoardGame().handleMouseClickTile(getCoordinates((JLabel) e.getSource()));
-					}
-					public void mouseEntered(MouseEvent e) {
-						Game.getBoardGame().handleMouseEnterTile(getCoordinates((JLabel) e.getSource()));
-					}
-					public void mouseExited(MouseEvent e) {
-						Game.getBoardGame().handleMouseLeaveTile();
-					}
-					private int[] getCoordinates (JLabel tile) {
-						int[] coordinates = new int[2];
-						for (int i = 0; i < board.length; i++)
-							for (int j = 0; j < board.length; j++)
-								if (tile.equals(board[i][j])) {
-									coordinates[0] = i;
-									coordinates[1] = j;
-								}
-						return coordinates;
-					}
-				});
-			}
-		pane.repaint();
 	}
 	
 	/**
@@ -493,13 +527,12 @@ public class GameScreen extends Screen {
 	public void updateChat(String newText, String senderKey) {
 		// update chat text
 		int textStart = newText.indexOf(":") + 1;
-		
 		// if user is not a spectator
 		if (!Game.getBoardGame().isPlayerIsSpectating()) {
 			// if the user sent the text make user text green, delete the users current text
 			// if opponent sent the text make opponent text red
 			// if a spectator sent the text, verify that user wants to receive, if so set cyan
-			if (senderKey.equals(Game.getPlayer().getUser_key())) {
+			if (Game.getPlayer().getUser_key().equals(senderKey)) {
 				chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
 				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
 				chat.setText("");
@@ -519,7 +552,7 @@ public class GameScreen extends Screen {
 			// if a player sent the text make player text red
 			// if a spectator sent the text, verify that user wants to receive, if so set cyan
 			chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
-			if (senderKey.equals(Game.getPlayer().getUser_key())) {
+			if (Game.getPlayer().getUser_key().equals(senderKey)) {
 				appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
 				chat.setText("");
 			} else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())

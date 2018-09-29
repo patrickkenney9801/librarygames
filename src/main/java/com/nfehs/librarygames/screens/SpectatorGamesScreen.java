@@ -33,7 +33,6 @@ public class SpectatorGamesScreen extends Screen {
 
 		refresh = new JButton("REFRESH");
 		Game.mainWindow.add(refresh);
-		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 - 60, 150, 30);
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// goes back to active games list
@@ -44,7 +43,6 @@ public class SpectatorGamesScreen extends Screen {
 
 		back = new JButton("BACK");
 		Game.mainWindow.add(back);
-		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 + 60, 150, 30);
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// goes back to active games list
@@ -52,6 +50,10 @@ public class SpectatorGamesScreen extends Screen {
 				Game.openActiveGamesScreen();
 			}
 		});
+		
+		spectate = new JLabel("Spectate:");
+		Game.mainWindow.add(spectate);
+		
 		spectatorGamesPanel = new JPanel();
 		spectatorGamesPanel.setLayout(null);
 		spectatorGamesPanel.setBackground(GameFrame.background);
@@ -60,33 +62,38 @@ public class SpectatorGamesScreen extends Screen {
 		spectatorGamesTab.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		spectatorGamesTab.setAutoscrolls(true);
 		spectatorGamesTab.getVerticalScrollBar().setUnitIncrement(15);
-		
-		spectate = new JLabel();
+		Game.mainWindow.add(spectatorGamesTab);
 		
 		spectatorGames = new JButton[0];
+
+		setPositions();
+		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 - 60, 150, 30);
+		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 + 60, 150, 30);
+		spectate.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
+							(int) Game.screenSize.getHeight() / 5 - 30, 300, 30);
+		spectatorGamesTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
+				(int) Game.screenSize.getHeight() / 5, 300,
+				((int) Game.screenSize.getHeight() * 3 / 5) - 50);
 	}
 	
 	/**
 	 * This method is called once the client has received the game data from the server
 	 */
 	public void loadSpectatorGames() {
-		// remove current active games
-		removeAndNullSpectatorGames();
+		// remove current spectator games
+		spectatorGamesPanel.removeAll();
 		
 		// finished games
-		spectate = new JLabel("Spectate:");
-		Game.mainWindow.add(spectate);
-		spectate.setBounds ((int) Game.screenSize.getWidth() / 2 - 150, 
-							(int) Game.screenSize.getHeight() / 5 - 30, 300, 30);
-		
 		spectatorGames = new JButton[Game.getPlayer().getSpectatorBoardGames().length];
 		spectatorGamesPanel.setPreferredSize(new Dimension(285, spectatorGames.length*50 - 10));
 		spectatorGamesPanel.setBounds(5, 5, 285, spectatorGames.length*50 - 10);
-		
-		spectatorGamesTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
-				(int) Game.screenSize.getHeight() / 5, 300,
-				((int) Game.screenSize.getHeight() * 3 / 5) - 50);
-		Game.mainWindow.add(spectatorGamesTab);
 		
 		for (int i = 0; i < spectatorGames.length; i++) {
 			spectatorGames[i] = new JButton(Game.getPlayer().getSpectatorBoardGames()[i].split("~")[1]);
@@ -113,32 +120,17 @@ public class SpectatorGamesScreen extends Screen {
 		spectatorGamesTab.revalidate();
 		Game.mainWindow.repaint();
 	}
-	
-	/**
-	 * Removes all spectator games from main window and sets the null
-	 */
-	private void removeAndNullSpectatorGames() {
-		for (JButton spectatorGame : spectatorGames) {
-			spectatorGamesPanel.remove(spectatorGame);
-			spectatorGame = null;
-		}
-		Game.mainWindow.remove(spectate);
-		
-		Game.mainWindow.remove(spectatorGamesTab);
-		
-		spectate = null;
-	}
 
 	@Override
 	public void exit() {
 		exitParentGUI();
 		
-		removeAndNullSpectatorGames();
-		
 		Game.mainWindow.remove(refresh);
 		Game.mainWindow.remove(back);
 		Game.mainWindow.remove(spectatorGamesTab);
+		Game.mainWindow.remove(spectate);
 		
+		spectate = null;
 		refresh = null;
 		back = null;
 		spectatorGamesTab = null;

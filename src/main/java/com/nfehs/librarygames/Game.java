@@ -31,7 +31,7 @@ public class Game {
 	private static Player player;
 	private static BoardGame boardGame;
 	
-	public static final byte[] SERVER_IP_ADDRESS = {108, (byte) 205, (byte) 143, 97};
+	public static final byte[] SERVER_IP_ADDRESS = {(byte) 172, (byte) 7, (byte) 247, (byte) 229};
 	
 	public static final int LOGIN = 0;
 	public static final int CREATE_ACCOUNT = 1;
@@ -376,28 +376,28 @@ public class Game {
 	}
 	
 	/**
-	 * This method refreshes the current screen, used when screen resized
+	 * This method resizes the current screen
 	 */
-	public static void refresh() {
+	public static void resize() {
 		// make sure screen is defined
 		if (screen == null)
 			return;
-		
-		switch (gameState) {
-			case LOGIN:					openLoginScreen();
-										break;
-			case CREATE_ACCOUNT:		openCreateAccountScreen();
-										break;
-			case ACTIVE_GAMES:			openActiveGamesScreen();
-										break;
-			case CREATE_GAME:			openCreateGameScreen();
-										break;
-			case PLAYING_GAME:			openGameScreen();
-										break;
-			case SPECTATOR_GAMES:		openSpectatorGamesScreen();
-										break;
-			case CREATE_OFFLINE_GAME:	openCreateOfflineGameScreen();
-		}
+		screen.resize();
+//		switch (gameState) {
+//			case LOGIN:					openLoginScreen();
+//										break;
+//			case CREATE_ACCOUNT:		openCreateAccountScreen();
+//										break;
+//			case ACTIVE_GAMES:			openActiveGamesScreen();
+//										break;
+//			case CREATE_GAME:			openCreateGameScreen();
+//										break;
+//			case PLAYING_GAME:			openGameScreen();
+//										break;
+//			case SPECTATOR_GAMES:		openSpectatorGamesScreen();
+//										break;
+//			case CREATE_OFFLINE_GAME:	openCreateOfflineGameScreen();
+//		}
 	}
 	
 	/**

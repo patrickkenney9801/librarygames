@@ -54,17 +54,14 @@ public class CreateGameScreen extends Screen {
 		
 		gameChoices = new JComboBox<String>(choices);
 		Game.mainWindow.add(gameChoices);
-		gameChoices.setBounds((int) Game.screenSize.getWidth() / 2 - 225, (int) Game.screenSize.getHeight() / 10, 150, 30);
 		gameChoices.setSelectedIndex(0);
 		
 		userGoesFirst = new JRadioButton("I go first");
 		Game.mainWindow.add(userGoesFirst);
-		userGoesFirst.setBounds((int) Game.screenSize.getWidth() / 2 + 30, (int) Game.screenSize.getHeight() / 10, 120, 30);
 		userGoesFirst.setSelected(true);
 		
 		opponentGoesFirst = new JRadioButton("Opponent goes first");
 		Game.mainWindow.add(opponentGoesFirst);
-		opponentGoesFirst.setBounds((int) Game.screenSize.getWidth() / 2 + 160, (int) Game.screenSize.getHeight() / 10, 150, 30);
 		
 		startingPlayer = new ButtonGroup();
 		startingPlayer.add(userGoesFirst);
@@ -72,15 +69,12 @@ public class CreateGameScreen extends Screen {
 		
 		chooseOpponent = new JLabel("Choose opponent:");
 		Game.mainWindow.add(chooseOpponent);
-		chooseOpponent.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 75, 150, 30);
 		
 		chooseFriend = new JLabel("Friends:");
 		Game.mainWindow.add(chooseFriend);
-		chooseFriend.setBounds((int) Game.screenSize.getWidth() / 2 - 275, (int) Game.screenSize.getHeight() / 10 + 125, 150, 30);
 		
 		chooseRandomPlayer = new JLabel("All players:");
 		Game.mainWindow.add(chooseRandomPlayer);
-		chooseRandomPlayer.setBounds((int) Game.screenSize.getWidth() / 2 + 10, (int) Game.screenSize.getHeight() / 10 + 125, 150, 30);
 		
 		friendsPanel = new JPanel();
 		friendsPanel.setLayout(null);
@@ -90,6 +84,7 @@ public class CreateGameScreen extends Screen {
 		friendsTab.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		friendsTab.setAutoscrolls(true);
 		friendsTab.getVerticalScrollBar().setUnitIncrement(15);
+		Game.mainWindow.add(friendsTab);
 		
 		randomPlayersPanel = new JPanel();
 		randomPlayersPanel.setLayout(null);
@@ -99,6 +94,7 @@ public class CreateGameScreen extends Screen {
 		randomPlayersTab.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		randomPlayersTab.setAutoscrolls(true);
 		randomPlayersTab.getVerticalScrollBar().setUnitIncrement(15);
+		Game.mainWindow.add(randomPlayersTab);
 		
 		players = new ButtonGroup();
 		friends = new JRadioButton[0];
@@ -107,7 +103,6 @@ public class CreateGameScreen extends Screen {
 
 		refresh = new JButton("REFRESH");
 		Game.mainWindow.add(refresh);
-		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 - 40, 150, 30);
 		refresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// goes back to active games list
@@ -118,7 +113,6 @@ public class CreateGameScreen extends Screen {
 		
 		createGame = new JButton("CREATE GAME");
 		Game.mainWindow.add(createGame);
-		createGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4, 150, 30);
 		createGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// attempts to create a new game
@@ -160,13 +154,11 @@ public class CreateGameScreen extends Screen {
 		
 		error = new JLabel();
 		Game.mainWindow.add(error);
-		error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 5 * 4 + 30, 300, 20);
 		error.setForeground(Color.RED);
 		error.setHorizontalAlignment(SwingConstants.CENTER);
 
 		back = new JButton("BACK");
 		Game.mainWindow.add(back);
-		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 + 60, 150, 30);
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// goes back to active games list
@@ -174,6 +166,31 @@ public class CreateGameScreen extends Screen {
 				Game.openActiveGamesScreen();
 			}
 		});
+
+		setPositions();
+		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		gameChoices.setBounds((int) Game.screenSize.getWidth() / 2 - 225, (int) Game.screenSize.getHeight() / 10, 150, 30);
+		userGoesFirst.setBounds((int) Game.screenSize.getWidth() / 2 + 30, (int) Game.screenSize.getHeight() / 10, 120, 30);
+		opponentGoesFirst.setBounds((int) Game.screenSize.getWidth() / 2 + 160, (int) Game.screenSize.getHeight() / 10, 150, 30);
+		chooseOpponent.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 10 + 75, 150, 30);
+		chooseFriend.setBounds((int) Game.screenSize.getWidth() / 2 - 275, (int) Game.screenSize.getHeight() / 10 + 125, 150, 30);
+		chooseRandomPlayer.setBounds((int) Game.screenSize.getWidth() / 2 + 10, (int) Game.screenSize.getHeight() / 10 + 125, 150, 30);
+		friendsTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 325,
+				(int) Game.screenSize.getHeight() / 10 + 155, 300,
+				(int) Game.screenSize.getHeight() / 5 * 4 - ((int) Game.screenSize.getHeight() / 10 + 155) - 50);
+		randomPlayersTab.setBounds ((int) Game.screenSize.getWidth() / 2 + 25,
+				(int) Game.screenSize.getHeight() / 10 + 155, 300,
+				(int) Game.screenSize.getHeight() / 5 * 4 - ((int) Game.screenSize.getHeight() / 10 + 155) - 50);
+		refresh.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 - 40, 150, 30);
+		createGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4, 150, 30);
+		error.setBounds((int) Game.screenSize.getWidth() / 2 - 150, (int) Game.screenSize.getHeight() / 5 * 4 + 30, 300, 20);
+		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 5 * 4 + 60, 150, 30);
 	}
 	
 	/**
@@ -181,18 +198,14 @@ public class CreateGameScreen extends Screen {
 	 */
 	public void loadPlayers() {
 		// remove current players
-		removeAndNullPlayers();
+		friendsPanel.removeAll();
+		randomPlayersPanel.removeAll();
 		
 		// add friends
 		friends = new JRadioButton[Game.getPlayer().getFriends().length];
 		
 		friendsPanel.setPreferredSize(new Dimension(285, friends.length*30));
 		friendsPanel.setBounds(5, 5, 285, friends.length*30);
-		
-		friendsTab.setBounds ((int) Game.screenSize.getWidth() / 2 - 325,
-				(int) Game.screenSize.getHeight() / 10 + 155, 300,
-				(int) Game.screenSize.getHeight() / 5 * 4 - ((int) Game.screenSize.getHeight() / 10 + 155) - 50);
-		Game.mainWindow.add(friendsTab);
 		
 		for (int i = 0; i < friends.length; i++) {
 			friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i].split("~")[0]);
@@ -207,11 +220,6 @@ public class CreateGameScreen extends Screen {
 		
 		randomPlayersPanel.setPreferredSize(new Dimension(285, randomPlayers.length*30 + 10));
 		randomPlayersPanel.setBounds(5, 0, 285, randomPlayers.length*30 + 10);
-		
-		randomPlayersTab.setBounds ((int) Game.screenSize.getWidth() / 2 + 25,
-				(int) Game.screenSize.getHeight() / 10 + 155, 300,
-				(int) Game.screenSize.getHeight() / 5 * 4 - ((int) Game.screenSize.getHeight() / 10 + 155) - 50);
-		Game.mainWindow.add(randomPlayersTab);
 		
 		for (int i = 0; i < randomPlayers.length; i++) {
 			randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i].split("~")[0]);
@@ -255,30 +263,6 @@ public class CreateGameScreen extends Screen {
 	public void setError(String errorMessage) {
 		error.setText(errorMessage);
 	}
-	
-	/**
-	 * Removes and nulls all current players in JRadioButtons
-	 */
-	private void removeAndNullPlayers() {
-		for (JRadioButton friend : friends) {
-			//Game.mainWindow.remove(friend);
-			friendsPanel.remove(friend);
-			friend = null;
-		}
-		for (JRadioButton randomPlayer : randomPlayers) {
-			//Game.mainWindow.remove(randomPlayer);
-			randomPlayersPanel.remove(randomPlayer);
-			randomPlayer = null;
-		}
-		for (JButton addFriend : addFriends) {
-			//Game.mainWindow.remove(addFriend);
-			randomPlayersPanel.remove(addFriend);
-			addFriend = null;
-		}
-		
-		Game.mainWindow.remove(friendsTab);
-		Game.mainWindow.remove(randomPlayersTab);
-	}
 
 	@Override
 	public void exit() {
@@ -294,6 +278,8 @@ public class CreateGameScreen extends Screen {
 		Game.mainWindow.remove(back);
 		Game.mainWindow.remove(refresh);
 		Game.mainWindow.remove(error);
+		Game.mainWindow.remove(friendsTab);
+		Game.mainWindow.remove(randomPlayersTab);
 		
 		gameChoices = null;
 		userGoesFirst = null;
@@ -307,7 +293,6 @@ public class CreateGameScreen extends Screen {
 		refresh = null;
 		error = null;
 		
-		removeAndNullPlayers();
 		players = null;
 		addFriends = null;
 		friendsTab = null;

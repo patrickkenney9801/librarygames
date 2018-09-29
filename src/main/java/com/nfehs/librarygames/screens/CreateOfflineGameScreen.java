@@ -37,17 +37,14 @@ public class CreateOfflineGameScreen extends Screen {
 		
 		gameChoices = new JComboBox<String>(choices);
 		Game.mainWindow.add(gameChoices);
-		gameChoices.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 300, 150, 30);
 		gameChoices.setSelectedIndex(0);
 		
 		
 		p1 = new JLabel("Player 1:");
 		Game.mainWindow.add(p1);
-		p1.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 250, 150, 30);
 		
 		player1 = new JTextField();
 		Game.mainWindow.add(player1);
-		player1.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
 		player1.requestFocusInWindow();
 		player1.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
@@ -60,11 +57,9 @@ public class CreateOfflineGameScreen extends Screen {
 		
 		p2 = new JLabel("Player 2:");
 		Game.mainWindow.add(p2);
-		p2.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 170, 150, 30);
 		
 		player2 = new JTextField();
 		Game.mainWindow.add(player2);
-		player2.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
 		player2.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
@@ -76,7 +71,6 @@ public class CreateOfflineGameScreen extends Screen {
 
 		createOfflineGame = new JButton("CREATE GAME");
 		Game.mainWindow.add(createOfflineGame);
-		createOfflineGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
 		createOfflineGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// create a new offline game
@@ -111,7 +105,6 @@ public class CreateOfflineGameScreen extends Screen {
 
 		back = new JButton("BACK");
 		Game.mainWindow.add(back);
-		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2, 150, 30);
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// goes back to login screen
@@ -119,7 +112,22 @@ public class CreateOfflineGameScreen extends Screen {
 				Game.openLoginScreen();
 			}
 		});
+		
+		setPositions();
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		gameChoices.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 300, 150, 30);
+		p1.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 250, 150, 30);
+		player1.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
+		p2.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 170, 150, 30);
+		player2.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 140, 150, 30);
+		createOfflineGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
+		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2, 150, 30);
 	}
 
 	@Override

@@ -39,11 +39,9 @@ public class CreateAccountScreen extends Screen {
 		
 		user = new JLabel("Username:");
 		Game.mainWindow.add(user);
-		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 250, 150, 30);
 		
 		username = new JTextField();
 		Game.mainWindow.add(username);
-		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
 		username.requestFocusInWindow();
 		username.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
@@ -56,11 +54,9 @@ public class CreateAccountScreen extends Screen {
 
 		em = new JLabel("Email (optional):");
 		Game.mainWindow.add(em);
-		em.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
 		
 		email = new JTextField();
 		Game.mainWindow.add(email);
-		email.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 160, 150, 30);
 		email.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
@@ -72,11 +68,9 @@ public class CreateAccountScreen extends Screen {
 		
 		pass = new JLabel("Password:");
 		Game.mainWindow.add(pass);
-		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 130, 150, 30);
 		
 		password = new JPasswordField();
 		Game.mainWindow.add(password);
-		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 100, 150, 30);
 		password.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
@@ -88,11 +82,9 @@ public class CreateAccountScreen extends Screen {
 		
 		passConfirm = new JLabel("Password (confirm):");
 		Game.mainWindow.add(passConfirm);
-		passConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 70, 150, 30);
 		
 		passwordConfirm = new JPasswordField();
 		Game.mainWindow.add(passwordConfirm);
-		passwordConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 40, 150, 30);
 		passwordConfirm.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {}
 			public void keyReleased(KeyEvent e) {}
@@ -104,7 +96,6 @@ public class CreateAccountScreen extends Screen {
 		
 		createAccount = new JButton("CREATE ACCOUNT");
 		Game.mainWindow.add(createAccount);
-		createAccount.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 10, 150, 30);
 		createAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Create account clicked");
@@ -114,13 +105,11 @@ public class CreateAccountScreen extends Screen {
 		
 		error = new JLabel();
 		Game.mainWindow.add(error);
-		error.setBounds((int) Game.screenSize.getWidth() / 2 - 200, (int) Game.screenSize.getHeight() / 2 + 40, 400, 20);
 		error.setForeground(Color.RED);
 		error.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		back = new JButton("BACK");
 		Game.mainWindow.add(back);
-		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 60, 150, 30);
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// returns user back to login screen
@@ -129,7 +118,25 @@ public class CreateAccountScreen extends Screen {
 			}
 		});
 
+		setPositions();
 		Game.mainWindow.repaint();
+	}
+	
+	/**
+	 * Sets the positions for all items on screen
+	 */
+	protected void setPositions() {
+		user.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 250, 150, 30);
+		username.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 220, 150, 30);
+		em.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 190, 150, 30);
+		email.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 160, 150, 30);
+		pass.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 130, 150, 30);
+		password.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 100, 150, 30);
+		passConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 70, 150, 30);
+		passwordConfirm.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 40, 150, 30);
+		createAccount.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 10, 150, 30);
+		error.setBounds((int) Game.screenSize.getWidth() / 2 - 200, (int) Game.screenSize.getHeight() / 2 + 40, 400, 20);
+		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 + 60, 150, 30);
 	}
 	
 	/**

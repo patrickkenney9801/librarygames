@@ -966,14 +966,16 @@ public class GameServer extends Thread {
 		Packet10SendChat packet = new Packet10SendChat(data);
 		if (!packet.isValid())
 			return;
-
-		setSenderGameKey(packet.getSenderKey(), packet.getGameKey());
+		String senderKey = packet.getSenderKey();
+		
+		setSenderGameKey(senderKey, packet.getGameKey());
 		boolean player1OnGame = userOnGame(Security.encrypt(packet.getPlayer1Username()), packet.getGameKey());
 		boolean player2OnGame = userOnGame(Security.encrypt(packet.getPlayer2Username()), packet.getGameKey());
 		
 		// create return packet
-		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), player1OnGame, player2OnGame, packet.getText(), true);
-		
+		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), senderKey, packet.getGameKey(), player1OnGame, player2OnGame, packet.getText(), true);
+		// set senderKey for others null to increase security
+		returnPacket.setSenderKey(null);
 		// send chat to players (the opponent must be on the game to send the chat), expect receipts
 		// also send chat to spectators if option is on
 		boolean sendToSpectators = packet.isSendToSpectators();
