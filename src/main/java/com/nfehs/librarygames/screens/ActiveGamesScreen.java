@@ -239,33 +239,4 @@ public class ActiveGamesScreen extends Screen {
 		activeGamesTab.revalidate();
 		Game.mainWindow.repaint();
 	}
-
-	public void exit() {
-		exitParentGUI();
-		
-		Game.mainWindow.remove(createGame);
-		Game.mainWindow.remove(spectatorGames);
-		Game.mainWindow.remove(refresh);
-		Game.mainWindow.remove(finishedGamesTab);
-		Game.mainWindow.remove(activeGamesUserTab);
-		Game.mainWindow.remove(activeGamesTab);
-		Game.mainWindow.remove(finished);
-		Game.mainWindow.remove(userTurn);
-		Game.mainWindow.remove(opponentTurn);
-		Game.mainWindow.remove(finishedGamesTab);
-		Game.mainWindow.remove(activeGamesTab);
-		Game.mainWindow.remove(activeGamesUserTab);
-		
-		createGame = null;
-		spectatorGames = null;
-		refresh = null;
-		finishedGamesTab = null;
-		activeGamesUserTab = null;
-		activeGamesTab = null;
-		finished = null;
-		userTurn = null;
-		opponentTurn = null;
-		
-		Game.mainWindow.repaint();
-	}
 }

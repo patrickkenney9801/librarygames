@@ -603,38 +603,6 @@ public class GameScreen extends Screen {
 		pane.repaint();
 	}
 
-	@Override
-	public void exit() {
-		if (Game.isOnline())
-			exitParentGUI();
-		
-		Game.mainWindow.remove(back);
-		Game.mainWindow.remove(title);
-		Game.mainWindow.remove(pane);
-		Game.mainWindow.remove(pass);
-		Game.mainWindow.remove(resign);
-		Game.mainWindow.remove(gameOverInfo);
-		Game.mainWindow.remove(gameInfo);
-		Game.mainWindow.remove(capturedPieces);
-		Game.mainWindow.remove(chatInterface);
-		Game.mainWindow.remove(allowSpectatorsInChat);
-		
-		back = null;
-		title = null;
-		pane = null;
-		board = null;
-		shadowPiece = null;
-		pass = null;
-		resign = null;
-		gameOverInfo = null;
-		gameInfo = null;
-		capturedPieces = null;
-		chatInterface = null;
-		allowSpectatorsInChat = null;
-		
-		Game.mainWindow.repaint();
-	}
-
 	public double getScale() {
 		return scale;
 	}

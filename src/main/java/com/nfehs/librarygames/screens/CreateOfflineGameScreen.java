@@ -129,25 +129,4 @@ public class CreateOfflineGameScreen extends Screen {
 		createOfflineGame.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2 - 50, 150, 30);
 		back.setBounds((int) Game.screenSize.getWidth() / 2 - 75, (int) Game.screenSize.getHeight() / 2, 150, 30);
 	}
-
-	@Override
-	public void exit() {
-		Game.mainWindow.remove(gameChoices);
-		Game.mainWindow.remove(p1);
-		Game.mainWindow.remove(player1);
-		Game.mainWindow.remove(p2);
-		Game.mainWindow.remove(player2);
-		Game.mainWindow.remove(createOfflineGame);
-		Game.mainWindow.remove(back);
-		
-		gameChoices = null;
-		p1 = null;
-		player1 = null;
-		p2 = null;
-		player2 = null;
-		createOfflineGame = null;
-		back = null;
-		
-		Game.mainWindow.repaint();
-	}
 }

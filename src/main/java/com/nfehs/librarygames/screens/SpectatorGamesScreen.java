@@ -120,21 +120,4 @@ public class SpectatorGamesScreen extends Screen {
 		spectatorGamesTab.revalidate();
 		Game.mainWindow.repaint();
 	}
-
-	@Override
-	public void exit() {
-		exitParentGUI();
-		
-		Game.mainWindow.remove(refresh);
-		Game.mainWindow.remove(back);
-		Game.mainWindow.remove(spectatorGamesTab);
-		Game.mainWindow.remove(spectate);
-		
-		spectate = null;
-		refresh = null;
-		back = null;
-		spectatorGamesTab = null;
-		
-		Game.mainWindow.repaint();
-	}
 }

@@ -153,35 +153,4 @@ public class CreateAccountScreen extends Screen {
 	private void createAccount() {
 		Game.createAccount(username.getText(), email.getText(), password.getPassword(), passwordConfirm.getPassword());
 	}
-	
-	/**
-	 * Removes all traces of the login screen (to be used before opening a new screen)
-	 */
-	public void exit() {
-		Game.mainWindow.remove(user);
-		Game.mainWindow.remove(em);
-		Game.mainWindow.remove(pass);
-		Game.mainWindow.remove(passConfirm);
-		Game.mainWindow.remove(username);
-		Game.mainWindow.remove(email);
-		Game.mainWindow.remove(password);
-		Game.mainWindow.remove(passwordConfirm);
-		Game.mainWindow.remove(createAccount);
-		Game.mainWindow.remove(error);
-		Game.mainWindow.remove(back);
-		
-		user			= null;
-		em				= null;
-		pass			= null;
-		passConfirm		= null;
-		username		= null;
-		email			= null;
-		password		= null;
-		passwordConfirm	= null;
-		createAccount	= null;
-		error			= null;
-		back			= null;
-		
-		Game.mainWindow.repaint();
-	}
 }

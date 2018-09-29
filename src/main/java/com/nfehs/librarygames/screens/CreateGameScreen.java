@@ -263,41 +263,4 @@ public class CreateGameScreen extends Screen {
 	public void setError(String errorMessage) {
 		error.setText(errorMessage);
 	}
-
-	@Override
-	public void exit() {
-		exitParentGUI();
-		
-		Game.mainWindow.remove(gameChoices);
-		Game.mainWindow.remove(userGoesFirst);
-		Game.mainWindow.remove(opponentGoesFirst);
-		Game.mainWindow.remove(createGame);
-		Game.mainWindow.remove(chooseOpponent);
-		Game.mainWindow.remove(chooseFriend);
-		Game.mainWindow.remove(chooseRandomPlayer);
-		Game.mainWindow.remove(back);
-		Game.mainWindow.remove(refresh);
-		Game.mainWindow.remove(error);
-		Game.mainWindow.remove(friendsTab);
-		Game.mainWindow.remove(randomPlayersTab);
-		
-		gameChoices = null;
-		userGoesFirst = null;
-		opponentGoesFirst = null;
-		startingPlayer = null;
-		createGame = null;
-		chooseOpponent = null;
-		chooseFriend = null;
-		chooseRandomPlayer = null;
-		back = null;
-		refresh = null;
-		error = null;
-		
-		players = null;
-		addFriends = null;
-		friendsTab = null;
-		randomPlayersTab = null;
-		
-		Game.mainWindow.repaint();
-	}
 }

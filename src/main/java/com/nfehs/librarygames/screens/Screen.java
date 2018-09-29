@@ -112,15 +112,7 @@ public abstract class Screen {
 	
 	public void exit() {
 		Game.mainWindow.removeAll();
-	}
-	protected void exitParentGUI() {
-		Game.mainWindow.remove(loggedUser);
-		Game.mainWindow.remove(logout);
-		Game.mainWindow.remove(notification);
-		
-		loggedUser = null;
-		logout = null;
-		notification = null;
+		Game.mainWindow.repaint();
 	}
 	
 	protected abstract void setPositions();

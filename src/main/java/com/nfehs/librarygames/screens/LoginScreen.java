@@ -128,29 +128,4 @@ public class LoginScreen extends Screen {
 	private void login() {
 		Game.login(username.getText(), password.getPassword());
 	}
-	
-	/**
-	 * Removes all traces of the login screen (to be used before opening a new screen)
-	 */
-	public void exit() {
-		Game.mainWindow.remove(user);
-		Game.mainWindow.remove(pass);
-		Game.mainWindow.remove(username);
-		Game.mainWindow.remove(password);
-		Game.mainWindow.remove(login);
-		Game.mainWindow.remove(error);
-		Game.mainWindow.remove(createAccount);
-		Game.mainWindow.remove(offline);
-		
-		user			= null;
-		pass			= null;
-		username		= null;
-		password		= null;
-		login			= null;
-		error			= null;
-		createAccount	= null;
-		offline			= null;
-		
-		Game.mainWindow.repaint();
-	}
 }
