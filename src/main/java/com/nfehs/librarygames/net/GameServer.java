@@ -38,6 +38,7 @@ public class GameServer extends Thread {
 	
 	private ArrayList<Player> onlinePlayers;
 	private HashMap<String, Boolean> sentPackets;
+	//private HashMap<String, Player> players;
 	
 	public GameServer() {
 		try {

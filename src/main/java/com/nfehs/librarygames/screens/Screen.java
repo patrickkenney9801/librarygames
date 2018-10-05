@@ -1,6 +1,7 @@
 package com.nfehs.librarygames.screens;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -60,11 +61,12 @@ public abstract class Screen {
 				public void run() {
 					try {
 						Thread.sleep(5000);
-						if (notification != null)
+						if (notification != null) {
 							Game.mainWindow.remove(notification);
-						if (Game.screen instanceof GameScreen)
-							Game.mainWindow.add(((GameScreen) Game.screen).title);
-						Game.mainWindow.repaint();
+							if (Game.screen instanceof GameScreen)
+								Game.mainWindow.add(((GameScreen) Game.screen).title);
+							Game.mainWindow.repaint();
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -86,6 +88,7 @@ public abstract class Screen {
 		Game.mainWindow.add(notification);
 		
 		alertUser.start();
+		Toolkit.getDefaultToolkit().beep();
 		Game.mainWindow.repaint();
 	}
 	
