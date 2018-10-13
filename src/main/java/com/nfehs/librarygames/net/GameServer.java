@@ -38,7 +38,6 @@ public class GameServer extends Thread {
 	
 	private ArrayList<Player> onlinePlayers;
 	private HashMap<String, Boolean> sentPackets;
-	//private HashMap<String, Player> players;
 	
 	public GameServer() {
 		try {
@@ -874,13 +873,15 @@ public class GameServer extends Thread {
 				int p2StonesCaptured = result.getInt("p2_stones_captured");
 				int p1Score = 0;
 				int p2Score = 0;
+				String olderBoard = Go.retrieveOldBoard(newBoard);
+				String newestBoard = Go.retrieveCurrentBoard(newBoard);
 				
 				// if the user did not pass, calculate score
 				if (packet.getMoveTo() > -1) {
 					int capturedPieces = -1;	// for use in go games
 					// calculate number of captured pieces in a go game
-					for (int i = 0; i < oldBoard.length(); i++)
-						if (oldBoard.charAt(i) != newBoard.charAt(i))
+					for (int i = 0; i < olderBoard.length(); i++)
+						if (olderBoard.charAt(i) != newestBoard.charAt(i))
 							capturedPieces++;
 					if (moves % 2 == 0)
 						p1StonesCaptured += capturedPieces;
@@ -897,7 +898,7 @@ public class GameServer extends Thread {
 					}
 					
 					// get player scores
-					int[] territoryScores = Go.calculateTerritory(oldBoard);
+					int[] territoryScores = Go.calculateTerritory(Go.retrieveCurrentBoard(oldBoard));
 					p1Score = territoryScores[0] + p1StonesCaptured;
 					
 					// apply Komi

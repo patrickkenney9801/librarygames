@@ -106,7 +106,7 @@ public class GameScreen extends Screen {
 				System.out.println("RESIGN CLICKED");
 				if (JOptionPane.showConfirmDialog(null, "Are you sure you want to resign?", "Resign", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					Game.sendMove(-2, -2);
-					if (Game.getBoardGame().getMoves() < 3)
+					if (Game.getBoardGame().getMoves() < 3 && Game.isOnline())
 						Game.openActiveGamesScreen();
 				}
 				chat.requestFocus();

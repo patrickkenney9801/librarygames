@@ -209,7 +209,7 @@ public abstract class BoardGame {
 	public abstract void handleMouseClickCapturedPiece(int[] coordinates);
 	
 	// implement in child classes, for use in logic
-	protected abstract boolean validMove(int x, int y);
+	//protected abstract boolean validMove(int x, int y);
 	
 	/**
 	 * Handles validating and executing moves
@@ -239,62 +239,7 @@ public abstract class BoardGame {
 	 * @param movingFrom
 	 * @param movingTo
 	 */
-	public void makeMoveOffline(int movingFrom,  int movingTo) {
-		// first handle resignation case
-		if (movingTo == -2)
-			if (isPlayer1Turn())
-				updateWinner(4);
-			else
-				updateWinner(3);
-		
-		// get new move
-		String oldBoard = getBoardAsString();
-		String newBoard = BoardGame.makeMove(gameType, oldBoard, moves % 2 == 0, penultMove, lastMove, movingFrom, movingTo);
-		setBoard(newBoard);
-
-		// if the game is go
-		if (getGameType() < 3) {
-			// if the user did not pass, calculate score
-			if (movingTo > -1) {
-				int capturedPieces = -1;	// for use in go games
-				// calculate number of captured pieces in a go game
-				for (int i = 0; i < oldBoard.length(); i++)
-					if (oldBoard.charAt(i) != newBoard.charAt(i))
-						capturedPieces++;
-				if (getMoves() % 2 == 0)
-					((Go) this).setWhiteStonesCaptured(((Go) this).getWhiteStonesCaptured() + capturedPieces);
-				else
-					((Go) this).setBlackStonesCaptured(((Go) this).getBlackStonesCaptured() + capturedPieces);
-			}
-			
-			// if the user passed, it is end of game if last move was a pass too
-			if (movingTo == -1 && getLastMove() == -1) {
-				// get player scores
-				int[] territoryScores = Go.calculateTerritory(oldBoard);
-				((Go) this).setPlayer1Score(territoryScores[0] + ((Go) this).getWhiteStonesCaptured());
-				
-				// apply Komi
-				switch (getGameType()) {
-					case 2:				((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 6);
-										break;
-					case 1:				((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 3);
-										break;
-					default: 			((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 1);
-				}
-				updateWinner(1);
-				if (((Go) this).getPlayer2Score() >= ((Go) this).getPlayer1Score())
-					updateWinner(2);
-				setScoreInfo("Score: " + ((Go) this).getPlayer1Score() + " - " + ((Go) this).getPlayer2Score() + ".5");
-			}
-		}
-
-		setPieces();
-		setPlayer1Turn(!isPlayer1Turn());
-		setMoves(getMoves() + 1);
-		setPlayer1(!isPlayer1());
-		setPenultMove(getLastMove());
-		setLastMove(movingTo);
-	}
+	public abstract void makeMoveOffline(int movingFrom,  int movingTo);
 
 	/**
 	 * Converts 2D coordinates into 1D
@@ -367,7 +312,7 @@ public abstract class BoardGame {
 		// set all $ equal to 0, (capture pieces)
 		String board = "";
 		for (int i = 1; i < paddedBoard.length-1; i++)
-			for (int j = 1; j < paddedBoard.length-1; j++)
+			for (int j = 1; j < paddedBoard[j].length-1; j++)
 				board += paddedBoard[i][j] != '$' ? paddedBoard[i][j] : '0';
 		return board;
 	}
@@ -627,15 +572,9 @@ public abstract class BoardGame {
 	 * @param board the board to set
 	 */
 	public void setBoard(String board) {
-		// get length of sides
-		int arrayLength = (int) Math.sqrt(board.length());
-		
-		// build 2D board
-		char[][] board2D = new char[arrayLength][arrayLength];
-		for (int i = 0; i < board2D.length; i++)
-			board2D[i] = board.substring(i*arrayLength, (i+1)*arrayLength).toCharArray();
-		this.board = board2D;
+		this.board = initializeBoard(board);
 	}
+	protected abstract char[][] initializeBoard(String board);
 	
 	/**
 	 * @return

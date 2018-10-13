@@ -22,6 +22,7 @@ public class Go extends BoardGame {
 	private int blackStonesCaptured;
 	private int player1Score;
 	private int player2Score;
+	private String initialBoard;
 	
 	/**
 	 * Constructor for a game of Go
@@ -55,6 +56,65 @@ public class Go extends BoardGame {
 		if (winner == 1 || winner == 2)
 			setScoreInfo("Score: " + getPlayer1Score() + " - " + getPlayer2Score() + ".5");
 	}
+	
+	@Override
+	public void makeMoveOffline(int movingFrom, int movingTo) {
+		// first handle resignation case
+		if (movingTo == -2)
+			if (isPlayer1Turn())
+				updateWinner(4);
+			else
+				updateWinner(3);
+		
+		// get new move
+		String oldBoard = getInitialBoard();
+		String newBoard = makeMove(oldBoard, getMoves() % 2 == 0, getPenultMove(), getLastMove(), movingFrom, movingTo);
+		if (newBoard == null)
+			return;
+		setBoard(newBoard);
+
+		// if the user did not pass, calculate score
+		if (movingTo > -1) {
+			int capturedPieces = -1;	// for use in go games
+			// calculate number of captured pieces in a go game
+			String olderBoard = Go.retrieveOldBoard(newBoard);
+			String newestBoard = Go.retrieveCurrentBoard(newBoard);
+			for (int i = 0; i < olderBoard.length(); i++)
+				if (olderBoard.charAt(i) != newestBoard.charAt(i))
+					capturedPieces++;
+			if (getMoves() % 2 == 0)
+				setWhiteStonesCaptured(getWhiteStonesCaptured() + capturedPieces);
+			else
+				setBlackStonesCaptured(getBlackStonesCaptured() + capturedPieces);
+		}
+		
+		// if the user passed, it is end of game if last move was a pass too
+		if (movingTo == -1 && getLastMove() == -1) {
+			// get player scores
+			int[] territoryScores = Go.calculateTerritory(retrieveCurrentBoard(oldBoard));
+			setPlayer1Score(territoryScores[0] + getWhiteStonesCaptured());
+			
+			// apply Komi
+			switch (getGameType()) {
+				case 2:				setPlayer2Score(territoryScores[1] + getBlackStonesCaptured() + 6);
+									break;
+				case 1:				setPlayer2Score(territoryScores[1] + getBlackStonesCaptured() + 3);
+									break;
+				default: 			setPlayer2Score(territoryScores[1] + getBlackStonesCaptured() + 1);
+			}
+			updateWinner(1);
+			if (getPlayer2Score() >= getPlayer1Score())
+				updateWinner(2);
+			setScoreInfo("Score: " + getPlayer1Score() + " - " + getPlayer2Score() + ".5");
+		}
+
+		setPieces();
+		setPlayer1Turn(!isPlayer1Turn());
+		setMoves(getMoves() + 1);
+		setPlayer1(!isPlayer1());
+		setPenultMove(getLastMove());
+		setLastMove(movingTo);
+	}
 
 	/**
 	 * Makes a given move if it is legal, otherwise return a null String
@@ -64,18 +124,16 @@ public class Go extends BoardGame {
 	 * @param moveFrom1D
 	 * @param moveTo1D
 	 * @return
+	 * @Override
 	 */
 	public static String makeMove(String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D, int moveFrom1D, int moveTo1D) {
 		// check pass or resign first
 		if (moveTo1D < 0)
 			return board1D;
 		
-		// check Ko rule
-		if (moveTo1D == penultMove1D)
-			return null;
-		
 		// get 2D data and implement placement of move
-		char[][] paddedBoard = getPaddedBoard(board1D);
+		String currBoard = retrieveCurrentBoard(board1D);
+		char[][] paddedBoard = getPaddedBoard(currBoard);
 		int[] coors = get2DCoordinates(moveTo1D, paddedBoard.length-2);
 		int x = coors[0]+1;
 		int y = coors[1]+1;
@@ -113,8 +171,13 @@ public class Go extends BoardGame {
 				hasLiberty = true;
 		
 		// if it is a valid move, get board in String form and return
-		if (hasLiberty)
-			return buildBoard(paddedBoard);
+		if (hasLiberty) {
+			String newBoard = buildBoard(paddedBoard);
+			// check Ko rule
+			if (!newBoard.equals(retrieveOldBoard(board1D)))
+				// encode in current board to newBoard
+				return combineBoards(newBoard, currBoard);
+		}
 		return null;
 	}
 
@@ -181,7 +244,7 @@ public class Go extends BoardGame {
 
 	/**
 	 * Returns true if the proposed move is allowed
-	 */
+	 *
 	public boolean validMove(int x, int y) {
 		// if the location already has a stone, the move is invalid
 		if (getBoard()[x][y] != '0')
@@ -197,7 +260,7 @@ public class Go extends BoardGame {
 		
 		// check if the move has any liberties, if not it is invalid
 		return hasLiberties(paddedCopy, x+1, y+1);
-	}
+	}*/
 	
 	/**
 	 * Returns true if the placement has at least one liberty
@@ -205,7 +268,7 @@ public class Go extends BoardGame {
 	 * @param x
 	 * @param y
 	 * @return
-	 */
+	 *
 	private boolean hasLiberties(char[][] paddedBoard, int x, int y) {
 		char piece = paddedBoard[x][y];
 		char opposingPiece = '2';
@@ -239,7 +302,7 @@ public class Go extends BoardGame {
 			if (!groupHasLiberty(paddedBoard, x-1, y))
 				return true;
 		return false;
-	}
+	}*/
 	
 	/**
 	 * Returns true if a group of stones containing (x, y) has a liberty
@@ -327,7 +390,8 @@ public class Go extends BoardGame {
 			return;
 		if (isPlayerIsSpectating())
 			return;
-		if (!validMove(coordinates[0], coordinates[1]))
+		int movingTo = getLinearCoordinate(coordinates[0], coordinates[1]);
+		if (makeMove(getInitialBoard(), isPlayer1Turn(), 0, 0, movingTo, movingTo) == null)
 			return;
 		if (Game.screen instanceof GameScreen)
 			((GameScreen) Game.screen).displayPieceShadow(coordinates[0], coordinates[1]);
@@ -353,7 +417,8 @@ public class Go extends BoardGame {
 			return;
 		if (isPlayerIsSpectating())
 			return;
-		if (!validMove(coordinates[0], coordinates[1]))
+		int movingTo = getLinearCoordinate(coordinates[0], coordinates[1]);
+		if (makeMove(getInitialBoard(), isPlayer1Turn(), 0, 0, movingTo, movingTo) == null)
 			return;
 		// first remove piece shadow
 		if (Game.screen instanceof GameScreen)
@@ -364,6 +429,10 @@ public class Go extends BoardGame {
 		
 		// send packet
 		Game.sendMove(move, move);
+		
+		// set player turn false if online
+		if (Game.isOnline())
+			setPlayerTurn(false);
 	}
 	
 	// these methods are not used in go
@@ -461,5 +530,65 @@ public class Go extends BoardGame {
 	 */
 	public void setPlayer2Score(int player2Score) {
 		this.player2Score = player2Score;
+	}
+
+	/**
+	 * Returns the board and sets the old board
+	 * @Override
+	 */
+	public char[][] initializeBoard(String board) {
+		// get length of sides
+		int arrayLength = (int) Math.sqrt(board.length());
+		
+		// build 2D board
+		char[][] board2D = new char[arrayLength][arrayLength];
+		for (int i = 0; i < board2D.length; i++)
+			for (int j = 0; j < board2D.length; j++)
+				board2D[i][j] = (char) ((board.charAt(i*arrayLength + j) - '0') % 3 + '0');
+		
+		setInitialBoard(board);
+		return board2D;
+	}
+
+	/**
+	 * @param board raw board data for a game of Go
+	 * @return the last board orientation in a game of Go given the raw board data
+	 */
+	public static String retrieveCurrentBoard(String board) {
+		String currBoard = "";
+		for (char c : board.toCharArray())
+			currBoard += (char) ((c - '0') % 3 + '0');
+		return currBoard;
+	}
+
+	/**
+	 * @param board raw board data for a game of Go
+	 * @return the last board orientation in a game of Go given the raw board data
+	 */
+	public static String retrieveOldBoard(String board) {
+		String oldBoard = "";
+		for (char c : board.toCharArray())
+			oldBoard += (char) ((c - '0') / 3 + '0');
+		return oldBoard;
+	}
+
+	/**
+	 * @param newerBoard newerBoard.length() = olderBoard.length()
+	 * @param olderBoard has piece positional data as a 1D String
+	 * @return a 1D board of length newerBoard.length(), olderBoard positions are by multiple of 3
+	 */
+	private static String combineBoards(String newerBoard, String olderBoard) {
+		String combinedBoard = "";
+		for (int i = 0; i < newerBoard.length(); i++)
+			combinedBoard += (char) (newerBoard.charAt(i) + (olderBoard.charAt(i) - '0') * 3);
+		return combinedBoard;
+	}
+
+	public String getInitialBoard() {
+		return initialBoard;
+	}
+
+	public void setInitialBoard(String initialBoard) {
+		this.initialBoard = initialBoard;
 	}
 }
