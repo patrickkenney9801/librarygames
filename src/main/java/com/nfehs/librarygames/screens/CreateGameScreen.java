@@ -24,7 +24,7 @@ import com.nfehs.librarygames.GameFrame;
  */
 
 public class CreateGameScreen extends Screen {
-	private final String[] choices = {"Go 9x9", "Go 13x13", "Go 19x19"};
+	private final String[] choices = {"Go 9x9", "Go 13x13", "Go 19x19", "Xiangqi"};
 	private JComboBox<String> gameChoices;
 	
 	private ButtonGroup startingPlayer;

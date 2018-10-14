@@ -30,7 +30,7 @@ public abstract class Piece {
 	 * @return
 	 */
 	protected static BufferedImage getProperImage(BufferedImage img, int boardLength, int rotations) {
-		int newLength = (int) (GameScreen.getBoardSize() / boardLength);
+		int newLength = (int) (GameScreen.getBoardHeighth() / boardLength);
 		
 		BufferedImage properImage = new BufferedImage(newLength, newLength, BufferedImage.TYPE_INT_ARGB);
 		AffineTransform at = new AffineTransform();

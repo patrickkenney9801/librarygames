@@ -38,7 +38,9 @@ import com.nfehs.librarygames.games.go.pieces.Stone;
 
 public class GameScreen extends Screen {
 	private static final double imageTileSize = 100;
-	private static double boardSize;
+	
+	private static double boardHeighth;
+	private static double boardWidth;
 	private static int infoTextSize;
 	
 	private double scale;
@@ -188,7 +190,7 @@ public class GameScreen extends Screen {
 		chatBox = new JTextPane();
 		chatInterface.add(chatBox);
 		chatBox.setEditable(false);
-		chatBox.setBounds(0, 0, 0, (int) getBoardSize() * 7 / 8 - 40);
+		chatBox.setBounds(0, 0, 0, (int) getBoardWidth() * 7 / 8 - 40);
 		chatBox.setMargin(new Insets(chatBox.getHeight() - 20, 0, 0, 0));
 		
 		chat = new JTextField();
@@ -241,35 +243,37 @@ public class GameScreen extends Screen {
 	 * Sets the positions for all items on screen
 	 */
 	protected void setPositions() {
-		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates
+		// get the scale for tiles (all images are 50pixels), tile size, and top left coordinates, get width of board
 		int rowLength = Game.getBoardGame().getBoard().length;
-		setScreenTileSize((int) (getBoardSize() / rowLength));
+		int colLength = Game.getBoardGame().getBoard()[0].length;
+		setScreenTileSize((int) (getBoardHeighth() / rowLength));
+		setBoardWidth(getScreenTileSize() * colLength);
 		setScale(getScreenTileSize() / imageTileSize);
 		setTopLeftY((int) Game.screenSize.getHeight() / 25);
-		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getScreenTileSize() * Game.getBoardGame().getBoard().length / 2)));
+		setTopLeftX((int) (Game.screenSize.getWidth() / 2 - (getBoardWidth() / 2)));
 		
-		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardSize()) * 9 / 10;
+		int panelWidth = (int) (Game.screenSize.getWidth() - getTopLeftX() - (int) getBoardWidth()) * 9 / 10;
 		title.setBounds(getTopLeftX(), getTopLeftY() - 20, 250, 15);
-		back.setBounds(getTopLeftX(), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
-		resign.setBounds(getTopLeftX() + (int) getBoardSize() - 150, getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
+		back.setBounds(getTopLeftX(), getTopLeftY() + (int) getBoardHeighth() + 10, 150, 30);
+		resign.setBounds(getTopLeftX() + (int) getBoardWidth() - 150, getTopLeftY() + (int) getBoardHeighth() + 10, 150, 30);
 		if (Game.getBoardGame().getGameType() < 3)
-			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
-		gameOverInfo.setBounds(getTopLeftX() + (int) getBoardSize() + panelWidth / 20, getTopLeftY(), panelWidth, getInfoTextSize() * 7 / 2);
+			pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardHeighth() + 10, 150, 30);
+		gameOverInfo.setBounds(getTopLeftX() + (int) getBoardWidth() + panelWidth / 20, getTopLeftY(), panelWidth, getInfoTextSize() * 7 / 2);
 		winner.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
 		score.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize(), getInfoTextSize());
-		gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
+		gameInfo.setBounds(	getTopLeftX() + (int) getBoardWidth() + panelWidth / 20,
 							getTopLeftY() + getInfoTextSize() * 2, panelWidth, getInfoTextSize() * 5);
 		moveCount.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
 		player1Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 2, getInfoTextSize(), getInfoTextSize());
 		player1User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
 		player2Icon.setBounds(getInfoTextSize() / 2, getInfoTextSize() * 7 / 2, getInfoTextSize(), getInfoTextSize());
 		player2User.setBounds(getInfoTextSize() * 2, getInfoTextSize() * 7 / 2, panelWidth - getInfoTextSize() * 5 / 2, getInfoTextSize());
-		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + panelWidth / 20,
+		capturedPieces.setBounds(	getTopLeftX() + (int) getBoardWidth() + panelWidth / 20,
 							getTopLeftY() + getInfoTextSize() * 8, panelWidth, getInfoTextSize() * 6);
 		capturedPiecesBG.setBounds(0, 0, capturedPieces.getWidth(), capturedPieces.getHeight());
 		captured.setBounds(getInfoTextSize() / 2, getInfoTextSize() / 2, panelWidth - getInfoTextSize(), getInfoTextSize());
 
-		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardSize() * 7 / 8);
+		chatInterface.setBounds(panelWidth / 20, getTopLeftY(), panelWidth, (int) getBoardHeighth() * 7 / 8);
 		chatBox.setMargin(new Insets(chatBox.getInsets().top - (chatBox.getHeight() - (chatInterface.getHeight() - 40)), 0, 0, 0));
 		chatBox.setBounds(5, 5, chatInterface.getWidth() - 10, chatInterface.getHeight() - 40);
 		chat.setBounds(5, chatInterface.getHeight() - 35, chatInterface.getWidth() - 10, 30);
@@ -306,10 +310,10 @@ public class GameScreen extends Screen {
 	 */
 	private void addBoard() {
 		Tile[][] tiles = Game.getBoardGame().getTiles();
-		board = new JLabel[tiles.length][tiles.length];
+		board = new JLabel[tiles.length][tiles[0].length];
 		
 		for (int i = 0; i < board.length; i++)
-			for (int j = 0; j < board.length; j++) {
+			for (int j = 0; j < board[i].length; j++) {
 				board[i][j] = new JLabel(new ImageIcon(tiles[i][j].getTile()));
 				pane.add(board[i][j], JLayeredPane.FRAME_CONTENT_LAYER);
 				
@@ -327,7 +331,7 @@ public class GameScreen extends Screen {
 					private int[] getCoordinates (JLabel tile) {
 						int[] coordinates = new int[2];
 						for (int i = 0; i < board.length; i++)
-							for (int j = 0; j < board.length; j++)
+							for (int j = 0; j < board[i].length; j++)
 								if (tile.equals(board[i][j])) {
 									coordinates[0] = i;
 									coordinates[1] = j;
@@ -415,7 +419,7 @@ public class GameScreen extends Screen {
 		Piece[][] gamePieces = Game.getBoardGame().getPieces();
 		
 		for (int i = 0; i < pieces.length; i++)
-			for (int j = 0; j < pieces.length; j++) {
+			for (int j = 0; j < pieces[i].length; j++) {
 				if (pieces[i][j] != null)
 					pane.remove(pieces[i][j]);
 				if (gamePieces[i][j] != null) {
@@ -436,7 +440,7 @@ public class GameScreen extends Screen {
 						private int[] getCoordinates (JLabel piece) {
 							int[] coordinates = new int[2];
 							for (int i = 0; i < pieces.length; i++)
-								for (int j = 0; j < pieces.length; j++)
+								for (int j = 0; j < pieces[i].length; j++)
 									if (piece.equals(pieces[i][j])) {
 										coordinates[0] = i;
 										coordinates[1] = j;
@@ -482,8 +486,8 @@ public class GameScreen extends Screen {
 									? Game.getBoardGame().getPlayer2() : Game.getBoardGame().getPlayer1())
 									+ "   Passed", SwingConstants.CENTER);
 							pane.add(pass, JLayeredPane.POPUP_LAYER);
-							pass.setBounds(0, (int) getBoardSize() / 2 - (int) getScreenTileSize() / 2,
-											(int) getBoardSize(), (int) getScreenTileSize());
+							pass.setBounds(0, (int) getBoardHeighth() / 2 - (int) getScreenTileSize() / 2,
+											(int) getBoardWidth(), (int) getScreenTileSize());
 							pass.setFont(new Font("Serif", Font.PLAIN, 50));
 							pass.setOpaque(true);
 							
@@ -499,9 +503,9 @@ public class GameScreen extends Screen {
 			moveCount.setText("Move: " + (Game.getBoardGame().getMoves() + 1));
 		} else {
 			Game.mainWindow.add(gameOverInfo);
-			gameInfo.setBounds(	getTopLeftX() + (int) getBoardSize() + gameInfo.getWidth() / 20,
+			gameInfo.setBounds(	getTopLeftX() + (int) getBoardWidth() + gameInfo.getWidth() / 20,
 					getTopLeftY() + getInfoTextSize() * 4, gameInfo.getWidth(), getInfoTextSize() * 5);
-			this.capturedPieces.setBounds(	getTopLeftX() + (int) getBoardSize() + gameInfo.getWidth() / 20,
+			this.capturedPieces.setBounds(	getTopLeftX() + (int) getBoardWidth() + gameInfo.getWidth() / 20,
 								getTopLeftY() + getInfoTextSize() * 10, gameInfo.getWidth(), getInfoTextSize() * 6);
 			moveCount.setText("Move: " + (Game.getBoardGame().getMoves()));
 			winner.setText("Winner: " + Game.getBoardGame().getWinner());
@@ -635,20 +639,6 @@ public class GameScreen extends Screen {
 		this.topLeftY = topLeftY;
 	}
 
-	/**
-	 * @return the boardSize
-	 */
-	public static double getBoardSize() {
-		return boardSize;
-	}
-
-	/**
-	 * @param boardSize the boardSize to set
-	 */
-	public static void setBoardSize(double boardSize) {
-		GameScreen.boardSize = boardSize;
-	}
-
 	public static double getImagetilesize() {
 		return imageTileSize;
 	}
@@ -665,6 +655,22 @@ public class GameScreen extends Screen {
 	 */
 	public static void setInfoTextSize(int infoTextSize) {
 		GameScreen.infoTextSize = infoTextSize;
+	}
+
+	public static double getBoardWidth() {
+		return boardWidth;
+	}
+
+	public static void setBoardWidth(double boardWidth) {
+		GameScreen.boardWidth = boardWidth;
+	}
+
+	public static double getBoardHeighth() {
+		return boardHeighth;
+	}
+
+	public static void setBoardHeighth(double boardHeighth) {
+		GameScreen.boardHeighth = boardHeighth;
 	}
 
 }

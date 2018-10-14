@@ -530,6 +530,7 @@ public class GameServer extends Thread {
 						+ gameKey + "', 0, 0, 0, 0);");
 				createGoGame.executeUpdate();
 			}
+			// if (packet.getGameType() == 3) { TODO
 			
 			System.out.println("GAME CREATED");
 			
@@ -742,6 +743,7 @@ public class GameServer extends Thread {
 				extraData += "," + result.getInt("p1_score");
 				extraData += "," + result.getInt("p2_score");
 			}
+			// if (gameType == 3) { TODO
 			
 			// send requested game to client, expect receipt
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), gameType, 
@@ -923,6 +925,8 @@ public class GameServer extends Thread {
 				extraInfo += "," + p1Score;
 				extraInfo += "," + p2Score;
 			}
+			// update specific game info and handle end of game
+			// if (gameType == 3) { TODO
 			
 			// update game
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
@@ -976,13 +980,14 @@ public class GameServer extends Thread {
 		
 		// create return packet
 		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), senderKey, packet.getGameKey(), player1OnGame, player2OnGame, packet.getText(), true);
+		sendPacket(returnPacket, address, port);
 		// set senderKey for others null to increase security
 		returnPacket.setSenderKey(null);
 		// send chat to players (the opponent must be on the game to send the chat), expect receipts
 		// also send chat to spectators if option is on
 		boolean sendToSpectators = packet.isSendToSpectators();
 		for (Player p : onlinePlayers)
-			if (packet.getGameKey().equals(p.getGame_key()))
+			if (!packet.getSenderKey().equals(p.getUser_key()) && packet.getGameKey().equals(p.getGame_key()))
 				if (sendToSpectators)
 					sendPacket(returnPacket, p.getIpAddress(), p.getPort());
 				else if (p.getUsername().equals(Security.encrypt(packet.getPlayer1Username()))
@@ -1016,6 +1021,7 @@ public class GameServer extends Thread {
 			case 0:
 			case 1:
 			case 2:						return "go";
+			case 3:						return "xiangqi";
 			default:					return null;
 		}
 	}

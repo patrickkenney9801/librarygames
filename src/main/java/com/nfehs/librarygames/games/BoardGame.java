@@ -14,7 +14,7 @@ import com.nfehs.librarygames.net.Security;
 
 public abstract class BoardGame {
 	public static enum GameTypes {
-		INVALID(-1), GO9x9(00), GO13x13(01), GO19x19(02);
+		INVALID(-1), GO9x9(00), GO13x13(01), GO19x19(02), XIANGQI(03);
 		
 		private int gameType;
 		private GameTypes(int gameType) {
@@ -127,6 +127,7 @@ public abstract class BoardGame {
 			case 0:
 			case 1:
 			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData);
+			// case 4:					TODO
 			default:					// handle wrong game type
 										System.out.println("ERROR WRONG GAME TYPE");
 										return null;
@@ -208,9 +209,6 @@ public abstract class BoardGame {
 	public abstract void handleMouseLeaveCapturedPiece();
 	public abstract void handleMouseClickCapturedPiece(int[] coordinates);
 	
-	// implement in child classes, for use in logic
-	//protected abstract boolean validMove(int x, int y);
-	
 	/**
 	 * Handles validating and executing moves
 	 * @param gameType
@@ -229,6 +227,7 @@ public abstract class BoardGame {
 			case 0:
 			case 1:						// get result of move for a Go game
 			case 2:						return  Go.makeMove(board1D, isPlayer1Turn, penultMove1D, lastMove1D, moveFrom1D, moveTo1D);
+			// case 3:				TODO
 			default:					System.out.println("GAME TYPE NOT FOUND");
 										return null;
 		}
@@ -271,7 +270,7 @@ public abstract class BoardGame {
 	protected char[][] getBoardCopy() {
 		char[][] copy = new char[getBoard().length][getBoard().length];
 		for (int i = 0; i < copy.length; i++)
-			for (int j = 0; j < copy.length; j++)
+			for (int j = 0; j < copy[i].length; j++)
 				copy[i][j] = getBoard()[i][j];
 		return copy;
 	}
@@ -283,9 +282,9 @@ public abstract class BoardGame {
 	 */
 	protected static char[][] getPaddedBoard(String board) {
 		char[][] reqBoard = getBoard(board);
-		char[][] padded = new char[reqBoard.length+2][reqBoard.length+2];
+		char[][] padded = new char[reqBoard.length+2][reqBoard[0].length+2];
 		for (int i = 0; i < padded.length-2; i++)
-			for (int j = 0; j < padded.length-2; j++)
+			for (int j = 0; j < padded[i].length-2; j++)
 				padded[i+1][j+1] = reqBoard[i][j];
 		return padded;
 	}
@@ -296,9 +295,9 @@ public abstract class BoardGame {
 	 * @return
 	 */
 	protected char[][] getPaddedBoardCopy() {
-		char[][] copy = new char[getBoard().length+2][getBoard().length+2];
+		char[][] copy = new char[getBoard().length+2][getBoard()[0].length+2];
 		for (int i = 0; i < copy.length-2; i++)
-			for (int j = 0; j < copy.length-2; j++)
+			for (int j = 0; j < copy[i].length-2; j++)
 				copy[i+1][j+1] = getBoard()[i][j];
 		return copy;
 	}
@@ -312,7 +311,7 @@ public abstract class BoardGame {
 		// set all $ equal to 0, (capture pieces)
 		String board = "";
 		for (int i = 1; i < paddedBoard.length-1; i++)
-			for (int j = 1; j < paddedBoard[j].length-1; j++)
+			for (int j = 1; j < paddedBoard[i].length-1; j++)
 				board += paddedBoard[i][j] != '$' ? paddedBoard[i][j] : '0';
 		return board;
 	}
@@ -360,6 +359,7 @@ public abstract class BoardGame {
 											for (int i = 0; i < 19*19; i++)
 												board += "0";
 											break;
+			// case 3:					// TODO
 			default:						// error no valid game type, return null
 											return null;
 		}
@@ -379,6 +379,7 @@ public abstract class BoardGame {
 			case 2:							// generates new extra game info for go games
 											board = "0,0,0,0";
 											break;
+			// case 3:					TODO
 			default:						// error no valid game type, return null
 											return null;
 		}
@@ -428,12 +429,12 @@ public abstract class BoardGame {
 	 */
 	private static String lookupGameName(GameTypes type) {
 		switch (type) {
-			case INVALID:				return "";
 			case GO9x9:					return "Go 9x9";
 			case GO13x13:				return "Go 13x13";
 			case GO19x19:				return "Go 19x19";
+			case XIANGQI:				return "Xiangqi";
+			default:					return "";
 		}
-		return "";
 	}
 
 	/**

@@ -52,8 +52,8 @@ public class GameFrame extends JFrame {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
-				GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
-				GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
+				GameScreen.setBoardHeighth((Game.screenSize.getHeight() * 4 / 5));
+				GameScreen.setInfoTextSize((int) (GameScreen.getBoardHeighth() / 16));
 				Tile.loadImages();
 				Piece.loadImages();
 				
@@ -91,8 +91,8 @@ public class GameFrame extends JFrame {
 		UIManager.put("CheckBox.background", background);
 		
 		// load images here
-		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
-		GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
+		GameScreen.setBoardHeighth((Game.screenSize.getHeight() * 4 / 5));
+		GameScreen.setInfoTextSize((int) (GameScreen.getBoardHeighth() / 16));
 		Tile.loadImages();
 		Piece.loadImages();
 	}

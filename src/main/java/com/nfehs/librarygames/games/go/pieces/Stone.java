@@ -65,10 +65,10 @@ public class Stone extends GoPiece {
 		
 		// load images
 		for (int i = 0; i < stones.length; i++) {
-			stones[i][0] = getStoneImage(true, (int) GameScreen.getBoardSize() / ROWS[i], false);
-			stones[i][1] = getStoneImage(false, (int) GameScreen.getBoardSize() / ROWS[i], false);
-			stonesLastMove[i][0] = getStoneImage(true, (int) GameScreen.getBoardSize() / ROWS[i], true);
-			stonesLastMove[i][1] = getStoneImage(false, (int) GameScreen.getBoardSize() / ROWS[i], true);
+			stones[i][0] = getStoneImage(true, (int) GameScreen.getBoardHeighth() / ROWS[i], false);
+			stones[i][1] = getStoneImage(false, (int) GameScreen.getBoardHeighth() / ROWS[i], false);
+			stonesLastMove[i][0] = getStoneImage(true, (int) GameScreen.getBoardHeighth() / ROWS[i], true);
+			stonesLastMove[i][1] = getStoneImage(false, (int) GameScreen.getBoardHeighth() / ROWS[i], true);
 		}
 	}
 }

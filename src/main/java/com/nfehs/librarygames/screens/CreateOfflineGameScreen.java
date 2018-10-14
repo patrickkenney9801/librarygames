@@ -21,7 +21,7 @@ import com.nfehs.librarygames.net.Security;
  */
 
 public class CreateOfflineGameScreen extends Screen {
-	private final String[] choices = {"Go 9x9", "Go 13x13", "Go 19x19"};
+	private final String[] choices = {"Go 9x9", "Go 13x13", "Go 19x19", "Xiangqi"};
 	private JComboBox<String> gameChoices;
 
 	private JLabel p1;
