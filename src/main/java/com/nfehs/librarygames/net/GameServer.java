@@ -982,7 +982,7 @@ public class GameServer extends Thread {
 		Packet10SendChat returnPacket = new Packet10SendChat(packet.getUuidKey(), senderKey, packet.getGameKey(), player1OnGame, player2OnGame, packet.getText(), true);
 		sendPacket(returnPacket, address, port);
 		// set senderKey for others null to increase security
-		returnPacket.setSenderKey(null);
+		returnPacket = new Packet10SendChat(packet.getUuidKey(), null, packet.getGameKey(), player1OnGame, player2OnGame, packet.getText(), true);
 		// send chat to players (the opponent must be on the game to send the chat), expect receipts
 		// also send chat to spectators if option is on
 		boolean sendToSpectators = packet.isSendToSpectators();
