@@ -1,7 +1,6 @@
 package com.nfehs.librarygames.screens;
 
 import java.awt.Color;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -88,7 +87,6 @@ public abstract class Screen {
 		Game.mainWindow.add(notification);
 		
 		alertUser.start();
-		Toolkit.getDefaultToolkit().beep();
 		Game.mainWindow.repaint();
 	}
 	

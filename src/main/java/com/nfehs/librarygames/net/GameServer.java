@@ -370,7 +370,7 @@ public class GameServer extends Thread {
 				}
 			}
 			
-			if (usernamesAdded % 20 != 0) {
+			if (usernamesAdded % 20 != 19) {
 				Packet04GetPlayers returnPacket = new Packet04GetPlayers(packet.getUuidKey(), packetsToSend, usernamesAdded / 20 + 1, friends, others, true);
 				returnPacket.writeData(this, address, port);
 			}
@@ -630,7 +630,7 @@ public class GameServer extends Thread {
 					gameInformation = new String[10];
 				}
 			}
-			if (packetsToSend % 10 != 0) {
+			if (packetsToSend % 10 != 9) {
 				// send games to client, only send 10 games at a time
 				Packet07GetGames returnPacket = new Packet07GetGames(packet.getUuidKey(), packetsToSend, ++packetsSent, gameInformation, true);
 				returnPacket.writeData(this, address, port);
@@ -811,10 +811,15 @@ public class GameServer extends Thread {
 			boolean resigned = false;
 			
 			String playerTurnKey;
-			if (moves % 2 == 0)
+			String opponentKey;
+			if (moves % 2 == 0) {
 				playerTurnKey = player1Key;
-			else
+				opponentKey = player2Key;
+			}
+			else {
 				playerTurnKey = player2Key;
+				opponentKey = player1Key;
+			}
 			
 			// if the game is already over, exit and send error
 			if (winner != 0) {
@@ -952,7 +957,9 @@ public class GameServer extends Thread {
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
 			
 			for (Player p : onlinePlayers)
-				if (packet.getGameKey().equals(p.getGame_key()) && !p.getUser_key().equals(packet.getSenderKey()))
+				// send to opponent if online and to spectators
+				if (opponentKey.equals(p.getUser_key()) 
+						|| packet.getGameKey().equals(p.getGame_key()) && !p.getUser_key().equals(packet.getSenderKey()))
 					getBoard(temp.getData(), p.getIpAddress(), p.getPort());
 			
 			updateSender(packet);

@@ -1,5 +1,6 @@
 package com.nfehs.librarygames.net;
 
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -345,8 +346,10 @@ public class GameClient extends Thread {
 		}
 		// check to see if user is receiving packet while on GameScreen, if it is the same game, update screen
 		else if (Game.gameState == Game.PLAYING_GAME && Game.getBoardGame().update(packet.getGameKey(), packet.getBoard(),
-				packet.getPenultMove(), packet.getLastMove(), packet.getMoves(), packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData()))
+				packet.getPenultMove(), packet.getLastMove(), packet.getMoves(), packet.getWinner(), packet.isPlayer1OnGame(), packet.isPlayer2OnGame(), packet.getExtraData())) {
 			Game.updateGameBoard();
+			Toolkit.getDefaultToolkit().beep();
+		}
 		// if none of the above, notify the client
 		else {
 			// if the user is on the active games screen, update it
@@ -355,6 +358,7 @@ public class GameClient extends Thread {
 			// notify the user
 			Game.notifyUser(BoardGame.createGame(packet.getGameKey(), packet.getGameType(), packet.getPlayer1(), packet.getPlayer2(), packet.getMoves(),
 					packet.getPenultMove(), packet.getLastMove(), packet.getWinner(), true, true, packet.getBoard(), packet.getExtraData()));
+			Toolkit.getDefaultToolkit().beep();
 		}
 	}
 
