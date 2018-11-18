@@ -241,68 +241,6 @@ public class Go extends BoardGame {
 						return true;
 		return false;
 	}
-
-	/**
-	 * Returns true if the proposed move is allowed
-	 *
-	public boolean validMove(int x, int y) {
-		// if the location already has a stone, the move is invalid
-		if (getBoard()[x][y] != '0')
-			return false;
-		
-		// check ko rule
-		if (getPenultMove() == getLinearCoordinate(x, y))
-			return false;
-		
-		// copy board and add new piece to the copy
-		char[][] paddedCopy = getPaddedBoardCopy();
-		paddedCopy[x+1][y+1] = isPlayer1() ? '1' : '2';
-		
-		// check if the move has any liberties, if not it is invalid
-		return hasLiberties(paddedCopy, x+1, y+1);
-	}*/
-	
-	/**
-	 * Returns true if the placement has at least one liberty
-	 * @param board
-	 * @param x
-	 * @param y
-	 * @return
-	 *
-	private boolean hasLiberties(char[][] paddedBoard, int x, int y) {
-		char piece = paddedBoard[x][y];
-		char opposingPiece = '2';
-		if (piece == '2')
-			opposingPiece = '1';
-		
-		// check if the group of stones created has a liberty
-		if (groupHasLiberty(paddedBoard, x, y))
-			return true;
-		// if not reset paddedBoard
-		paddedBoard = paintBoard(paddedBoard, x, y, '$', piece);
-		
-		// finally test if a surrounding opposing stone is captured, if so the move is valid
-		// unpainting boards is not neccessary
-		if (paddedBoard[x][y+1] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x, y+1))
-				return true;
-			else
-				paddedBoard = paintBoard(paddedBoard, x, y+1, '$', opposingPiece);
-		if (paddedBoard[x][y-1] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x, y-1))
-				return true;
-			else
-				paddedBoard = paintBoard(paddedBoard, x, y-1, '$', opposingPiece);
-		if (paddedBoard[x+1][y] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x+1, y))
-				return true;
-			else
-				paddedBoard = paintBoard(paddedBoard, x+1, y, '$', opposingPiece);
-		if (paddedBoard[x-1][y] == opposingPiece)
-			if (!groupHasLiberty(paddedBoard, x-1, y))
-				return true;
-		return false;
-	}*/
 	
 	/**
 	 * Returns true if a group of stones containing (x, y) has a liberty

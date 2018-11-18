@@ -127,7 +127,7 @@ public abstract class BoardGame {
 			case 0:
 			case 1:
 			case 2:						return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData);
-			// case 4:					TODO
+			// case 3:					TODO
 			default:					// handle wrong game type
 										System.out.println("ERROR WRONG GAME TYPE");
 										return null;
