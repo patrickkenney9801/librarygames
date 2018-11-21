@@ -1,6 +1,8 @@
 package com.nfehs.librarygames.games;
 
 import java.awt.image.BufferedImage;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.go.Go;
@@ -384,6 +386,56 @@ public abstract class BoardGame {
 											return null;
 		}
 		return board;
+	}
+	
+	/**
+	 * Generates brand new specific extra game info
+	 * @param gameType
+	 * @param gameKey
+	 * @return
+	 */
+	public static String createExtraGameInfo(int gameType, String gameKey) {
+		String extraGameInfo = "";
+		switch (gameType) {
+			case 0:							
+			case 1:							
+			case 2:							// generates new extra game info for go games
+											extraGameInfo = "INSERT INTO go VALUES ('" 
+													+ gameKey + "', 0, 0, 0, 0);";
+											break;
+			// case 3:					TODO
+			default:						// error no valid game type, return null
+											return null;
+		}
+		return extraGameInfo;
+	}
+	
+	/**
+	 * Gets game specific data from database to send to client
+	 * @param gameType
+	 * @param gameData
+	 * @return
+	 */
+	public static String getExtraGameData(int gameType, ResultSet gameData) {
+		String extraGameData = "";
+		try {
+			switch (gameType) {
+				case 0:							
+				case 1:							
+				case 2:							// generates new extra game info for go games
+												extraGameData += gameData.getInt("p1_stones_captured");
+												extraGameData += "," + gameData.getInt("p2_stones_captured");
+												extraGameData += "," + gameData.getInt("p1_score");
+												extraGameData += "," + gameData.getInt("p2_score");
+												break;
+				// case 3:					TODO
+				default:						// error no valid game type, return null
+												return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return extraGameData;
 	}
 	
 	/**

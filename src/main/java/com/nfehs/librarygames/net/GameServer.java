@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.nfehs.librarygames.Player;
@@ -37,7 +37,10 @@ public class GameServer extends Thread {
 	private final String DATABASE_PASS = "9801";
 	
 	private ArrayList<Player> onlinePlayers;
-	private HashMap<String, Boolean> sentPackets;
+	private HashSet<String> sentPackets;
+	// HashMap <session_keys, player>
+	// HashMap <game_key, ArrayList<player>>
+	// HashMap <user_keys, session_keys>
 	
 	public GameServer() {
 		try {
@@ -46,7 +49,7 @@ public class GameServer extends Thread {
 			this.socket = new DatagramSocket(PORT);
 			System.out.println("Connected to UDP");
 			this.onlinePlayers = new ArrayList<Player>();
-			setSentPackets(new HashMap<String, Boolean>());
+			setSentPackets(new HashSet<String>());
 		} catch (SocketException e) {
 			e.printStackTrace();
 	} catch (SQLException e) {
@@ -524,13 +527,9 @@ public class GameServer extends Thread {
 			createGame.executeUpdate();
 			
 			// next create specific game table for extra data
-			if(packet.getGameType() < 3) {
-				// if go, make a go table as well
-				PreparedStatement createGoGame = database.prepareStatement("INSERT INTO go VALUES ('" 
-						+ gameKey + "', 0, 0, 0, 0);");
-				createGoGame.executeUpdate();
-			}
-			// if (packet.getGameType() == 3) { TODO
+			PreparedStatement createGameSpecificData = database.prepareStatement(
+					BoardGame.createExtraGameInfo(packet.getGameType(), gameKey));
+			createGameSpecificData.executeUpdate();
 			
 			System.out.println("GAME CREATED");
 			
@@ -735,15 +734,7 @@ public class GameServer extends Thread {
 			player2OnGame = userOnGame(player2, packet.getGameKey());
 			
 			// retrieve specific game data
-			String extraData = "";
-			if (gameType < 3) {
-				// handle getting extra data for go games
-				extraData += result.getInt("p1_stones_captured");
-				extraData += "," + result.getInt("p2_stones_captured");
-				extraData += "," + result.getInt("p1_score");
-				extraData += "," + result.getInt("p2_score");
-			}
-			// if (gameType == 3) { TODO
+			String extraData = BoardGame.getExtraGameData(gameType, result);
 			
 			// send requested game to client, expect receipt
 			Packet08GetBoard returnPacket = new Packet08GetBoard(packet.getUuidKey(), packet.getSenderKey(), packet.getGameKey(), gameType, 
@@ -933,7 +924,7 @@ public class GameServer extends Thread {
 			// update specific game info and handle end of game
 			// if (gameType == 3) { TODO
 			
-			// update game
+			// update game and move count
 			PreparedStatement updateGame = database.prepareStatement("UPDATE games SET " 
 					+ "moves = " + ++moves + ", penult_move = " + lastMove + ", last_move = " + packet.getMoveTo()
 					 + ", winner = " + winner + ", last_action_date = NOW(), board = '" + newBoard + "' WHERE game_key = '" + packet.getGameKey() + "';");
@@ -951,7 +942,7 @@ public class GameServer extends Thread {
 			sendPacket(returnPacket, address, port);
 			
 			/*
-			 *  send a 08 packet to opponent to notify or update their client
+			 *  send a 08 packet to opponent and spectators to notify or update their client
 			 */
 			Packet08GetBoard temp = new Packet08GetBoard(packet.getSenderKey(), packet.getUsername(), packet.getGameKey(), gameType);
 			temp.setUuidKey(packet.getUuidKey());		// preserve packet id
@@ -1158,10 +1149,9 @@ public class GameServer extends Thread {
 		Packet13Receipt packet = new Packet13Receipt(data);
 		if (!packet.isValid())
 			return;
-		// if the HashMap has the packetIdentifier, set it true
+		// remove the packetIdentifier from HashSet
 		String packetIdentifier = packet.getUuidKey() + address.toString();
-		if (getSentPackets().containsKey(packetIdentifier))
-			getSentPackets().put(packetIdentifier, true);
+		getSentPackets().remove(packetIdentifier);
 	}
 
 	/**
@@ -1199,7 +1189,7 @@ public class GameServer extends Thread {
 	private void sendPacket(final Packet packet, final InetAddress address, final int port) {
 		// add packet identifier to HashMap
 		final String packetIdentifier = packet.getUuidKey() + address.toString();
-		getSentPackets().put(packetIdentifier, false);
+		getSentPackets().add(packetIdentifier);
 		new Thread(new Runnable() {
 			public void run() {
 				// send packet and then check for receipt 500ms later, if receipt received exit
@@ -1213,7 +1203,7 @@ public class GameServer extends Thread {
 					return;
 				if (sendPacket(packet, address, port, packetIdentifier, 5000))
 					return;
-				// if a response is not receives after 5 tries, remove players with address from onlinePlayers
+				// if a response is not received after 5 tries, remove players with address from onlinePlayers
 				for (int i = 0; i < onlinePlayers.size(); i++)
 					if (onlinePlayers.get(i).getIpAddress().equals(address)) {
 						sendOnGame(onlinePlayers.get(i).getGame_key(), onlinePlayers.get(i).getUsername(), false);
@@ -1239,15 +1229,8 @@ public class GameServer extends Thread {
 			packet.writeData(this, address, port);
 			sleep(waitTime);
 			
-			// check if sent packet still exists
-			if (!getSentPackets().containsKey(packetIdentifier))
-				return true;
-			// check for receipt, if one, exit and remove packet, if none send again
-			if (getSentPackets().get(packetIdentifier)) {
-				getSentPackets().remove(packetIdentifier);
-				return true;
-			}
-			return false;
+			// return if sent packet still exists
+			return !getSentPackets().contains(packetIdentifier);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -1316,11 +1299,11 @@ public class GameServer extends Thread {
 		}
 	}
 
-	public HashMap<String, Boolean> getSentPackets() {
+	public HashSet<String> getSentPackets() {
 		return sentPackets;
 	}
 
-	public void setSentPackets(HashMap<String, Boolean> sentPackets) {
+	public void setSentPackets(HashSet<String> sentPackets) {
 		this.sentPackets = sentPackets;
 	}
 }
