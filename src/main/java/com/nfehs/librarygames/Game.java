@@ -2,6 +2,7 @@ package com.nfehs.librarygames;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
@@ -31,7 +32,7 @@ public class Game {
 	private static Player player;
 	private static BoardGame boardGame;
 	
-	public static final byte[] SERVER_IP_ADDRESS = {108, (byte) 205, (byte) 143, 97};
+	public static final byte[] DEFAULT_SERVER_IP_ADDRESS = {127, 0, 0, 1};
 	
 	public static final int LOGIN = 0;
 	public static final int CREATE_ACCOUNT = 1;
@@ -47,7 +48,7 @@ public class Game {
 	public static boolean online = false;
 
 	public Game() throws UnknownHostException {
-		client = new GameClient(SERVER_IP_ADDRESS);
+		client = new GameClient(getServerAddress());
 		client.start();
 	}
 	
@@ -544,5 +545,13 @@ public class Game {
 
 	public static void setOnline(boolean online) {
 		Game.online = online;
+	}
+
+	private static byte[] getServerAddress() throws UnknownHostException {
+		String serverAddress = System.getenv("LIBRARY_GAMES_SERVER_ADDRESS");
+		if (serverAddress == null) {
+			return DEFAULT_SERVER_IP_ADDRESS;
+		}
+		return InetAddress.getByName(serverAddress).getAddress();
 	}
 }

@@ -1,0 +1,47 @@
+{{- $root := . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "librarygames.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-mysql-schema
+data:
+  schema.sql: |
+    USE library_games;
+    CREATE TABLE friends (
+      userkey1 CHAR(36) NOT NULL,
+      userkey2 CHAR(36) NOT NULL,
+      id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+      PRIMARY KEY (id)
+    );
+    CREATE TABLE games (
+      game_key CHAR(36) NOT NULL,
+      player1_key CHAR(36) NOT NULL,
+      player2_key CHAR(36) NOT NULL,
+      game_type SMALLINT(5) UNSIGNED NOT NULL,
+      moves SMALLINT(5) UNSIGNED NOT NULL,
+      penult_move SMALLINT(6) NOT NULL,
+      last_move SMALLINT(6) NOT NULL,
+      winner SMALLINT(5) UNSIGNED NOT NULL,
+      last_action_date DATETIME NOT NULL DEFAULT NOW(),
+      board VARCHAR(361) NOT NULL,
+      PRIMARY KEY (game_key)
+    );
+    CREATE TABLE go (
+      game_key CHAR(36) NOT NULL,
+      p1_stones_captured SMALLINT(5) UNSIGNED NOT NULL,
+      p2_stones_captured SMALLINT(5) UNSIGNED NOT NULL,
+      p1_score SMALLINT(5) UNSIGNED NOT NULL,
+      p2_score SMALLINT(5) UNSIGNED NOT NULL,
+      PRIMARY KEY (game_key)
+    );
+    CREATE TABLE users (
+      username VARCHAR(100) NOT NULL,
+      password VARCHAR(100) NOT NULL,
+      email VARCHAR(30),
+      user_key CHAR(36) NOT NULL,
+      last_action_date DATETIME NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (user_key),
+      UNIQUE (username)
+    );

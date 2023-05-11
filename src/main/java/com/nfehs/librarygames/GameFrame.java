@@ -37,7 +37,7 @@ public class GameFrame extends JFrame {
 		Game.window.setResizable(true);
 		Game.window.setLocationRelativeTo(null);
 		try {
-			Game.window.setIconImage(ImageIO.read(GameFrame.class.getResource("/com/nfehs/librarygames/media/yinyang.png")));
+			Game.window.setIconImage(ImageIO.read(GameFrame.class.getResource("/yinyang.png")));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
