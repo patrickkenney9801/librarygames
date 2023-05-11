@@ -61,11 +61,11 @@ public class GoTile extends Tile {
 		
 		// load images
 		try {
-			centerTiles[2] = ImageIO.read(GoTile.class.getResource("/com/nfehs/librarygames/media/go/goCenterTile.png"));
+			centerTiles[2] = ImageIO.read(GoTile.class.getResource("/go/goCenterTile.png"));
 			
 			for (int i = 0; i < edgeTiles[0].length; i++) {
-				edgeTiles[2][i] = ImageIO.read(GoTile.class.getResource("/com/nfehs/librarygames/media/go/goEdgeTile" + i + ".png"));
-				cornerTiles[2][i] = ImageIO.read(GoTile.class.getResource("/com/nfehs/librarygames/media/go/goCornerTile" + i + ".png"));
+				edgeTiles[2][i] = ImageIO.read(GoTile.class.getResource("/go/goEdgeTile" + i + ".png"));
+				cornerTiles[2][i] = ImageIO.read(GoTile.class.getResource("/go/goCornerTile" + i + ".png"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

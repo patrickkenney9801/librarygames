@@ -33,9 +33,10 @@ public class GameServer extends Thread {
 	private DatagramSocket socket;
 	private Connection database;
 	private static final int PORT = 19602;
-	private final String DATABASE_USER = "pkenney";
-	private final String DATABASE_PASS = "9801";
-	
+	private final String DATABASE_ADDRESS = System.getenv("MYSQL_SERVER_ADDRESS");
+	private final String DATABASE_USER = System.getenv("MYSQL_DATABASE_USERNAME");
+	private final String DATABASE_PASS = System.getenv("MYSQL_DATABASE_PASSWORD");
+
 	private ArrayList<Player> onlinePlayers;
 	private HashMap<String, Boolean> sentPackets;
 	
@@ -63,8 +64,9 @@ public class GameServer extends Thread {
 		try {
 			String driver = "com.mysql.cj.jdbc.Driver";
 			Class.forName(driver);
-			
-			return DriverManager.getConnection("jdbc:mysql://localhost:3306/library_games?autoReconnect=true", DATABASE_USER, DATABASE_PASS);
+
+			String databaseURL = DATABASE_ADDRESS + "/library_games?autoReconnect=true";
+			return DriverManager.getConnection(databaseURL, DATABASE_USER, DATABASE_PASS);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -84,11 +86,7 @@ public class GameServer extends Thread {
 				e.printStackTrace();
 			}
 			System.out.println();
-			// do not output messages
-			if (new String(packet.getData()).substring(0, 2).equals("10"))
-				System.out.println("CLIENT > PACKET 10 RECEIVED");
-			else
-				System.out.println("CLIENT > " + new String(packet.getData()));
+			System.out.println("CLIENT > " + new String(packet.getData()));
 			
 			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
 		}
@@ -292,6 +290,7 @@ public class GameServer extends Thread {
 		
 		for (int i = 0; i < onlinePlayers.size(); i++)
 			if (onlinePlayers.get(i).getIpAddress().equals(address)
+					&& onlinePlayers.get(i).getPort() == port
 					&& onlinePlayers.get(i).getUser_key().equals(packet.getSenderKey())) {
 				sendOnGame(onlinePlayers.get(i).getGame_key(), onlinePlayers.get(i).getUsername(), false);
 				onlinePlayers.remove(i);
@@ -670,7 +669,7 @@ public class GameServer extends Thread {
 			
 			// find game
 			PreparedStatement statement = database.prepareStatement("SELECT * FROM games RIGHT JOIN " + type + " ON games.game_key = " + type 
-																	+ ".game_key WHERE games.game_key = '" + packet.getGameKey() + "';");
+									 															            + ".game_key WHERE games.game_key = '" + packet.getGameKey() + "';");
 			ResultSet result = statement.executeQuery();
 			
 			/*
@@ -1198,7 +1197,8 @@ public class GameServer extends Thread {
 					return;
 				// if a response is not receives after 5 tries, remove players with address from onlinePlayers
 				for (int i = 0; i < onlinePlayers.size(); i++)
-					if (onlinePlayers.get(i).getIpAddress().equals(address)) {
+					if (onlinePlayers.get(i).getIpAddress().equals(address)
+							&& onlinePlayers.get(i).getPort() == port) {
 						sendOnGame(onlinePlayers.get(i).getGame_key(), onlinePlayers.get(i).getUsername(), false);
 						onlinePlayers.remove(i);
 					}

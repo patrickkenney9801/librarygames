@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "librarygames.fullname" . }}
+  labels:
+    {{- include "librarygames.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "librarygames.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.librarygames.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "librarygames.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.librarygames.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "librarygames.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.librarygames.podSecurityContext | nindent 8 }}
+      containers:
+        - name: librarygames
+          env:
+            {{- include "kubernetes.envContainerResources" (dict "container" "librarygames") | nindent 12 }}
+            {{- include "kubernetes.envPodInformation" . | nindent 12 }}
+            {{- include "librarygames.envVars" . | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.librarygames.securityContext | nindent 12 }}
+          image: "{{ .Values.librarygames.image.repository }}:{{ .Values.librarygames.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.librarygames.image.pullPolicy }}
+          ports:
+            - name: games
+              containerPort: 19602
+              protocol: UDP
+          resources:
+            {{- toYaml .Values.librarygames.resources | nindent 12 }}
+      {{- with .Values.librarygames.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.librarygames.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.librarygames.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
