@@ -1,3 +1,4 @@
+---
 # Default values for librarygames.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -16,7 +17,7 @@ librarygames:
     tag: ""
 
   imagePullSecrets: []
-  
+
   mysql:
     address: ~
 
@@ -29,23 +30,23 @@ librarygames:
   podAnnotations: {}
 
   podSecurityContext: {}
-    # fsGroup: 2000
+  # fsGroup: 2000
 
   resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
 
   securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
 
   service:
     type: NodePort
@@ -57,7 +58,7 @@ librarygames:
     # Annotations to add to the service account
     annotations: {}
     # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
+    # If not set and create is true, a name is generated
     name: ""
 
   tolerations: []

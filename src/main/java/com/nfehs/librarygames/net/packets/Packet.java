@@ -14,153 +14,153 @@ import com.nfehs.librarygames.net.GameServer;
  */
 
 public abstract class Packet {
-	/**
-	 * Creates an enum to encompass all packet types
-	 * @author Patrick
-	 */
-	public static enum PacketTypes {
-		INVALID(-1), LOGIN(00), CREATEACCOUNT(01), ERROR(02), LOGOUT(03),
-		GETPLAYERS(04), ADDFRIEND(05), CREATEGAME(06), GETGAMES(07), GETBOARD(8),
-		SENDMOVE(9), SENDCHAT(10), ONGAME(11), GETSPECTATES(12), RECEIPT(13);
-		
-		private int packetId;
-		private PacketTypes(int packetId) {
-			this.packetId = packetId;
-		}
-		
-		public int getId() {
-			return packetId;
-		}
-	}
-	
-	private byte packetId;
-	private String uuidKey;
-	private String senderKey;
-	private boolean isValid;
-	
-	public Packet(int packetId) {
-		setPacketId((byte) packetId); 
-		setUuidKey("" + UUID.randomUUID());
-		setValid(true);
-	}
-	
-	public Packet(int packetId, String senderKey) {
-		setPacketId((byte) packetId); 
-		setUuidKey("" + UUID.randomUUID());
-		setSenderKey(senderKey);
-		setValid(true);
-	}
-	
-	/**
-	 * Sends data to the server from client
-	 * @param client
-	 */
-	public void writeData(GameClient client) {
-		client.sendData(getData());
-	}
-	/**
-	 * Sends data to the client from server
-	 * @param server
-	 * @param address
-	 * @param port
-	 */
-	public void writeData(GameServer server, InetAddress address, int port) {
-		server.sendData(getDataServer(), address, port);
-	}
+  /**
+   * Creates an enum to encompass all packet types
+   * @author Patrick
+   */
+  public static enum PacketTypes {
+    INVALID(-1), LOGIN(00), CREATEACCOUNT(01), ERROR(02), LOGOUT(03),
+    GETPLAYERS(04), ADDFRIEND(05), CREATEGAME(06), GETGAMES(07), GETBOARD(8),
+    SENDMOVE(9), SENDCHAT(10), ONGAME(11), GETSPECTATES(12), RECEIPT(13);
 
-	// these will be implemented to create data
-	public abstract byte[] getData();			// creates packet data to send to server
-	public abstract byte[] getDataServer();		// creates packet data to send to client
-	
-	/**
-	 * This method will read messages sent, cuts off id (first 2 chars)
-	 * @param data
-	 * @return
-	 */
-	public String readData(byte[] data) {
-		String message = new String(data).trim();
-		return message.substring(2);
-	}
-	
-	/**
-	 * This method returns what type of packet the packet is
-	 * @param id String
-	 * @return
-	 */
-	public static PacketTypes lookupPacket(String id) {
-		try {
-			return lookupPacket(Integer.parseInt(id));
-		} catch (Exception e) {
-			return PacketTypes.INVALID;
-		}
-	}
-	
-	/**
-	 * This method returns what type of packet the packet is
-	 * @param id int
-	 * @return
-	 */
-	public static PacketTypes lookupPacket(int id) {
-		for (PacketTypes p : PacketTypes.values()) {
-			if (p.getId() == id)
-				return p;
-		}
-		return PacketTypes.INVALID;
-	}
+    private int packetId;
+    private PacketTypes(int packetId) {
+      this.packetId = packetId;
+    }
 
-	/**
-	 * @return the packetId
-	 */
-	public byte getPacketId() {
-		return packetId;
-	}
+    public int getId() {
+      return packetId;
+    }
+  }
 
-	/**
-	 * @param packetId the packetId to set
-	 */
-	public void setPacketId(byte packetId) {
-		this.packetId = packetId;
-	}
+  private byte packetId;
+  private String uuidKey;
+  private String senderKey;
+  private boolean isValid;
 
-	/**
-	 * @return the uuidKey
-	 */
-	public String getUuidKey() {
-		return uuidKey;
-	}
+  public Packet(int packetId) {
+    setPacketId((byte) packetId);
+    setUuidKey("" + UUID.randomUUID());
+    setValid(true);
+  }
 
-	/**
-	 * @param uuidKey the uuidKey to set
-	 */
-	public void setUuidKey(String uuidKey) {
-		this.uuidKey = uuidKey;
-	}
+  public Packet(int packetId, String senderKey) {
+    setPacketId((byte) packetId);
+    setUuidKey("" + UUID.randomUUID());
+    setSenderKey(senderKey);
+    setValid(true);
+  }
 
-	/**
-	 * @return the senderKey
-	 */
-	public String getSenderKey() {
-		return senderKey;
-	}
+  /**
+   * Sends data to the server from client
+   * @param client
+   */
+  public void writeData(GameClient client) {
+    client.sendData(getData());
+  }
+  /**
+   * Sends data to the client from server
+   * @param server
+   * @param address
+   * @param port
+   */
+  public void writeData(GameServer server, InetAddress address, int port) {
+    server.sendData(getDataServer(), address, port);
+  }
 
-	/**
-	 * @param senderKey the senderKey to set
-	 */
-	public void setSenderKey(String senderKey) {
-		this.senderKey = senderKey;
-	}
+  // these will be implemented to create data
+  public abstract byte[] getData();      // creates packet data to send to server
+  public abstract byte[] getDataServer();    // creates packet data to send to client
 
-	/**
-	 * @return the isValid
-	 */
-	public boolean isValid() {
-		return isValid;
-	}
+  /**
+   * This method will read messages sent, cuts off id (first 2 chars)
+   * @param data
+   * @return
+   */
+  public String readData(byte[] data) {
+    String message = new String(data).trim();
+    return message.substring(2);
+  }
 
-	/**
-	 * @param isValid the isValid to set
-	 */
-	public void setValid(boolean isValid) {
-		this.isValid = isValid;
-	}
+  /**
+   * This method returns what type of packet the packet is
+   * @param id String
+   * @return
+   */
+  public static PacketTypes lookupPacket(String id) {
+    try {
+      return lookupPacket(Integer.parseInt(id));
+    } catch (Exception e) {
+      return PacketTypes.INVALID;
+    }
+  }
+
+  /**
+   * This method returns what type of packet the packet is
+   * @param id int
+   * @return
+   */
+  public static PacketTypes lookupPacket(int id) {
+    for (PacketTypes p : PacketTypes.values()) {
+      if (p.getId() == id)
+        return p;
+    }
+    return PacketTypes.INVALID;
+  }
+
+  /**
+   * @return the packetId
+   */
+  public byte getPacketId() {
+    return packetId;
+  }
+
+  /**
+   * @param packetId the packetId to set
+   */
+  public void setPacketId(byte packetId) {
+    this.packetId = packetId;
+  }
+
+  /**
+   * @return the uuidKey
+   */
+  public String getUuidKey() {
+    return uuidKey;
+  }
+
+  /**
+   * @param uuidKey the uuidKey to set
+   */
+  public void setUuidKey(String uuidKey) {
+    this.uuidKey = uuidKey;
+  }
+
+  /**
+   * @return the senderKey
+   */
+  public String getSenderKey() {
+    return senderKey;
+  }
+
+  /**
+   * @param senderKey the senderKey to set
+   */
+  public void setSenderKey(String senderKey) {
+    this.senderKey = senderKey;
+  }
+
+  /**
+   * @return the isValid
+   */
+  public boolean isValid() {
+    return isValid;
+  }
+
+  /**
+   * @param isValid the isValid to set
+   */
+  public void setValid(boolean isValid) {
+    this.isValid = isValid;
+  }
 }
