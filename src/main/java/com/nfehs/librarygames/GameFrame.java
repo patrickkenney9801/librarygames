@@ -22,78 +22,78 @@ import com.nfehs.librarygames.screens.GameScreen;
  */
 
 public class GameFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	public static final Color background = new Color(25, 25, 25);
-	public static final Color textBackground = new Color(50, 50, 50);
+  private static final long serialVersionUID = 1L;
+  public static final Color background = new Color(25, 25, 25);
+  public static final Color textBackground = new Color(50, 50, 50);
 
-	public GameFrame() {
-		Game.screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		Game.screenSize.setSize((int) Game.screenSize.getWidth() - 125, (int) Game.screenSize.getHeight() - 100);
-		
-		Game.window = new JFrame("Library Games");
-		Game.window.setVisible(true);
-		Game.window.setSize((int) Game.screenSize.getWidth(), (int) Game.screenSize.getHeight());
-		Game.window.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		Game.window.setResizable(true);
-		Game.window.setLocationRelativeTo(null);
-		try {
-			Game.window.setIconImage(ImageIO.read(GameFrame.class.getResource("/yinyang.png")));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Game.window.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				System.out.println("Closing window");
-				Game.logout();
-			}
-		});
-		Game.window.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
-				GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
-				GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
-				Tile.loadImages();
-				Piece.loadImages();
-				
-				Game.refresh();
-			}
-		});
-		
-		Game.mainWindow = Game.window.getContentPane();
-		Game.mainWindow.setLayout(null);
-		Game.mainWindow.setBackground(background);
-		
-		// set UI presets
-		UIManager.put("Label.foreground", Color.WHITE);
-		UIManager.put("Label.background", background);
-		UIManager.put("TextArea.foreground", Color.WHITE);
-		UIManager.put("TextArea.background", textBackground);
-		UIManager.put("TextField.foreground", Color.WHITE);
-		UIManager.put("TextField.background", textBackground);
-		UIManager.put("TextField.caretForeground", Color.WHITE);
-		UIManager.put("PasswordField.foreground", Color.WHITE);
-		UIManager.put("PasswordField.background", textBackground);
-		UIManager.put("PasswordField.caretForeground", Color.WHITE);
-		UIManager.put("ComboBox.foreground", Color.WHITE);
-		UIManager.put("ComboBox.background", textBackground);
-		UIManager.put("RadioButton.foreground", Color.WHITE);
-		UIManager.put("RadioButton.background", background);
-		UIManager.put("Panel.background", textBackground);
-		UIManager.put("OptionPane.messageForeground", Color.WHITE);
-		UIManager.put("OptionPane.foreground", Color.WHITE);
-		UIManager.put("OptionPane.background", background);
-		UIManager.put("TextPane.background", textBackground);
-		UIManager.put("ScrollPane.background", background);
-		UIManager.put("ScrollBar.background", textBackground);
-		UIManager.put("CheckBox.foreground", Color.WHITE);
-		UIManager.put("CheckBox.background", background);
-		
-		// load images here
-		GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
-		GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
-		Tile.loadImages();
-		Piece.loadImages();
-	}
+  public GameFrame() {
+    Game.screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Game.screenSize.setSize((int) Game.screenSize.getWidth() - 125, (int) Game.screenSize.getHeight() - 100);
+
+    Game.window = new JFrame("Library Games");
+    Game.window.setVisible(true);
+    Game.window.setSize((int) Game.screenSize.getWidth(), (int) Game.screenSize.getHeight());
+    Game.window.setDefaultCloseOperation(EXIT_ON_CLOSE);
+    Game.window.setResizable(true);
+    Game.window.setLocationRelativeTo(null);
+    try {
+      Game.window.setIconImage(ImageIO.read(GameFrame.class.getResource("/yinyang.png")));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    Game.window.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+        System.out.println("Closing window");
+        Game.logout();
+      }
+    });
+    Game.window.addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(ComponentEvent e) {
+        Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
+        GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+        GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
+        Tile.loadImages();
+        Piece.loadImages();
+
+        Game.refresh();
+      }
+    });
+
+    Game.mainWindow = Game.window.getContentPane();
+    Game.mainWindow.setLayout(null);
+    Game.mainWindow.setBackground(background);
+
+    // set UI presets
+    UIManager.put("Label.foreground", Color.WHITE);
+    UIManager.put("Label.background", background);
+    UIManager.put("TextArea.foreground", Color.WHITE);
+    UIManager.put("TextArea.background", textBackground);
+    UIManager.put("TextField.foreground", Color.WHITE);
+    UIManager.put("TextField.background", textBackground);
+    UIManager.put("TextField.caretForeground", Color.WHITE);
+    UIManager.put("PasswordField.foreground", Color.WHITE);
+    UIManager.put("PasswordField.background", textBackground);
+    UIManager.put("PasswordField.caretForeground", Color.WHITE);
+    UIManager.put("ComboBox.foreground", Color.WHITE);
+    UIManager.put("ComboBox.background", textBackground);
+    UIManager.put("RadioButton.foreground", Color.WHITE);
+    UIManager.put("RadioButton.background", background);
+    UIManager.put("Panel.background", textBackground);
+    UIManager.put("OptionPane.messageForeground", Color.WHITE);
+    UIManager.put("OptionPane.foreground", Color.WHITE);
+    UIManager.put("OptionPane.background", background);
+    UIManager.put("TextPane.background", textBackground);
+    UIManager.put("ScrollPane.background", background);
+    UIManager.put("ScrollBar.background", textBackground);
+    UIManager.put("CheckBox.foreground", Color.WHITE);
+    UIManager.put("CheckBox.background", background);
+
+    // load images here
+    GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+    GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
+    Tile.loadImages();
+    Piece.loadImages();
+  }
 }

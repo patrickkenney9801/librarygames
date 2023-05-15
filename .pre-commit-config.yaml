@@ -1,0 +1,39 @@
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.2.0
+    hooks:
+      - id: forbid-tabs
+      - id: remove-tabs
+        args: [--whitespaces-count, '2']
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.31.1
+    hooks:
+      - id: markdownlint
+        exclude: charts/librarygames/CHANGELOG.md|charts/librarygames/README.md
+      - id: markdownlint-fix
+        exclude: charts/librarygames/CHANGELOG.md|charts/librarygames/README.md
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.26.3
+    hooks:
+      - id: yamllint
+        entry: yamllint --config-file .yamllint.yaml
+        exclude: charts/librarygames/Chart.yaml|charts/librarygames/templates
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: v1.2.0
+    hooks:
+      - id: helm-docs
+        args:
+          - --chart-search-root=charts/librarygames
+          # A base filename makes it relative to each chart directory found
+          - --template-files=README.md.gotmpl
