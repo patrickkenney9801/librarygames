@@ -24,6 +24,9 @@ run:
 run-wsl:
 	@docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg --net=host -e LIBRARY_GAMES_SERVER_ADDRESS=$(call node_ip) -e LIBRARY_GAMES_SERVER_PORT=$(call node_port) ${IMAGE_NAME}:${VERSION}
 
+run-offline:
+	@docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg --net=host ${IMAGE_NAME}:${VERSION}
+
 clean:
 	@docker image prune
 
@@ -45,7 +48,7 @@ deploy:
 uninstall:
 	@helm --kube-context ${PROFILE} -n ${NAMESPACE} delete ${RELEASE_NAME}
 
-dependencies: dependencies-asdf
+dependencies: dependencies-asdf helm-dependencies
 
 dependencies-asdf:
 	@echo "Updating asdf plugins..."
@@ -58,6 +61,12 @@ dependencies-asdf:
 	@cat ./.tool-versions | xargs -I{} bash -c 'asdf local {}'
 	@asdf reshim
 	@echo "Done!"
+
+helm-dependencies:
+	@cd charts/librarygames; \
+	helm repo add bitnami https://charts.bitnami.com/bitnami; \
+	helm dependencies update; \
+	helm dependencies build; \
 
 hooks:
 	@pre-commit install --hook-type pre-commit
