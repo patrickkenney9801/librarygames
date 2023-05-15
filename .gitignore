@@ -1,5 +1,9 @@
 # Do not check in the chart dependencies
-chart/*/charts
+charts/*/charts
 
 # Do not check in generated chart packages
-chart/*/*.tgz
+charts/*/*.tgz
+
+.settings
+
+*.class

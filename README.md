@@ -31,6 +31,11 @@ make hooks
 make pre-commit
 ```
 
+### [helm](https://helm.sh/)
+
+Tool for deploying on `kubernetes`.
+Run `make helm-dependencies` to initialize a new environment.
+
 ## Usage
 
 ### Building
