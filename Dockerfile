@@ -6,7 +6,11 @@ RUN apt-get update && \
     maven \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY ./ /tmp/librarygames
+COPY src/ /tmp/librarygames/src
+COPY .classpath /tmp/librarygames/.classpath
+COPY .project /tmp/librarygames/.project
+COPY pom.xml /tmp/librarygames/pom.xml
+
 WORKDIR /tmp/librarygames
 RUN mvn clean compile assembly:single install
 
@@ -23,7 +27,9 @@ USER librarygames
 WORKDIR /home/librarygames
 ENV DISPLAY=:0
 
-COPY --from=mvn-build /tmp/librarygames/target/librarygames-1.0.7.jar /home/librarygames/librarygames.jar
+ARG VERSION
+
+COPY --from=mvn-build /tmp/librarygames/target/librarygames-${VERSION}.jar /home/librarygames/librarygames.jar
 COPY --from=mvn-build /tmp/librarygames/target/lib/ /home/librarygames/lib
 
 CMD ["java", "-jar", "/home/librarygames/librarygames.jar"]

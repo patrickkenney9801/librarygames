@@ -23,7 +23,7 @@ public class GameClient extends Thread {
 
 	private InetAddress ipAddress;
 	private DatagramSocket socket;
-	public static final int PORT = 19602;
+	public int port;
 	
 	private String[] lastPacketKeysSent;
 	
@@ -39,11 +39,12 @@ public class GameClient extends Thread {
 	
 	private boolean lastMoveReceived;
 	
-	public GameClient(byte[] ipAddress) {
+	public GameClient(byte[] ipAddress, int port) {
 		setLastPacketKeysSent(new String[13]);
 		try {
 			this.socket = new DatagramSocket();
 			this.ipAddress = InetAddress.getByAddress(ipAddress);
+			this.port = port;
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -112,7 +113,7 @@ public class GameClient extends Thread {
 	 * @param data
 	 */
 	public void sendData(byte[] data) {
-		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, PORT);
+		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, port);
 		try {
 			socket.send(packet);
 		} catch (IOException e) {

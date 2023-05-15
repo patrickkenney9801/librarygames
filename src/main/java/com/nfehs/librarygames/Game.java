@@ -33,6 +33,7 @@ public class Game {
 	private static BoardGame boardGame;
 	
 	public static final byte[] DEFAULT_SERVER_IP_ADDRESS = {127, 0, 0, 1};
+	public static final int DEFAULT_SERVER_PORT = 19602;
 	
 	public static final int LOGIN = 0;
 	public static final int CREATE_ACCOUNT = 1;
@@ -48,7 +49,7 @@ public class Game {
 	public static boolean online = false;
 
 	public Game() throws UnknownHostException {
-		client = new GameClient(getServerAddress());
+		client = new GameClient(getServerAddress(), getServerPort());
 		client.start();
 	}
 	
@@ -553,5 +554,13 @@ public class Game {
 			return DEFAULT_SERVER_IP_ADDRESS;
 		}
 		return InetAddress.getByName(serverAddress).getAddress();
+	}
+
+	private static int getServerPort() {
+		String serverPort = System.getenv("LIBRARY_GAMES_SERVER_PORT");
+		if (serverPort == null) {
+			return DEFAULT_SERVER_PORT;
+		}
+		return Integer.parseInt(serverPort);
 	}
 }
