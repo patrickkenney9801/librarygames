@@ -40,7 +40,10 @@ Run `make helm-dependencies` to initialize a new environment.
 
 ### Building
 
-To build the latest docker image run `make image`.
+To build the latest client docker image run `make image`.
+To build the latest server docker image run `make image-server`.
+
+To generate protobuf definitions runs `make proto`.
 
 ### Server
 
@@ -49,6 +52,10 @@ To launch the server on `minikube` run:
 ```shell
 # if minikube is not already running
 make start-minikube
+# deploy observability tools
+make observability-minikube
+# open grafana and/or get grafana address
+make grafana
 # if a new image was created
 make load
 # actually deploy the server

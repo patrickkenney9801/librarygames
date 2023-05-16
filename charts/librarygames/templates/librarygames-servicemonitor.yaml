@@ -1,0 +1,22 @@
+{{- if .Values.librarygames.metrics.enabled }}
+{{- $root := . }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "librarygames.serviceMonitorName" . }}
+  labels:
+    {{- include "librarygames.labels" . | nindent 4 }}
+  {{- with .Values.librarygames.metrics.namespace }}
+  namespace: {{ . }}
+  {{- end }}
+spec:
+  endpoints:
+  - interval: {{ .Values.librarygames.metrics.interval }}
+    port: {{ .Values.librarygames.service.portName }}
+    path: /metrics
+    scheme: http
+  selector:
+    matchLabels:
+      {{- include "librarygames.labels" . | nindent 6 }}
+{{- end }}

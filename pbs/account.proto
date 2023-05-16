@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option go_package = "./v1";
+
+service Login {
+  rpc Login (LoginRequest) returns (LoginResponse) {}
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string username = 1;
+  string user_token = 2;
+}
+
+service CreateAccount {
+  rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse) {}
+}
+
+message CreateAccountRequest {
+  string username = 1;
+  string password = 2;
+  string email = 3;
+}
+
+message CreateAccountResponse {}
+
+service Logout {
+  rpc Logout (LogoutRequest) returns (LogoutResponse) {}
+}
+
+message LogoutRequest {}
+
+message LogoutResponse {}
+
+service GetUsers {
+  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse) {}
+}
+
+message GetUsersRequest {}
+
+message GetUsersResponse {
+  message PeerUser {
+    string username = 1;
+    bool online = 2;
+    bool friend = 3;
+  }
+  repeated PeerUser users = 1;
+}
+
+service AddFriend {
+  rpc AddFriend (AddFriendRequest) returns (AddFriendResponse) {}
+}
+
+message AddFriendRequest {
+  string friend = 1;
+}
+
+message AddFriendResponse {}

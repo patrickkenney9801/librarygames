@@ -9,7 +9,7 @@ spec:
   ports:
     - port: {{ .Values.librarygames.service.port }}
       targetPort: games
-      protocol: UDP
-      name: games
+      protocol: TCP
+      name: {{ .Values.librarygames.service.portName }}
   selector:
     {{- include "librarygames.selectorLabels" . | nindent 4 }}

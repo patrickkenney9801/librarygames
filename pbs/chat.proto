@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "./v1";
+
+service Chat {
+  rpc Chat (stream ChatRequest) returns (stream ChatResponse) {}
+}
+
+message ChatRequest {
+  string game_key = 1;
+  string message = 2;
+  bool public = 3;
+}
+
+message ChatResponse {
+  string sender = 1;
+  string message = 2;
+}

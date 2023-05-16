@@ -239,7 +239,7 @@ public abstract class BoardGame {
    * @param movingFrom
    * @param movingTo
    */
-  public void makeMoveOffline(int movingFrom,  int movingTo) {
+  public void makeMoveOffline(int movingFrom, int movingTo) {
     // first handle resignation case
     if (movingTo == -2)
       if (isPlayer1Turn())

@@ -1,0 +1,12 @@
+{{- $root := . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "librarygames.labels" . | nindent 4 }}
+  name: {{ include "librarygames.fullname" . }}
+data:
+  config.yaml: |
+    ---
+    {{- (tpl (toYaml .Values.librarygames.config) . | nindent 4) | replace ": |" ":" }}

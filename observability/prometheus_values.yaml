@@ -1,0 +1,62 @@
+---
+# Default values for kube-prometheus deployed on minikube.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+alertmanager:
+  enabled: false
+defaultRules:
+  create: false
+grafana:
+  enabled: false
+kubernetesServiceMonitors:
+  enabled: false
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+kube-state-metrics:
+  prometheus:
+    monitor:
+      enabled: false
+nodeExporter:
+  enabled: false
+prometheus-node-exporter:
+  prometheus:
+    monitor:
+      enabled: false
+prometheusOperator:
+  enabled: true
+prometheus:
+  enabled: true
+  prometheusSpec:
+    enableFeatures:
+      - exemplar-storage
+    evaluationInterval: 10s
+    exemplars:
+      maxSize: 100000
+    podMonitorSelectorNilUsesHelmValues: false
+    replicas: 1
+    ruleSelectorNilUsesHelmValues: false
+    scrapeInterval: 30s
+    serviceMonitorSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: standard
+          resources:
+            requests:
+              storage: 8Gi

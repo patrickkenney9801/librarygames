@@ -1,0 +1,95 @@
+---
+# Default dev values for efk fluentbit.
+# This is a YAML-formatted file.
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: false
+  seccompProfile:
+    type: RuntimeDefault
+
+luaScripts:
+  cleanupServerLog.lua: |
+    function cleanupServerLog(tag, timestamp, record)
+      record = removeCruft(record)
+      return 2, timestamp, record
+    end
+    function removeCruft(record)
+      if record["log"] ~= nil then
+        record["log"] = record["log"]:gsub('.-{','{')
+      else
+      end
+      return record
+      end
+    function dump(o)
+      if type(o) == 'table' then
+          local s = '{ '
+          for k,v in pairs(o) do
+            if type(k) ~= 'number' then k = '"'..k..'"' end
+            s = s .. '['..k..'] = ' .. dump(v) .. ','
+          end
+          return s .. '} '
+      else
+          return tostring(o)
+      end
+    end
+
+config:
+  parsers: |
+    [PARSER]
+        Name        custom_json
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+
+  ## https://docs.fluentbit.io/manual/pipeline/inputs
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/librarygames-server*.log
+        Parser docker
+        Refresh_Interval 15
+        Skip_Long_Lines On
+        Skip_Empty_Lines On
+        Path_Key pod
+        Tag kube.*
+
+  ## https://docs.fluentbit.io/manual/pipeline/filters
+  filters: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc.cluster.local:443
+        Merge_Log           Off
+        K8S-Logging.Parser  On
+
+    [FILTER]
+        Name lua
+        Match kube.*
+        script /fluent-bit/scripts/cleanupServerLog.lua
+        # function name to call
+        call cleanupServerLog
+    [FILTER]
+        Name parser
+        Match kube.*
+        Parser docker
+        Key_name log
+        Reserve_Data True
+
+  ## https://docs.fluentbit.io/manual/pipeline/outputs
+  outputs: |
+    [OUTPUT]
+        Name es
+        Match kube.*
+        Host elasticsearch-master.elasticsearch
+        Logstash_Format On
+        Retry_Limit False
+        tls On
+        tls.verify Off
+        HTTP_User elastic
+        HTTP_Passwd elastic
+        Suppress_Type_Name On

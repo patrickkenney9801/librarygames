@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+option go_package = "./v1";
+
+enum GameType {
+  UNSPECIFIED = 0;
+
+  GO_9X9 = 1;
+  GO_13X13 = 2;
+  GO_19X19 = 3;
+}
+
+message GameMetadata {
+  GameType game_type = 1;
+  string game_key = 2;
+  string user1 = 3;
+  string user2 = 4;
+  int32 moves = 5;
+  int32 winner = 6;
+}
+
+message GameState {
+  string board = 1;
+  int32 moves = 2;
+  int32 winner = 3;
+
+  int32 last_move = 4;
+  int32 penult_move = 5;
+
+  bool player1Online = 6;
+  bool player2Online = 7;
+}
+
+service CreateGame {
+  rpc CreateGame (CreateGameRequest) returns (CreateGameResponse) {}
+}
+
+message CreateGameRequest {
+  GameType game_type = 1;
+  string other_user = 2;
+  oneof game_data {
+    CreateGoGameRequest go = 3;
+  }
+}
+
+message CreateGameResponse {
+  GameType game_type = 1;
+  string game_key = 2;
+  oneof game_data {
+    CreateGoGameResponse go = 3;
+  }
+}
+
+message CreateGoGameRequest {
+  bool creator_goes_first = 3;
+}
+
+message CreateGoGameResponse {}
+
+service GetGames {
+  rpc GetGames (GetGamesRequest) returns (GetGamesResponse) {}
+}
+
+message GetGamesRequest {}
+
+message GetGamesResponse {
+  repeated GameMetadata games = 1;
+}
+
+service GetSpectatorGames {
+  rpc GetSpectatorGames (GetSpectatorGamesRequest) returns (GetSpectatorGamesResponse) {}
+}
+
+message GetSpectatorGamesRequest {}
+
+message GetSpectatorGamesResponse {
+  repeated GameMetadata games = 1;
+}
+
+service Go {
+  rpc PlayGo (stream MoveGoRequest) returns (stream StateGoResponse) {}
+  rpc SpectateGo (SpectateGoRequest) returns (stream StateGoResponse) {}
+}
+
+message MoveGoRequest {
+  string game_key = 1;
+  int32 move_from = 2;
+  int32 move_to = 3;
+}
+
+message StateGoResponse {
+  GameState game_state = 1;
+  int32 p1_stones_captured = 2;
+  int32 p2_stones_captured = 3;
+  int32 p1_score = 4;
+  int32 p2_score = 5;
+}
+
+message SpectateGoRequest {
+  string game_key = 1;
+}

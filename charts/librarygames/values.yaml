@@ -11,12 +11,28 @@ global:
 librarygames:
   affinity: {}
 
+  config:
+    database:
+      address: |-
+        {{ include "librarygames.mysqlAddress" . }}
+      name: "{{ .Values.mysql.auth.database }}"
+      username: "{{ .Values.mysql.auth.username }}"
+      password: "{{ .Values.mysql.auth.password }}"
+
+    observability:
+      trace:
+        collectorEndpoint: "localhost:4317"
+
   image:
     pullPolicy: IfNotPresent
-    repository: librarygames
+    repository: librarygames-server
     tag: ""
 
   imagePullSecrets: []
+
+  metrics:
+    enabled: false
+    interval: 30s
 
   mysql:
     address: ~
@@ -51,6 +67,7 @@ librarygames:
   service:
     type: NodePort
     port: 19602
+    portName: games
 
   serviceAccount:
     # Specifies whether a service account should be created

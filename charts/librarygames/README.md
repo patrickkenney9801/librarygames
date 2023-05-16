@@ -16,11 +16,18 @@ A Helm chart for running a librarygames backend on Kubernetes
 |-----|------|---------|-------------|
 | global.mysql.enabled | bool | `true` | Enables the deployment of MySQL by this chart |
 | librarygames.affinity | object | `{}` |  |
+| librarygames.config.database.address | string | `"{{ include \"librarygames.mysqlAddress\" . }}"` |  |
+| librarygames.config.database.name | string | `"{{ .Values.mysql.auth.database }}"` |  |
+| librarygames.config.database.password | string | `"{{ .Values.mysql.auth.password }}"` |  |
+| librarygames.config.database.username | string | `"{{ .Values.mysql.auth.username }}"` |  |
+| librarygames.config.observability.trace.collectorEndpoint | string | `"localhost:4317"` |  |
 | librarygames.fullnameOverride | string | `""` |  |
 | librarygames.image.pullPolicy | string | `"IfNotPresent"` |  |
-| librarygames.image.repository | string | `"librarygames"` |  |
+| librarygames.image.repository | string | `"librarygames-server"` |  |
 | librarygames.image.tag | string | `""` |  |
 | librarygames.imagePullSecrets | list | `[]` |  |
+| librarygames.metrics.enabled | bool | `false` |  |
+| librarygames.metrics.interval | string | `"30s"` |  |
 | librarygames.mysql.address | string | `nil` |  |
 | librarygames.nameOverride | string | `""` |  |
 | librarygames.nodeSelector | object | `{}` |  |
@@ -29,6 +36,7 @@ A Helm chart for running a librarygames backend on Kubernetes
 | librarygames.resources | object | `{}` |  |
 | librarygames.securityContext | object | `{}` |  |
 | librarygames.service.port | int | `19602` |  |
+| librarygames.service.portName | string | `"games"` |  |
 | librarygames.service.type | string | `"NodePort"` |  |
 | librarygames.serviceAccount.annotations | object | `{}` |  |
 | librarygames.serviceAccount.create | bool | `true` |  |
