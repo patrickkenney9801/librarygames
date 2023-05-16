@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "librarygames.fullname" . }}
+  name: {{ include "librarygames.fullname" . }}-server
   labels:
     {{- include "librarygames.labels" . | nindent 4 }}
 spec:
@@ -37,9 +37,15 @@ spec:
           ports:
             - name: games
               containerPort: 19602
-              protocol: UDP
+              protocol: TCP
+          readinessProbe:
+            grpc:
+              port: 19602
           resources:
             {{- toYaml .Values.librarygames.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /etc/librarygames
+              name: config-volume
       {{- with .Values.librarygames.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -52,3 +58,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "librarygames.fullname" . }}

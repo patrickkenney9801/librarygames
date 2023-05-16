@@ -1,0 +1,12 @@
+---
+# Default values for librarygames deployed on minikube.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+librarygames:
+  config:
+    observability:
+      trace:
+        collectorEndpoint: "tempo.tempo:4317"
+  metrics:
+    enabled: true

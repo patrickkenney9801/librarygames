@@ -1,0 +1,29 @@
+---
+# Default values for tempo deployed on minikube.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+persistence:
+  enabled: true
+  size: "8Gi"
+tempo:
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    allowPrivilegeEscalation: False
+    seccompProfile:
+      type: RuntimeDefault
+tempoQuery:
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    allowPrivilegeEscalation: False
+    seccompProfile:
+      type: RuntimeDefault
+securityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  runAsNonRoot: true

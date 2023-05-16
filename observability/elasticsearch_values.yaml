@@ -1,0 +1,13 @@
+---
+# Default dev values for elastic search.
+# This is a YAML-formatted file.
+
+antiAffinity: soft
+enableServiceLinks: false
+secret:
+  password: "elastic"
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi

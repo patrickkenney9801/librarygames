@@ -62,11 +62,18 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Create the name of the service monitor to use
+*/}}
+{{- define "librarygames.serviceMonitorName" -}}
+{{ include "librarygames.fullname" . }}-service-monitor
+{{- end }}
+
+{{/*
 LibraryGames MySQL server address
 */}}
 {{- define "librarygames.mysqlAddress" -}}
 {{- if .Values.global.mysql.enabled }}
-  {{- $address := print "jdbc:mysql://" .Release.Name "-mysql:" .Values.mysql.primary.service.ports.mysql }}
+  {{- $address := print .Release.Name "-mysql:" .Values.mysql.primary.service.ports.mysql }}
   {{- (dig "librarygames" "mysql" "address" (printf "%s" $address) (.Values | merge (dict))) | default (printf "%s" $address) }}
 {{- else }}
   {{- default "" .Values.librarygames.mysql.address }}
@@ -133,4 +140,6 @@ Template environment variables to inject into server
   value: "{{ .Values.mysql.auth.username }}"
 - name: MYSQL_DATABASE_PASSWORD
   value: "{{ .Values.mysql.auth.password }}"
+- name: LIBRARYGAMES_GRPC_PORT
+  value: "{{ .Values.librarygames.service.port }}"
 {{- end }}

@@ -13,7 +13,8 @@ data:
       userkey1 CHAR(36) NOT NULL,
       userkey2 CHAR(36) NOT NULL,
       id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-      PRIMARY KEY (id)
+      PRIMARY KEY (id),
+      UNIQUE (userkey1, userkey2)
     );
     CREATE TABLE games (
       game_key CHAR(36) NOT NULL,

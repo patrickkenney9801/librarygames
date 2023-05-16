@@ -1,0 +1,70 @@
+---
+# Default dev values for grafana.
+# This is a YAML-formatted file.
+
+adminPassword: admin
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: tempo
+        type: tempo
+        uid: tempo
+        access: proxy
+        url: "http://tempo.tempo:3100"
+        jsonData:
+          httpMethod: GET
+      - name: elasticsearch
+        type: elasticsearch
+        uid: elasticsearch
+        access: proxy
+        url: "https://elasticsearch-master.elasticsearch:9200"
+        basicAuth: true
+        basicAuthUser: "elastic"
+        jsonData:
+          tlsAuth: true
+          tlsSkipVerify: true
+          tlsAuthWithCACert: false
+          esVersion: "8.0+"
+          timeField: "@timestamp"
+          logMessageField: "log"
+          logLevelField: "level"
+          maxConcurrentShardRequests: "5"
+        secureJsonData:
+          basicAuthPassword: "elastic"
+      - name: prometheus
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        url: "http://kube-prometheus-stack-prometheus.monitoring:9090"
+        jsonData:
+          exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: traceID
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/standard
+dashboards:
+  default:
+    go-dashboard:
+      gnetId: 13240
+      revision: 2
+      datasource: prometheus
+    grpc-dashboard:
+      gnetId: 14765
+      revision: 3
+      datasource: prometheus
+service:
+  type: NodePort
+persistence:
+  enabled: true
