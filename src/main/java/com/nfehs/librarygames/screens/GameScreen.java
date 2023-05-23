@@ -25,6 +25,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.games.BoardGame.GameType;
 import com.nfehs.librarygames.games.Piece;
 import com.nfehs.librarygames.games.Tile;
 import com.nfehs.librarygames.games.go.pieces.Stone;
@@ -131,7 +132,8 @@ public class GameScreen extends Screen {
     pass = new JButton("PASS");
 
     // if playing go define the pass button
-    if (Game.getBoardGame().getGameType() < 3) {
+    GameType gameType = Game.getBoardGame().getGameType();
+    if (gameType == GameType.GO9x9 || gameType == GameType.GO13x13 || gameType == GameType.GO19x19) {
       Game.mainWindow.add(pass);
       pass.setBounds((int) (Game.screenSize.getWidth() / 2 - 75), getTopLeftY() + (int) getBoardSize() + 10, 150, 30);
       pass.addActionListener(new ActionListener() {
@@ -249,8 +251,9 @@ public class GameScreen extends Screen {
         playerCapturedNumber[i][j].setBounds(gap + i*(getInfoTextSize()) + getInfoTextSize()/2, getInfoTextSize()*5/2 + j*(getInfoTextSize()*2), gap - getInfoTextSize()/2, getInfoTextSize());
         playerCapturedNumber[i][j].setFont(new Font("Serif", Font.PLAIN, getInfoTextSize()));
         // if game is go set top number to black
-        if (Game.getBoardGame().getGameType() < 3)
+        if (gameType == GameType.GO9x9 || gameType == GameType.GO13x13 || gameType == GameType.GO19x19) {
           playerCapturedNumber[0][0].setForeground(Color.BLACK);
+        }
       }
     }
 
@@ -487,47 +490,32 @@ public class GameScreen extends Screen {
 
   /**
    * Updates the game chat
-   * @param newText
-   * @param senderKey
+   * @param sender
+   * @param message
    */
-  public void updateChat(String newText, String senderKey) {
-    // update chat text
-    int textStart = newText.indexOf(":") + 1;
+  public void updateChat(String sender, String message) {
+    boolean clearText = sender.equals(Game.getPlayer().getUsername());
+    boolean displayMessage = true;
+    Color senderColor = Color.CYAN;
 
-    // if user is not a spectator
-    if (!Game.getBoardGame().isPlayerIsSpectating()) {
-      // if the user sent the text make user text green, delete the users current text
-      // if opponent sent the text make opponent text red
-      // if a spectator sent the text, verify that user wants to receive, if so set cyan
-      if (senderKey.equals(Game.getPlayer().getUser_key())) {
-        chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
-        appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
-        chat.setText("");
-        appendText(chatBox, newText.substring(textStart), Color.WHITE);
-      } else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
-          || newText.split(":")[0].equals(Game.getBoardGame().getPlayer2())) {
-        chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
-        appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
-        appendText(chatBox, newText.substring(textStart), Color.WHITE);
-      } else if (allowSpectatorsInChat.isSelected()) {
-        chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
-        appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
-        appendText(chatBox, newText.substring(textStart), Color.WHITE);
-      }
+
+    if (sender.equals(Game.getPlayer().getUsername())) {
+      senderColor = Color.GREEN;
+    } else if (sender.equals(Game.getBoardGame().getPlayer1())
+            || sender.equals(Game.getBoardGame().getPlayer2())) {
+      senderColor = Color.RED;
     } else {
-      // if the user sent the text make user text green, delete the users current text
-      // if a player sent the text make player text red
-      // if a spectator sent the text, verify that user wants to receive, if so set cyan
+      senderColor = Color.CYAN;
+      displayMessage = allowSpectatorsInChat.isSelected();
+    }
+
+    if (displayMessage) {
       chatBox.setMargin(new Insets(chatBox.getInsets().top-20, 0, 0, 0));
-      if (senderKey.equals(Game.getPlayer().getUser_key())) {
-        appendText(chatBox, "\n" + newText.substring(0, textStart), Color.GREEN);
-        chat.setText("");
-      } else if (newText.split(":")[0].equals(Game.getBoardGame().getPlayer1())
-          || newText.split(":")[0].equals(Game.getBoardGame().getPlayer2()))
-        appendText(chatBox, "\n" + newText.substring(0, textStart), Color.RED);
-      else
-        appendText(chatBox, "\n" + newText.substring(0, textStart), Color.CYAN);
-      appendText(chatBox, newText.substring(textStart), Color.WHITE);
+      appendText(chatBox, "\n" + sender + ": ", senderColor);
+      appendText(chatBox, message, Color.WHITE);
+    }
+    if (clearText) {
+      chat.setText("");
     }
 
     chat.requestFocus();
@@ -554,7 +542,7 @@ public class GameScreen extends Screen {
    */
   public void displayPieceShadow(int x, int y) {
     // adds shadow piece to screen
-    shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getPiece(Game.getBoardGame().getGameType(), Game.getBoardGame().isPlayer1()), .75f)));
+    shadowPiece.setIcon(new ImageIcon(getProperImage(Stone.getPiece((byte) (Game.getBoardGame().getGameType().getType() - 1), Game.getBoardGame().isPlayer1()), .75f)));
     pane.add(shadowPiece, JLayeredPane.PALETTE_LAYER);
 
     shadowPiece.setBounds((int) (y*getScreenTileSize()), (int) (x*getScreenTileSize()), (int) getScreenTileSize(), (int) getScreenTileSize());
@@ -572,8 +560,10 @@ public class GameScreen extends Screen {
 
   @Override
   public void exit() {
-    if (Game.isOnline())
+    if (Game.isOnline()) {
+      Game.stopPlaying();
       exitParentGUI();
+    }
 
     Game.mainWindow.remove(back);
     Game.mainWindow.remove(title);

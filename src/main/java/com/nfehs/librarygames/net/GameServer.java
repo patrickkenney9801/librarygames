@@ -459,14 +459,15 @@ public class GameServer extends Thread {
       if (!packet.isValid())
         return;
 
+      BoardGame.GameType gameType = BoardGame.GameType.values()[packet.getGameType()];
       // build game board from game type
-      String board = BoardGame.createNewBoard(packet.getGameType());
+      String board = BoardGame.createNewBoard(gameType);
       // if it is null, send error wrong game type and exit
       if (board == null) {
         // send invalid gameType error back
         Packet02Error errorPacket = new Packet02Error(packet.getUuidKey(), ErrorType.PACKET06_INVALID_GAMETYPE, true);
         errorPacket.writeData(this, address, port);
-        System.out.println("ERROR gameType: " + packet.getGameType());
+        System.out.println("ERROR gameType: " + gameType);
         return;
       }
 
@@ -853,7 +854,7 @@ public class GameServer extends Thread {
       }
 
       // make move
-      String newBoard = BoardGame.makeMove(gameType, oldBoard, moves % 2 == 0, penultMove, lastMove, packet.getMoveFrom(), packet.getMoveTo());
+      String newBoard = BoardGame.makeMove(BoardGame.GameType.values()[gameType], oldBoard, moves % 2 == 0, penultMove, lastMove, packet.getMoveFrom(), packet.getMoveTo());
 
       // if newBoard is null then an improper move was sent, send error and exit
       if (newBoard == null) {

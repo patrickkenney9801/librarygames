@@ -62,16 +62,16 @@ func (s *ChatServer) Chat(stream pbs.Chat_ChatServer) error {
         }
         done <- true
       }()
+    }
 
-      if len(message.Message) > 0 {
-        chat.sendMessage(
-          ChatMessage{
-            sender:  username,
-            message: message.Message,
-          },
-          message.Public,
-        )
-      }
+    if len(message.Message) > 0 {
+      chat.sendMessage(
+        ChatMessage{
+          sender:  username,
+          message: message.Message,
+        },
+        message.Public,
+      )
     }
   }
   return nil

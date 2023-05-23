@@ -75,16 +75,17 @@ public class Game {
     }
 
     // encrypt username and password
-    String username = Security.encrypt(user);
-    String password = "";
-    for (char c : pass)
-      password += (c + 15);
-    password = Security.encrypt(password);
+    String username = user;//Security.encrypt(user);
+    String password = new String(pass);
+    //for (char c : pass)
+    //  password += (c + 15);
+    //password = Security.encrypt(password);
 
     // send login packet to server
-    Packet packet = new Packet00Login(username, password);
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[0] = packet.getUuidKey();
+    //Packet packet = new Packet00Login(username, password);
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[0] = packet.getUuidKey();
+    client.login(username, password);
   }
 
   /**
@@ -123,21 +124,22 @@ public class Game {
       }
 
     // encrypt username and password
-    String username = Security.encrypt(user);
-    String password = "";
+    String username = user; //Security.encrypt(user);
+    String password = new String(pass);
     for (int i = 0; i < pass.length; i++) {
       if (pass[i] != pass2[i]) {
         setErrorCreateAccountScreen("ERROR: PASSWORDS DO NOT MATCH");
         return;
       }
-      password += (pass[i] + 15);
+      //password += (pass[i] + 15);
     }
-    password = Security.encrypt(password);
+    //password = Security.encrypt(password);
 
     // send create account packet to server
-    Packet packet = new Packet01CreateAcc(email, username, password);
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[1] = packet.getUuidKey();
+    //Packet packet = new Packet01CreateAcc(email, username, password);
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[1] = packet.getUuidKey();
+    client.createAccount(username, password, email);
   }
 
   /**
@@ -145,9 +147,10 @@ public class Game {
    */
   public static void logout() {
     // send logout packet to server
-    Packet packet = new Packet03Logout(getPlayer() == null ? null : getPlayer().getUser_key());
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[3] = packet.getUuidKey();
+    //Packet packet = new Packet03Logout(getPlayer() == null ? null : getPlayer().getUser_key());
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[3] = packet.getUuidKey();
+    client.logout();
   }
 
   /**
@@ -155,9 +158,10 @@ public class Game {
    */
   public static void getOtherPlayers() {
     // send get players packet to server
-    Packet packet = new Packet04GetPlayers(getPlayer().getUser_key());
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[4] = packet.getUuidKey();
+    //Packet packet = new Packet04GetPlayers(getPlayer().getUser_key());
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[4] = packet.getUuidKey();
+    client.getUsers();
   }
 
   /**
@@ -166,9 +170,10 @@ public class Game {
    */
   public static void addFriend(String friend) {
     // send addFriend packet to server
-    Packet packet = new Packet05AddFriend(getPlayer().getUser_key(), friend);
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[5] = packet.getUuidKey();
+    //Packet packet = new Packet05AddFriend(getPlayer().getUser_key(), friend);
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[5] = packet.getUuidKey();
+    client.addFriend(friend);
   }
 
   /**
@@ -177,11 +182,13 @@ public class Game {
    * @param creatorGoesFirst
    * @param gameType
    */
-  public static void createGame(String otherUser, boolean creatorGoesFirst, int gameType) {
+  public static void createGame(String otherUser, boolean creatorGoesFirst, BoardGame.GameType gameType) {
     // send create game packet to server
-    Packet packet = new Packet06CreateGame(getPlayer().getUser_key(), getPlayer().getUsername(), otherUser, creatorGoesFirst, gameType);
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[6] = packet.getUuidKey();
+    //Packet packet = new Packet06CreateGame(getPlayer().getUser_key(), getPlayer().getUsername(), otherUser, creatorGoesFirst, gameType);
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[6] = packet.getUuidKey();
+
+    client.createGame(otherUser, creatorGoesFirst, gameType);
   }
 
   /**
@@ -189,9 +196,10 @@ public class Game {
    */
   public static void getActiveGames() {
     // sends get games packet to server
-    Packet packet = new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername());
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[7] = packet.getUuidKey();
+    //Packet packet = new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername());
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[7] = packet.getUuidKey();
+    client.getGames();
   }
 
   /**
@@ -199,11 +207,41 @@ public class Game {
    * Ultimately leads to opening GameScreen
    * @param gameKey
    */
-  public static void getBoard(String gameKey, int gameType) {
+  public static void getBoard(String gameKey, BoardGame.GameType gameType) {
     // sends get board packet to server
-    Packet packet = new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey, gameType);
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[8] = packet.getUuidKey();
+    //Packet packet = new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey, gameType);
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[8] = packet.getUuidKey();
+  }
+
+  /**
+   * This method attempts to play a game
+   * Ultimately leads to opening GameScreen
+   * @param gameKey
+   */
+  public static void startPlaying(BoardGame.GameMetadata gameMetadata) {
+    switch (gameMetadata.gameType) {
+      case GO9x9:
+      case GO13x13:
+      case GO19x19:   client.startGo(gameMetadata);
+                      break;
+      default:        // handle invalid game type
+                      System.out.println("ERROR INVALID GAME TYPE");
+                      return;
+    }
+    client.chat(gameMetadata);
+  }
+
+  public static void stopPlaying() {
+    client.stopChatStream();
+    switch (getBoardGame().getGameType()) {
+      case GO9x9:
+      case GO13x13:
+      case GO19x19:   client.stopGoStream();
+                      break;
+      default:        // handle invalid game type
+                      return;
+    }
   }
 
   /**
@@ -214,6 +252,16 @@ public class Game {
   public static void sendMove(int movingFrom, int movingTo) {
     // if the user is online, send move to server, else offline server
     if (isOnline()) {
+      switch (getBoardGame().getGameType()) {
+        case GO9x9:
+        case GO13x13:
+        case GO19x19:   client.sendGoMove(getBoardGame().getGameKey(), movingFrom, movingTo);
+                        break;
+        default:        // handle invalid game type
+                        System.out.println("ERROR INVALID GAME TYPE");
+                        return;
+      }
+      /*
       // sends send move packet to server
       final Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
                 movingFrom, movingTo, getPlayer().getUsername(), getBoardGame().getGameType());
@@ -240,6 +288,7 @@ public class Game {
           System.exit(0);
         }
       }).start();
+      */
     } else {
       getBoardGame().makeMoveOffline(movingFrom, movingTo);
       updateGameBoard();
@@ -274,10 +323,11 @@ public class Game {
    */
   public static void sendChat(boolean sendToSpectators, String text) {
     // sends chat packet to server
-    Packet packet = new Packet10SendChat(getPlayer().getUser_key(), getBoardGame().getGameKey(),
-        getBoardGame().getPlayer1(), getBoardGame().getPlayer2(), sendToSpectators, getPlayer().getUsername() + ": " + text);
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[10] = packet.getUuidKey();
+    //Packet packet = new Packet10SendChat(getPlayer().getUser_key(), getBoardGame().getGameKey(),
+    //    getBoardGame().getPlayer1(), getBoardGame().getPlayer2(), sendToSpectators, getPlayer().getUsername() + ": " + text);
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[10] = packet.getUuidKey();
+    client.sendChat(getBoardGame().getGameKey(), text, sendToSpectators);
   }
 
   /**
@@ -295,9 +345,10 @@ public class Game {
    */
   public static void getSpectatorGames() {
     // sends get games packet to server
-    Packet packet = new Packet12GetSpectates(getPlayer().getUser_key());
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[12] = packet.getUuidKey();
+    //Packet packet = new Packet12GetSpectates(getPlayer().getUser_key());
+    //packet.writeData(client);
+    //client.getLastPacketKeysSent()[12] = packet.getUuidKey();
+    client.getSpectatorGames();
   }
 
   /**
@@ -437,15 +488,15 @@ public class Game {
 
   /**
    * This method updates the game chat on the GameScreen
-   * @param text
-   * @param senderKey
+   * @param sender
+   * @param message
    */
-  public static void updateGameChat(String text, String senderKey) {
+  public static void updateGameChat(String sender, String message) {
     if (!(screen instanceof GameScreen)) {
       System.out.println("GAMESTATE ERROR update game chat called on wrong screen");
       return;
     }
-    ((GameScreen) screen).updateChat(text, senderKey);
+    ((GameScreen) screen).updateChat(sender, message);
   }
 
   /**

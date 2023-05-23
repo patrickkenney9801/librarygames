@@ -34,12 +34,14 @@ image-test-server:
 	@docker build --build-arg VERSION=${VERSION} -t ${SERVER_IMAGE_NAME}-test:${VERSION} --file server.Dockerfile --target go-test .
 	@docker run --rm ${SERVER_IMAGE_NAME}-test:${VERSION}
 
+image-client-debug:
+	@docker build --build-arg VERSION=${VERSION} -t ${IMAGE_NAME}-debug:${VERSION} --file client.Dockerfile --target mvn-build .
+
 test-server:
 	@cd server; \
 	go test -v ./...
 
 proto:
-	@echo "protoc --java_out=out_dir path/to/your/proto/file"
 	@protoc --proto_path=pbs pbs/*.proto --go_out=server/internal/pbs --go-grpc_out=server/internal/pbs
 
 run:
@@ -95,12 +97,12 @@ metrics:
 	@curl -s $(call node_ip):$(call node_port)/metrics
 
 deploy:
-	@helm --kube-context ${PROFILE} -n ${NAMESPACE} install --create-namespace ${RELEASE_NAME} charts/librarygames -f observability/librarygames_values.yaml
+	@helm --kube-context ${PROFILE} -n ${NAMESPACE} install --create-namespace ${RELEASE_NAME} charts/librarygames -f observability/librarygames_values.yaml --set=librarygames.image.tag=${VERSION}
 
 uninstall:
 	@helm --kube-context ${PROFILE} -n ${NAMESPACE} delete ${RELEASE_NAME}
 
-dependencies: dependencies-asdf helm-dependencies
+dependencies: dependencies-asdf dependencies-helm dependencies-java
 
 dependencies-asdf:
 	@echo "Updating asdf plugins..."
@@ -114,7 +116,7 @@ dependencies-asdf:
 	@asdf reshim
 	@echo "Done!"
 
-helm-dependencies:
+dependencies-helm:
 	@helm repo add bitnami https://charts.bitnami.com/bitnami
 	@helm repo add elastic https://helm.elastic.co
 	@helm repo add fluent https://fluent.github.io/helm-charts
@@ -123,6 +125,9 @@ helm-dependencies:
 	@cd charts/librarygames; \
 	helm dependencies update; \
 	helm dependencies build; \
+
+dependencies-java:
+	@mvn dependency:resolve
 
 hooks:
 	@pre-commit install --hook-type pre-commit

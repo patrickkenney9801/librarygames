@@ -98,9 +98,10 @@ public class CreateOfflineGameScreen extends Screen {
         player2Username = Security.encrypt(player2Username);
 
         // if the no gameType is selected or there is some other error, exit and send message to screen
-        int gameType = gameChoices.getSelectedIndex();
-        if (gameType < 0)
-          gameType = 0;
+        int type = gameChoices.getSelectedIndex();
+        if (type < 0)
+          type = 0;
+        BoardGame.GameType gameType = BoardGame.GameType.values()[type + 1];
 
         // create an offline board game and open game screen
         Game.setBoardGame(BoardGame.createGame("GameKey", gameType, player1Username, player2Username, 0, -5, -5, 0, true, true,

@@ -26,6 +26,7 @@ import (
   "github.com/prometheus/client_golang/prometheus"
   "github.com/prometheus/client_golang/prometheus/promauto"
   "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+  "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc/filters"
   "go.opentelemetry.io/otel"
   "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
   "go.opentelemetry.io/otel/sdk/resource"
@@ -241,7 +242,13 @@ func setupGrpc(registry *prometheus.Registry, srvMetrics *grpcprom.ServerMetrics
     grpc.ChainUnaryInterceptor(
       // Order matters e.g. tracing interceptor have to create span first for the later exemplars to work.
       userManager.UnaryAuthIntercepter(),
-      otelgrpc.UnaryServerInterceptor(),
+      otelgrpc.UnaryServerInterceptor(
+        otelgrpc.WithInterceptorFilter(
+          filters.Not(
+            filters.HealthCheck(),
+          ),
+        ),
+      ),
       srvMetrics.UnaryServerInterceptor(grpcprom.WithExemplarFromContext(exemplarFromContext)),
       logging.UnaryServerInterceptor(interceptorLogger(rpcLogger), logging.WithFieldsFromContext(logTraceID)),
       recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),

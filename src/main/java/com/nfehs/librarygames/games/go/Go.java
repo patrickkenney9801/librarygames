@@ -38,16 +38,16 @@ public class Go extends BoardGame {
    * @param board
    * @param extraData
    */
-  public Go(String gameKey, int gameType, String player1, String player2, int moves,
-      int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board, String extraData) {
+  public Go(String gameKey, BoardGame.GameType gameType, String player1, String player2, int moves,
+      int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board,
+      int whiteStonesCaptured, int blackStonesCaptured, int p1Score, int p2Score) {
     super(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board);
-    String[] goData = extraData.split(",");
 
     try {
-      setWhiteStonesCaptured(Integer.parseInt(goData[0]));
-      setBlackStonesCaptured(Integer.parseInt(goData[1]));
-      setPlayer1Score(Integer.parseInt(goData[2]));
-      setPlayer2Score(Integer.parseInt(goData[3]));
+      setWhiteStonesCaptured(whiteStonesCaptured);
+      setBlackStonesCaptured(blackStonesCaptured);
+      setPlayer1Score(p1Score);
+      setPlayer2Score(p2Score);
     } catch (NumberFormatException e) {
       e.printStackTrace();
     }
@@ -263,16 +263,16 @@ public class Go extends BoardGame {
    * Returns false if not current game
    * @Override
    */
-  public boolean update(String gameKey, String board, int penultMove, int lastMove, int moves, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
-    if (!super.update(gameKey, board, penultMove, lastMove, moves, winner, player1OnGame, player2OnGame, extraData))
+  public boolean update(String gameKey, String board, int penultMove, int lastMove, int moves, int winner, boolean player1OnGame, boolean player2OnGame,
+                        int whiteStonesCaptured, int blackStonesCaptured, int p1Score, int p2Score) {
+    if (!update(gameKey, board, penultMove, lastMove, moves, winner, player1OnGame, player2OnGame))
       return false;
-    String[] goData = extraData.split(",");
 
     try {
-      setWhiteStonesCaptured(Integer.parseInt(goData[0]));
-      setBlackStonesCaptured(Integer.parseInt(goData[1]));
-      setPlayer1Score(Integer.parseInt(goData[2]));
-      setPlayer2Score(Integer.parseInt(goData[3]));
+      setWhiteStonesCaptured(whiteStonesCaptured);
+      setBlackStonesCaptured(blackStonesCaptured);
+      setPlayer1Score(p1Score);
+      setPlayer2Score(p2Score);
     } catch (NumberFormatException e) {
       e.printStackTrace();
       return false;
@@ -413,9 +413,9 @@ public class Go extends BoardGame {
     for (int i = 0; i < getBoard().length; i++)
       for (int j = 0; j < getBoard().length; j++)
         if (getBoard()[i][j] == '1')
-          pieces[i][j] = new Stone(getGameType(), true);
+          pieces[i][j] = new Stone((byte) (getGameType().getType() - 1), true);
         else if (getBoard()[i][j] == '2')
-          pieces[i][j] = new Stone(getGameType(), false);
+          pieces[i][j] = new Stone((byte) (getGameType().getType() - 1), false);
     this.pieces = pieces;
   }
 

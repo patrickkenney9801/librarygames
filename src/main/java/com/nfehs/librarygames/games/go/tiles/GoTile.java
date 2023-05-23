@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
+import com.nfehs.librarygames.games.BoardGame.GameType;
 import com.nfehs.librarygames.games.Tile;
 
 /**
@@ -20,7 +21,7 @@ public class GoTile extends Tile {
   private static BufferedImage[][] cornerTiles;
 
   private int tileType;
-  private int gameType;
+  private GameType gameType;
 
   /**
    * Sets the image for the tile
@@ -28,7 +29,7 @@ public class GoTile extends Tile {
    * @param gameType
    * @param rotation
    */
-  public GoTile(int tileType, int gameType, int rotation) {
+  public GoTile(int tileType, GameType gameType, int rotation) {
     super(rotation);
     setTileType(tileType);
     setGameType(gameType);
@@ -43,9 +44,9 @@ public class GoTile extends Tile {
    */
   public BufferedImage getTile() {
     switch (getTileType()) {
-      case 0:            return centerTiles[getGameType()];
-      case 1:            return edgeTiles[getGameType()][getRotations()];
-      case 2:            return cornerTiles[getGameType()][getRotations()];
+      case 0:            return centerTiles[getGameType().getType() - 1];
+      case 1:            return edgeTiles[getGameType().getType() - 1][getRotations()];
+      case 2:            return cornerTiles[getGameType().getType() - 1][getRotations()];
       default:          return null;
     }
   }
@@ -90,11 +91,11 @@ public class GoTile extends Tile {
     this.tileType = tileType;
   }
 
-  public int getGameType() {
+  public GameType getGameType() {
     return gameType;
   }
 
-  public void setGameType(int gameType) {
+  public void setGameType(GameType gameType) {
     this.gameType = gameType;
   }
 }

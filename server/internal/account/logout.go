@@ -16,7 +16,7 @@ type LogoutServer struct {
   userManager *UserManager
 }
 
-func (s *LogoutServer) LogoutServer(ctx context.Context, logoutRequest *pbs.LogoutRequest) (*pbs.LogoutResponse, error) {
+func (s *LogoutServer) Logout(ctx context.Context, logoutRequest *pbs.LogoutRequest) (*pbs.LogoutResponse, error) {
   username, err := util.GetGRPCUsername(ctx)
   if err != nil {
     return &pbs.LogoutResponse{}, status.Error(codes.Unauthenticated, err.Error())

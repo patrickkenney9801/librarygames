@@ -9,6 +9,7 @@ import (
   "github.com/go-sql-driver/mysql"
   "github.com/google/uuid"
   "github.com/patrickkenney9801/librarygames/internal/config"
+  "golang.org/x/crypto/bcrypt"
 )
 
 type MysqlBackend struct {
@@ -19,15 +20,19 @@ func (b *MysqlBackend) Login(ctx context.Context, username string, password stri
   ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
   defer cancel()
 
-  stmt, err := b.db.PrepareContext(ctx, "SELECT user_key FROM users WHERE username = ? AND password = ?")
+  stmt, err := b.db.PrepareContext(ctx, "SELECT user_key, password FROM users WHERE username = ?")
   if err != nil {
     return "", err
   }
   defer stmt.Close()
 
   var userKey string
-  if err := stmt.QueryRowContext(ctx, username, password).Scan(&userKey); err != nil {
-    return "", fmt.Errorf("invalid username or password")
+  var storedPassword string
+  if err := stmt.QueryRowContext(ctx, username).Scan(&userKey, &storedPassword); err != nil {
+    return "", ErrInvalidCredentials
+  }
+  if err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password)); err != nil {
+    return "", ErrInvalidCredentials
   }
   return userKey, nil
 }
@@ -36,13 +41,18 @@ func (b *MysqlBackend) CreateAccount(ctx context.Context, username string, passw
   ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
   defer cancel()
 
-  stmt, err := b.db.PrepareContext(ctx, "INSERT INTO users (?, ?, ?, ?, NOW())")
+  pass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+  if err != nil {
+    return false, err
+  }
+
+  stmt, err := b.db.PrepareContext(ctx, "INSERT INTO users VALUES (?, ?, ?, ?, NOW())")
   if err != nil {
     return false, err
   }
   defer stmt.Close()
 
-  res, err := stmt.ExecContext(ctx, username, password, email, uuid.NewString())
+  res, err := stmt.ExecContext(ctx, username, string(pass), email, uuid.NewString())
   if err != nil {
     return false, err
   }
@@ -110,7 +120,7 @@ func (b *MysqlBackend) GetUsers(ctx context.Context) ([]string, error) {
 }
 
 func (b *MysqlBackend) GetUserKeyMap(ctx context.Context) (map[string]string, error) {
-  var userKeyMap map[string]string
+  userKeyMap := make(map[string]string)
   ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
   defer cancel()
 
@@ -214,7 +224,7 @@ func (b *MysqlBackend) GetGamePlayerKeys(ctx context.Context, gameKey string) (s
   ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
   defer cancel()
 
-  stmt, err := b.db.PrepareContext(ctx, "SELECT userkey1, userkey2 FROM games WHERE game_key = ?")
+  stmt, err := b.db.PrepareContext(ctx, "SELECT player1_key, player2_key FROM games WHERE game_key = ?")
   if err != nil {
     return "", "", err
   }
@@ -262,7 +272,7 @@ func (b *MysqlBackend) GetGames(ctx context.Context, userKeyMap map[string]strin
   }
   defer stmt.Close()
 
-  rows, err := stmt.QueryContext(ctx, userKey)
+  rows, err := stmt.QueryContext(ctx, userKey, userKey)
   if err != nil {
     return nil, err
   }
@@ -353,7 +363,7 @@ func (b *MysqlBackend) GetGoGameState(ctx context.Context, gameKey string) (*GoG
   ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
   defer cancel()
 
-  stmt, err := b.db.PrepareContext(ctx, "SELECT game_type, game_key, player1_key, player2_key, moves, winner, last_move, penult_move, board, p1_stones_captured, p2_stones_captured, p1_score, p2_score FROM games RIGHT JOIN go ON games.game_key = go.game_key WHERE games.game_key = ?")
+  stmt, err := b.db.PrepareContext(ctx, "SELECT game_type, games.game_key, player1_key, player2_key, moves, winner, last_move, penult_move, board, p1_stones_captured, p2_stones_captured, p1_score, p2_score FROM games RIGHT JOIN go ON games.game_key = go.game_key WHERE games.game_key = ?")
   if err != nil {
     return nil, err
   }
@@ -424,11 +434,11 @@ func (b *MysqlBackend) UpdateGoGame(ctx context.Context, gameState *GoGameState)
   if err != nil {
     return false, err
   }
-  successGo, err := verifyRowsInserted(res)
+  _, err = verifyRowsInserted(res)
   if err != nil {
     return false, err
   }
-  return success && successGo, nil
+  return success, nil
 }
 
 func verifyRowsInserted(res sql.Result) (bool, error) {
@@ -441,12 +451,13 @@ func verifyRowsInserted(res sql.Result) (bool, error) {
 
 func NewMsqlBackend(cfg *config.Config) (*MysqlBackend, error) {
   mysqlConfig := mysql.Config{
-    User:      cfg.Database.Username,
-    Passwd:    cfg.Database.Password,
-    Net:       "tcp",
-    Addr:      cfg.Database.Address,
-    DBName:    cfg.Database.Name,
-    ParseTime: true,
+    User:                 cfg.Database.Username,
+    Passwd:               cfg.Database.Password,
+    Net:                  "tcp",
+    Addr:                 cfg.Database.Address,
+    DBName:               cfg.Database.Name,
+    AllowNativePasswords: true,
+    ParseTime:            true,
   }
 
   db, err := sql.Open("mysql", mysqlConfig.FormatDSN())

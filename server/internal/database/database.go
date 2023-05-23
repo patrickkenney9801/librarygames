@@ -2,6 +2,11 @@ package database
 
 import (
   "context"
+  "fmt"
+)
+
+var (
+  ErrInvalidCredentials = fmt.Errorf("invalid username or password")
 )
 
 type GameMetadata struct {
