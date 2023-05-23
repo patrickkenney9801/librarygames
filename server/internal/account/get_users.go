@@ -16,7 +16,7 @@ type GetUsersServer struct {
   userManager *UserManager
 }
 
-func (s *CreateAccountServer) GetUsers(ctx context.Context, getUsersRequest *pbs.GetUsersRequest) (*pbs.GetUsersResponse, error) {
+func (s *GetUsersServer) GetUsers(ctx context.Context, getUsersRequest *pbs.GetUsersRequest) (*pbs.GetUsersResponse, error) {
   username, err := util.GetGRPCUsername(ctx)
   if err != nil {
     return &pbs.GetUsersResponse{}, status.Error(codes.Unauthenticated, err.Error())

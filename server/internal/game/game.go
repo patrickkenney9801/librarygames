@@ -11,6 +11,7 @@ import (
 const (
   MovePass        = -1
   MoveResignation = -2
+  MoveLoadGame    = -3
 
   WinPlayer1              = 1
   WinPlayer2              = 2

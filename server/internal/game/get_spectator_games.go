@@ -16,7 +16,7 @@ type GetSpectatorGamesServer struct {
   gameManager *GameManager
 }
 
-func (s *GetGamesServer) GetSpectatorGames(ctx context.Context, getSpectatorGamesRequest *pbs.GetSpectatorGamesRequest) (*pbs.GetSpectatorGamesResponse, error) {
+func (s *GetSpectatorGamesServer) GetSpectatorGames(ctx context.Context, getSpectatorGamesRequest *pbs.GetSpectatorGamesRequest) (*pbs.GetSpectatorGamesResponse, error) {
   username, err := util.GetGRPCUsername(ctx)
   if err != nil {
     return &pbs.GetSpectatorGamesResponse{}, status.Error(codes.Unauthenticated, err.Error())

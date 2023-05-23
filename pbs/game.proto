@@ -1,6 +1,8 @@
 syntax = "proto3";
 
 option go_package = "./v1";
+option java_package = "com.nfehs.librarygames.net.pbs";
+option java_outer_classname = "GameProto";
 
 enum GameType {
   UNSPECIFIED = 0;
@@ -79,7 +81,6 @@ message GetSpectatorGamesResponse {
 
 service Go {
   rpc PlayGo (stream MoveGoRequest) returns (stream StateGoResponse) {}
-  rpc SpectateGo (SpectateGoRequest) returns (stream StateGoResponse) {}
 }
 
 message MoveGoRequest {
@@ -94,8 +95,4 @@ message StateGoResponse {
   int32 p2_stones_captured = 3;
   int32 p1_score = 4;
   int32 p2_score = 5;
-}
-
-message SpectateGoRequest {
-  string game_key = 1;
 }

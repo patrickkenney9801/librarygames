@@ -13,11 +13,11 @@ import com.nfehs.librarygames.net.Security;
  */
 
 public abstract class BoardGame {
-  public static enum GameTypes {
-    INVALID(-1), GO9x9(00), GO13x13(01), GO19x19(02);
+  public static enum GameType {
+    INVALID(00), GO9x9(01), GO13x13(02), GO19x19(03);
 
     private int gameType;
-    private GameTypes(int gameType) {
+    private GameType(int gameType) {
       this.gameType = gameType;
     }
 
@@ -26,8 +26,47 @@ public abstract class BoardGame {
     }
   }
 
+  public static class GameMetadata {
+    public GameType gameType;
+    public String gameKey;
+    public String user1;
+    public String user2;
+    public int moves;
+    public int winner;
+
+    public String title;
+    public boolean playing;
+    public boolean userTurn;
+    public boolean finished;
+    public boolean won;
+
+    public GameMetadata(GameType gameType, String gameKey, String user1, String user2, int moves, int winner, String currentUser) {
+      this.gameType = gameType;
+      this.gameKey = gameKey;
+      this.user1 = user1;
+      this.user2 = user2;
+      this.moves = moves;
+      this.winner = winner;
+
+      this.title = lookupGameName(gameType) + ":        " + user1 + "  vs.  " + user2;
+      this.playing = currentUser.equals(user1) || currentUser.equals(user2);
+
+      if (playing) {
+        // determine whether it is the logged players turn or not
+        boolean player1Turn = moves % 2 == 0;
+        this.userTurn = (currentUser.equals(user1) && player1Turn) || (currentUser.equals(user2) && !player1Turn);
+        this.finished = winner != 0;
+        this.won = false;
+        if (finished) {
+          boolean player1Won = winner == 1 || winner == 3;
+          this.won = (currentUser.equals(user1) && player1Won) || (currentUser.equals(user2) && !player1Won);
+        }
+      }
+    }
+  }
+
   // Universal use
-  protected byte gameType;
+  protected GameType gameType;
   private String gameTitle;
   private String gameName;
   private String player1;
@@ -62,13 +101,13 @@ public abstract class BoardGame {
    * @param player2OnGame
    * @param board
    */
-  public BoardGame(String gameKey, int gameType, String player1, String player2, int moves,
+  public BoardGame(String gameKey, GameType gameType, String player1, String player2, int moves,
       int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board) {
     setGameKey(gameKey);
-    setGameType((byte) gameType);
+    setGameType(gameType);
     setGameName(lookupGameName(getGameType()));
-    setPlayer1(Security.decrypt(player1));
-    setPlayer2(Security.decrypt(player2));
+    setPlayer1(player1);
+    setPlayer2(player2);
     setGameTitle(getGameName() + ":        " + getPlayer1() + "  vs.  " + getPlayer2());
     setPenultMove(penultMove);
     setLastMove(lastMove);
@@ -120,16 +159,16 @@ public abstract class BoardGame {
    * @param extraData
    * @return
    */
-  public static BoardGame createGame(String gameKey, int gameType, String player1, String player2, int moves,
+  public static BoardGame createGame(String gameKey, GameType gameType, String player1, String player2, int moves,
       int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board, String extraData) {
     // determine which game to make, then make it
     switch (gameType) {
-      case 0:
-      case 1:
-      case 2:            return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData);
-      default:          // handle wrong game type
-                    System.out.println("ERROR WRONG GAME TYPE");
-                    return null;
+      case GO9x9:
+      case GO13x13:
+      case GO19x19:   //return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData);
+      default:        // handle invalid game type
+                      System.out.println("ERROR INVALID GAME TYPE");
+                      return null;
     }
   }
 
@@ -143,10 +182,9 @@ public abstract class BoardGame {
    * @param winner
    * @param player1OnGame
    * @param player2OnGame
-   * @param extraData
    * @return false if not current game
    */
-  public boolean update(String gameKey, String board, int penultMove, int lastMove, int moves, int winner, boolean player1OnGame, boolean player2OnGame, String extraData) {
+  public boolean update(String gameKey, String board, int penultMove, int lastMove, int moves, int winner, boolean player1OnGame, boolean player2OnGame) {
     if (!getGameKey().equals(gameKey))
       return false;
     setPenultMove(penultMove);
@@ -222,15 +260,15 @@ public abstract class BoardGame {
    * @param moveTo1D
    * @return
    */
-  public static String makeMove(int gameType, String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D,
+  public static String makeMove(GameType gameType, String board1D, boolean isPlayer1Turn, int penultMove1D, int lastMove1D,
                   int moveFrom1D, int moveTo1D) {
     // handle based on game type
     switch (gameType) {
-      case 0:
-      case 1:            // get result of move for a Go game
-      case 2:            return  Go.makeMove(board1D, isPlayer1Turn, penultMove1D, lastMove1D, moveFrom1D, moveTo1D);
-      default:          System.out.println("GAME TYPE NOT FOUND");
-                    return null;
+      case GO9x9:
+      case GO13x13:   // get result of move for a Go game
+      case GO19x19:   return  Go.makeMove(board1D, isPlayer1Turn, penultMove1D, lastMove1D, moveFrom1D, moveTo1D);
+      default:        System.out.println("GAME TYPE NOT FOUND");
+                      return null;
     }
   }
 
@@ -253,7 +291,7 @@ public abstract class BoardGame {
     setBoard(newBoard);
 
     // if the game is go
-    if (getGameType() < 3) {
+    if (getGameType() == GameType.GO9x9 || getGameType() == GameType.GO13x13 || getGameType() == GameType.GO19x19) {
       // if the user did not pass, calculate score
       if (movingTo > -1) {
         int capturedPieces = -1;  // for use in go games
@@ -275,11 +313,11 @@ public abstract class BoardGame {
 
         // apply Komi
         switch (getGameType()) {
-          case 2:        ((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 6);
-                    break;
-          case 1:        ((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 3);
-                    break;
-          default:       ((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 1);
+          case GO19x19: ((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 6);
+                        break;
+          case GO13x13: ((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 3);
+                        break;
+          default:      ((Go) this).setPlayer2Score(territoryScores[1] + ((Go) this).getBlackStonesCaptured() + 1);
         }
         updateWinner(1);
         if (((Go) this).getPlayer2Score() >= ((Go) this).getPlayer1Score())
@@ -400,23 +438,23 @@ public abstract class BoardGame {
    * @param gameType
    * @return
    */
-  public static String createNewBoard(int gameType) {
+  public static String createNewBoard(GameType gameType) {
     String board = "";
     switch (gameType) {
-      case 0:              // handle game type Go 9x9
-                      for (int i = 0; i < 9*9; i++)
-                        board += "0";
-                      break;
-      case 1:              // handle game type Go 13x13
-                      for (int i = 0; i < 13*13; i++)
-                        board += "0";
-                      break;
-      case 2:              // handle game type Go 19x19
-                      for (int i = 0; i < 19*19; i++)
-                        board += "0";
-                      break;
-      default:            // error no valid game type, return null
-                      return null;
+      case GO9x9:   // handle game type Go 9x9
+                    for (int i = 0; i < 9*9; i++)
+                      board += "0";
+                    break;
+      case GO13x13: // handle game type Go 13x13
+                    for (int i = 0; i < 13*13; i++)
+                      board += "0";
+                    break;
+      case GO19x19: // handle game type Go 19x19
+                    for (int i = 0; i < 19*19; i++)
+                      board += "0";
+                    break;
+      default:      // error no valid game type, return null
+                    return null;
     }
     return board;
   }
@@ -426,16 +464,16 @@ public abstract class BoardGame {
    * @param gameType
    * @return
    */
-  public static String createExtraGameInfo(int gameType) {
+  public static String createExtraGameInfo(GameType gameType) {
     String board = "";
     switch (gameType) {
-      case 0:
-      case 1:
-      case 2:              // generates new extra game info for go games
-                      board = "0,0,0,0";
-                      break;
-      default:            // error no valid game type, return null
-                      return null;
+      case GO9x9:
+      case GO13x13:
+      case GO19x19: // generates new extra game info for go games
+                    board = "0,0,0,0";
+                    break;
+      default:      // error no valid game type, return null
+                    return null;
     }
     return board;
   }
@@ -477,11 +515,11 @@ public abstract class BoardGame {
   }
 
   /**
-   * Returns the name of the game given its enum GameTypes
+   * Returns the name of the game given its enum GameType
    * @param lookupGame
    * @return
    */
-  private static String lookupGameName(GameTypes type) {
+  private static String lookupGameName(GameType type) {
     switch (type) {
       case INVALID:        return "";
       case GO9x9:          return "Go 9x9";
@@ -496,11 +534,11 @@ public abstract class BoardGame {
    * @param id String
    * @return
    */
-  public static GameTypes lookupGame(String type) {
+  public static GameType lookupGame(String type) {
     try {
       return lookupGame(Integer.parseInt(type));
     } catch (Exception e) {
-      return GameTypes.INVALID;
+      return GameType.INVALID;
     }
   }
 
@@ -509,12 +547,12 @@ public abstract class BoardGame {
    * @param id int
    * @return
    */
-  public static GameTypes lookupGame(int type) {
-    for (GameTypes p : GameTypes.values()) {
+  public static GameType lookupGame(int type) {
+    for (GameType p : GameType.values()) {
       if (p.getType() == type)
         return p;
     }
-    return GameTypes.INVALID;
+    return GameType.INVALID;
   }
 
   /**
@@ -684,11 +722,11 @@ public abstract class BoardGame {
     this.isPlayer1 = isPlayer1;
   }
 
-  public byte getGameType() {
+  public GameType getGameType() {
     return gameType;
   }
 
-  public void setGameType(byte gameType) {
+  public void setGameType(GameType gameType) {
     this.gameType = gameType;
   }
 

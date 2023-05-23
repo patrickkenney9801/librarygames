@@ -9,7 +9,6 @@ import (
   "github.com/google/uuid"
   "github.com/patrickkenney9801/librarygames/internal/database"
   "github.com/patrickkenney9801/librarygames/internal/util"
-  "golang.org/x/crypto/bcrypt"
   "google.golang.org/grpc"
   "google.golang.org/grpc/codes"
   "google.golang.org/grpc/status"
@@ -54,12 +53,7 @@ func (m *UserManager) login(ctx context.Context, username string, password strin
   m.mu.Lock()
   defer m.mu.Unlock()
 
-  pass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-  if err != nil {
-    return nil, err
-  }
-
-  userKey, err := m.database.Login(ctx, username, string(pass))
+  userKey, err := m.database.Login(ctx, username, password)
   if err != nil {
     return nil, err
   }
@@ -104,12 +98,7 @@ func (m *UserManager) createAccount(ctx context.Context, username string, passwo
     return fmt.Errorf("user %q already exists", username)
   }
 
-  pass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-  if err != nil {
-    return err
-  }
-
-  ok, err := m.database.CreateAccount(ctx, username, string(pass), email)
+  ok, err := m.database.CreateAccount(ctx, username, password, email)
   if err != nil {
     return err
   }
@@ -202,16 +191,16 @@ func (m *UserManager) authorize(ctx context.Context, method string) error {
     return nil
   }
 
+  accessToken, err := util.GetGRPCAccessToken(ctx)
+  if err != nil {
+    return status.Errorf(codes.Unauthenticated, err.Error())
+  }
+
   userValue, err := util.GetGRPCUsername(ctx)
   if err != nil {
     return status.Errorf(codes.Unauthenticated, err.Error())
   }
   username := Username(userValue)
-
-  accessToken, err := util.GetGRPCAccessToken(ctx)
-  if err != nil {
-    return status.Errorf(codes.Unauthenticated, err.Error())
-  }
 
   user, ok := m.users[username]
   if !ok {

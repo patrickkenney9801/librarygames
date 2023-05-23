@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.GameFrame;
+import com.nfehs.librarygames.games.BoardGame.GameMetadata;
 
 /**
  * This class handles the user browsing their active games
@@ -121,7 +122,7 @@ public class ActiveGamesScreen extends Screen {
     finished.setBounds ((int) Game.screenSize.getWidth() / 2 - 500,
               (int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 
-    finishedGames = new JButton[Game.getPlayer().getFinishedBoardGames().length];
+    finishedGames = new JButton[Game.getPlayer().getFinishedBoardGames().size()];
     finishedGamesPanel.setPreferredSize(new Dimension(285, finishedGames.length*50 - 10));
     finishedGamesPanel.setBounds(5, 5, 285, finishedGames.length*50 - 10);
 
@@ -131,10 +132,11 @@ public class ActiveGamesScreen extends Screen {
     Game.mainWindow.add(finishedGamesTab);
 
     for (int i = 0; i < finishedGames.length; i++) {
-      finishedGames[i] = new JButton(Game.getPlayer().getFinishedBoardGames()[i].split("~")[1]);
+      GameMetadata game = Game.getPlayer().getFinishedBoardGames().get(i);
+      finishedGames[i] = new JButton(game.title);
       finishedGames[i].setBounds(5, 5 + i*50, finishedGamesPanel.getWidth() - 10, 30);
       finishedGamesPanel.add(finishedGames[i]);
-      finishedGames[i].setForeground(Boolean.parseBoolean(Game.getPlayer().getFinishedBoardGames()[i].split("~")[4]) ? new Color(0, 150, 0) : Color.RED);
+      finishedGames[i].setForeground(game.won ? new Color(0, 150, 0) : Color.RED);
       finishedGames[i].addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           System.out.println("An finished game clicked: " + ((JButton) e.getSource()).getText());
@@ -148,8 +150,8 @@ public class ActiveGamesScreen extends Screen {
             return;
 
           // send get board request to server
-          Game.getBoard(Game.getPlayer().getFinishedBoardGames()[elemNumber].split("~")[0],
-              Integer.parseInt(Game.getPlayer().getFinishedBoardGames()[elemNumber].split("~")[3]));
+          GameMetadata game = Game.getPlayer().getFinishedBoardGames().get(elemNumber);
+          Game.startPlaying(game);
         }
       });
     }
@@ -162,7 +164,7 @@ public class ActiveGamesScreen extends Screen {
     userTurn.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
               (int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 
-    activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().length];
+    activeGamesUserTurn = new JButton[Game.getPlayer().getYourTurnBoardGames().size()];
     activeGamesUserPanel.setPreferredSize(new Dimension(285, activeGamesUserTurn.length*50 - 10));
     activeGamesUserPanel.setBounds(5, 5, 285, activeGamesUserTurn.length*50 - 10);
 
@@ -172,7 +174,8 @@ public class ActiveGamesScreen extends Screen {
     Game.mainWindow.add(activeGamesUserTab);
 
     for (int i = 0; i < activeGamesUserTurn.length; i++) {
-      activeGamesUserTurn[i] = new JButton(Game.getPlayer().getYourTurnBoardGames()[i].split("~")[1]);
+      GameMetadata game = Game.getPlayer().getYourTurnBoardGames().get(i);
+      activeGamesUserTurn[i] = new JButton(game.title);
       activeGamesUserPanel.add(activeGamesUserTurn[i]);
       activeGamesUserTurn[i].setBounds(5, 5 + i*50, activeGamesUserPanel.getWidth() - 10, 30);
       activeGamesUserTurn[i].addActionListener(new ActionListener() {
@@ -188,8 +191,8 @@ public class ActiveGamesScreen extends Screen {
             return;
 
           // send get board request to server
-          Game.getBoard(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[0],
-              Integer.parseInt(Game.getPlayer().getYourTurnBoardGames()[elemNumber].split("~")[3]));
+          GameMetadata game = Game.getPlayer().getYourTurnBoardGames().get(elemNumber);
+          Game.startPlaying(game);
         }
       });
     }
@@ -202,7 +205,7 @@ public class ActiveGamesScreen extends Screen {
     opponentTurn.setBounds ((int) Game.screenSize.getWidth() / 2 + 200,
               (int) Game.screenSize.getHeight() / 10 + 200, 300, 30);
 
-    activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().length];
+    activeGames = new JButton[Game.getPlayer().getOpponentTurnBoardGames().size()];
     activeGamesPanel.setPreferredSize(new Dimension(285, activeGames.length*50 - 10));
     activeGamesPanel.setBounds(5, 5, 285, activeGames.length*50 - 10);
 
@@ -212,7 +215,8 @@ public class ActiveGamesScreen extends Screen {
     Game.mainWindow.add(activeGamesTab);
 
     for (int i = 0; i < activeGames.length; i++) {
-      activeGames[i] = new JButton(Game.getPlayer().getOpponentTurnBoardGames()[i].split("~")[1]);
+      GameMetadata game = Game.getPlayer().getOpponentTurnBoardGames().get(i);
+      activeGames[i] = new JButton(game.title);
       activeGamesPanel.add(activeGames[i]);
       activeGames[i].setBounds(5, 5 + i*50, activeGamesUserPanel.getWidth() - 10, 30);
       activeGames[i].addActionListener(new ActionListener() {
@@ -228,8 +232,8 @@ public class ActiveGamesScreen extends Screen {
             return;
 
           // send get board request to server
-          Game.getBoard(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[0],
-            Integer.parseInt(Game.getPlayer().getOpponentTurnBoardGames()[elemNumber].split("~")[3]));
+          GameMetadata game = Game.getPlayer().getOpponentTurnBoardGames().get(elemNumber);
+          Game.startPlaying(game);
         }
       });
     }

@@ -16,6 +16,8 @@ import javax.swing.SwingConstants;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.GameFrame;
+import com.nfehs.librarygames.Player;
+import com.nfehs.librarygames.games.BoardGame.GameType;
 
 /**
  * Handles the user creating a game,
@@ -146,14 +148,15 @@ public class CreateGameScreen extends Screen {
           creatorGoesFirst = true;
 
         // get gameType from selected index of gameChoices
-        int gameType = gameChoices.getSelectedIndex();
+        int type = gameChoices.getSelectedIndex();
 
         // if the no gameType is selected or there is some other error, exit and send message to screen
-        if (gameType < 0) {
+        if (type < 0) {
           setError("ERROR: NO GAME TYPE SELECTED");
           System.out.println("No game type selected");
           return;
         }
+        GameType gameType = GameType.values()[type + 1];
         Game.createGame(otherUser, creatorGoesFirst, gameType);
       }
     });
@@ -184,7 +187,7 @@ public class CreateGameScreen extends Screen {
     removeAndNullPlayers();
 
     // add friends
-    friends = new JRadioButton[Game.getPlayer().getFriends().length];
+    friends = new JRadioButton[Game.getPlayer().getFriends().size()];
 
     friendsPanel.setPreferredSize(new Dimension(285, friends.length*30));
     friendsPanel.setBounds(5, 5, 285, friends.length*30);
@@ -195,15 +198,16 @@ public class CreateGameScreen extends Screen {
     Game.mainWindow.add(friendsTab);
 
     for (int i = 0; i < friends.length; i++) {
-      friends[i] = new JRadioButton(Game.getPlayer().getFriends()[i].split("~")[0]);
+      Player.OtherPlayer friend = Game.getPlayer().getFriends().get(i);
+      friends[i] = new JRadioButton(friend.getUsername());
       players.add(friends[i]);
       friends[i].setBounds(5, 5 + i*30, friendsPanel.getWidth() - 10, 30);
-      friends[i].setForeground(Boolean.parseBoolean(Game.getPlayer().getFriends()[i].split("~")[1]) ? Color.GREEN : Color.RED);
+      friends[i].setForeground(friend.getOnline() ? Color.GREEN : Color.RED);
       friendsPanel.add(friends[i]);
     }
 
     // add other players
-    randomPlayers = new JRadioButton[Game.getPlayer().getOtherPlayers().length];
+    randomPlayers = new JRadioButton[Game.getPlayer().getOtherPlayers().size()];
 
     randomPlayersPanel.setPreferredSize(new Dimension(285, randomPlayers.length*30 + 10));
     randomPlayersPanel.setBounds(5, 0, 285, randomPlayers.length*30 + 10);
@@ -214,10 +218,11 @@ public class CreateGameScreen extends Screen {
     Game.mainWindow.add(randomPlayersTab);
 
     for (int i = 0; i < randomPlayers.length; i++) {
-      randomPlayers[i] = new JRadioButton(Game.getPlayer().getOtherPlayers()[i].split("~")[0]);
+      Player.OtherPlayer player = Game.getPlayer().getOtherPlayers().get(i);
+      randomPlayers[i] = new JRadioButton(player.getUsername());
       players.add(randomPlayers[i]);
       randomPlayers[i].setBounds(5, 5 + i*30, randomPlayersPanel.getWidth() - 85, 30);
-      randomPlayers[i].setForeground(Boolean.parseBoolean(Game.getPlayer().getOtherPlayers()[i].split("~")[1]) ? Color.GREEN : Color.RED);
+      randomPlayers[i].setForeground(player.getOnline() ? Color.GREEN : Color.RED);
       randomPlayersPanel.add(randomPlayers[i]);
     }
 

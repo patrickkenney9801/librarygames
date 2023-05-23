@@ -6,16 +6,20 @@ RUN apt-get update && \
     maven \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /tmp/librarygames
+
+COPY pom.xml /tmp/librarygames/pom.xml
+RUN mvn verify clean --fail-never
+
 COPY src/ /tmp/librarygames/src
+COPY pbs/ /tmp/librarygames/src/main/proto
 COPY .classpath /tmp/librarygames/.classpath
 COPY .project /tmp/librarygames/.project
-COPY pom.xml /tmp/librarygames/pom.xml
 
-WORKDIR /tmp/librarygames
-RUN mvn clean compile assembly:single install
+RUN mvn compile assembly:single install
 
 # Main image
-FROM --platform=linux/amd64 ubuntu:20.04
+FROM --platform=linux/amd64 ubuntu:20.04 AS mvn-release
 
 RUN apt-get update && \
   apt-get install -y \

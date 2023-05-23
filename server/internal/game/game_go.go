@@ -73,6 +73,9 @@ func newGoGame(database database.Database, gameMetadata *database.GoGameState, p
 func (g *GoGame) makeMove(ctx context.Context, username string, moveFrom int32, moveTo int32) error {
   g.mu.Lock()
   defer g.mu.Unlock()
+  if moveTo == MoveLoadGame {
+    return nil
+  }
   if g.closed {
     return ErrGameClosed
   }
@@ -122,10 +125,6 @@ func (g *GoGame) makeMove(ctx context.Context, username string, moveFrom int32, 
     }
   }
 
-  gameState.GeneralState.Moves += 1
-  gameState.GeneralState.PenultMove = gameState.GeneralState.LastMove
-  gameState.GeneralState.LastMove = moveTo
-
   // handle end of game when both players pass
   if moveTo == MovePass && gameState.GeneralState.LastMove == MovePass {
     p1Score, p2Score := calculateGoScore(gameState.GeneralState.GameType, gameState.GeneralState.Board, gameState.P1StonesCaptured, gameState.P2StonesCaptured)
@@ -138,6 +137,10 @@ func (g *GoGame) makeMove(ctx context.Context, username string, moveFrom int32, 
     gameState.P2Score = p2Score
   }
 
+  gameState.GeneralState.Moves += 1
+  gameState.GeneralState.PenultMove = gameState.GeneralState.LastMove
+  gameState.GeneralState.LastMove = moveTo
+
   success, err := g.database.UpdateGoGame(ctx, gameState)
   if err != nil {
     return err
@@ -146,12 +149,10 @@ func (g *GoGame) makeMove(ctx context.Context, username string, moveFrom int32, 
     return fmt.Errorf("persisting move failed")
   }
 
-  for _, channel := range g.watchers {
-    g.forwardState(channel, &GoGameState{
-      goState:   gameState,
-      liveState: g.getLiveState(),
-    })
-  }
+  g.forwardStateAll(&GoGameState{
+    goState:   gameState,
+    liveState: g.getLiveState(),
+  })
   return nil
 }
 
@@ -185,14 +186,20 @@ func (g *GoGame) registerWatcher(ctx context.Context, username string) chan *GoG
   if err != nil {
     slog.Warn("failed to get go game state", slog.String("error", err.Error()))
   }
-  g.forwardState(channel, &GoGameState{
+  message := &GoGameState{
     goState:   gameState,
     liveState: g.getLiveState(),
-  })
+  }
+
+  if username == g.player1 || username == g.player2 {
+    g.forwardStateAll(message)
+  } else {
+    g.forwardState(channel, message)
+  }
   return channel
 }
 
-func (g *GoGame) deregisterWatcher(username string) {
+func (g *GoGame) deregisterWatcher(ctx context.Context, username string) {
   g.mu.Lock()
   defer g.mu.Unlock()
   if g.closed {
@@ -203,6 +210,18 @@ func (g *GoGame) deregisterWatcher(username string) {
     close(staleChannel)
   }
   delete(g.watchers, username)
+
+  if username == g.player1 || username == g.player2 {
+    gameState, err := g.database.GetGoGameState(ctx, g.gameKey)
+    if err != nil {
+      slog.Warn("failed to get go game state", slog.String("error", err.Error()))
+    }
+    message := &GoGameState{
+      goState:   gameState,
+      liveState: g.getLiveState(),
+    }
+    g.forwardStateAll(message)
+  }
 }
 
 func (m *GameManager) CreateGoGame(ctx context.Context, gameType int32, user1 string, user2 string, creatorGoesFirst bool, board string) (string, error) {
@@ -230,6 +249,12 @@ func (g *GoGame) forwardState(channel chan *GoGameState, message *GoGameState) {
   select {
   case channel <- message:
   default: // TODO add metrics for dropped messages
+  }
+}
+
+func (g *GoGame) forwardStateAll(message *GoGameState) {
+  for _, channel := range g.watchers {
+    g.forwardState(channel, message)
   }
 }
 
@@ -309,8 +334,10 @@ func newGoBoard(gameType int32, board1D string) GoBoard {
   board := GoBoard{
     board: make([][]byte, boardSize+2),
   }
-  for i := 0; i < boardSize; i++ {
+  for i := range board.board {
     board.board[i] = make([]byte, boardSize+2)
+  }
+  for i := 0; i < boardSize; i++ {
     for j := 0; j < boardSize; j++ {
       board.board[i+1][j+1] = board1D[i*boardSize+j]
     }
@@ -363,6 +390,7 @@ func (b *GoBoard) makeMove(move1D int32, piece byte, opposingPiece byte) error {
   if err != nil {
     return err
   }
+  b.board[x][y] = piece
   // check if the group of stones created has a liberty
   hasLiberty := b.groupHasLiberty(x, y)
   // reset paddedBoard

@@ -289,8 +289,7 @@ var GetSpectatorGames_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-  Go_PlayGo_FullMethodName     = "/Go/PlayGo"
-  Go_SpectateGo_FullMethodName = "/Go/SpectateGo"
+  Go_PlayGo_FullMethodName = "/Go/PlayGo"
 )
 
 // GoClient is the client API for Go service.
@@ -298,7 +297,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GoClient interface {
   PlayGo(ctx context.Context, opts ...grpc.CallOption) (Go_PlayGoClient, error)
-  SpectateGo(ctx context.Context, in *SpectateGoRequest, opts ...grpc.CallOption) (Go_SpectateGoClient, error)
 }
 
 type goClient struct {
@@ -340,44 +338,11 @@ func (x *goPlayGoClient) Recv() (*StateGoResponse, error) {
   return m, nil
 }
 
-func (c *goClient) SpectateGo(ctx context.Context, in *SpectateGoRequest, opts ...grpc.CallOption) (Go_SpectateGoClient, error) {
-  stream, err := c.cc.NewStream(ctx, &Go_ServiceDesc.Streams[1], Go_SpectateGo_FullMethodName, opts...)
-  if err != nil {
-    return nil, err
-  }
-  x := &goSpectateGoClient{stream}
-  if err := x.ClientStream.SendMsg(in); err != nil {
-    return nil, err
-  }
-  if err := x.ClientStream.CloseSend(); err != nil {
-    return nil, err
-  }
-  return x, nil
-}
-
-type Go_SpectateGoClient interface {
-  Recv() (*StateGoResponse, error)
-  grpc.ClientStream
-}
-
-type goSpectateGoClient struct {
-  grpc.ClientStream
-}
-
-func (x *goSpectateGoClient) Recv() (*StateGoResponse, error) {
-  m := new(StateGoResponse)
-  if err := x.ClientStream.RecvMsg(m); err != nil {
-    return nil, err
-  }
-  return m, nil
-}
-
 // GoServer is the server API for Go service.
 // All implementations must embed UnimplementedGoServer
 // for forward compatibility
 type GoServer interface {
   PlayGo(Go_PlayGoServer) error
-  SpectateGo(*SpectateGoRequest, Go_SpectateGoServer) error
   mustEmbedUnimplementedGoServer()
 }
 
@@ -387,9 +352,6 @@ type UnimplementedGoServer struct {
 
 func (UnimplementedGoServer) PlayGo(Go_PlayGoServer) error {
   return status.Errorf(codes.Unimplemented, "method PlayGo not implemented")
-}
-func (UnimplementedGoServer) SpectateGo(*SpectateGoRequest, Go_SpectateGoServer) error {
-  return status.Errorf(codes.Unimplemented, "method SpectateGo not implemented")
 }
 func (UnimplementedGoServer) mustEmbedUnimplementedGoServer() {}
 
@@ -430,27 +392,6 @@ func (x *goPlayGoServer) Recv() (*MoveGoRequest, error) {
   return m, nil
 }
 
-func _Go_SpectateGo_Handler(srv interface{}, stream grpc.ServerStream) error {
-  m := new(SpectateGoRequest)
-  if err := stream.RecvMsg(m); err != nil {
-    return err
-  }
-  return srv.(GoServer).SpectateGo(m, &goSpectateGoServer{stream})
-}
-
-type Go_SpectateGoServer interface {
-  Send(*StateGoResponse) error
-  grpc.ServerStream
-}
-
-type goSpectateGoServer struct {
-  grpc.ServerStream
-}
-
-func (x *goSpectateGoServer) Send(m *StateGoResponse) error {
-  return x.ServerStream.SendMsg(m)
-}
-
 // Go_ServiceDesc is the grpc.ServiceDesc for Go service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -464,11 +405,6 @@ var Go_ServiceDesc = grpc.ServiceDesc{
       Handler:       _Go_PlayGo_Handler,
       ServerStreams: true,
       ClientStreams: true,
-    },
-    {
-      StreamName:    "SpectateGo",
-      Handler:       _Go_SpectateGo_Handler,
-      ServerStreams: true,
     },
   },
   Metadata: "game.proto",

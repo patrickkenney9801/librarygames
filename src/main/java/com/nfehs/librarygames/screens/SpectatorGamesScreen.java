@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.GameFrame;
+import com.nfehs.librarygames.games.BoardGame.GameMetadata;
 
 /**
  * This class handles the user browsing active games that are not their own
@@ -79,7 +80,7 @@ public class SpectatorGamesScreen extends Screen {
     spectate.setBounds ((int) Game.screenSize.getWidth() / 2 - 150,
               (int) Game.screenSize.getHeight() / 5 - 30, 300, 30);
 
-    spectatorGames = new JButton[Game.getPlayer().getSpectatorBoardGames().length];
+    spectatorGames = new JButton[Game.getPlayer().getSpectatorBoardGames().size()];
     spectatorGamesPanel.setPreferredSize(new Dimension(285, spectatorGames.length*50 - 10));
     spectatorGamesPanel.setBounds(5, 5, 285, spectatorGames.length*50 - 10);
 
@@ -89,7 +90,8 @@ public class SpectatorGamesScreen extends Screen {
     Game.mainWindow.add(spectatorGamesTab);
 
     for (int i = 0; i < spectatorGames.length; i++) {
-      spectatorGames[i] = new JButton(Game.getPlayer().getSpectatorBoardGames()[i].split("~")[1]);
+      GameMetadata game = Game.getPlayer().getSpectatorBoardGames().get(i);
+      spectatorGames[i] = new JButton(game.title);
       spectatorGames[i].setBounds(5, 5 + i*50, spectatorGamesPanel.getWidth() - 10, 30);
       spectatorGamesPanel.add(spectatorGames[i]);
       spectatorGames[i].addActionListener(new ActionListener() {
@@ -105,8 +107,8 @@ public class SpectatorGamesScreen extends Screen {
             return;
 
           // send get board request to server
-          Game.getBoard(Game.getPlayer().getSpectatorBoardGames()[elemNumber].split("~")[0],
-              Integer.parseInt(Game.getPlayer().getSpectatorBoardGames()[elemNumber].split("~")[3]));
+          GameMetadata game = Game.getPlayer().getSpectatorBoardGames().get(elemNumber);
+          Game.startPlaying(game);
         }
       });
     }

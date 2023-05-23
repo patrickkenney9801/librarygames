@@ -40,7 +40,7 @@ Run `make helm-dependencies` to initialize a new environment.
 
 ### Building
 
-To build the latest client docker image run `make image`.
+To build the latest client docker image run `make image-client`.
 To build the latest server docker image run `make image-server`.
 
 To generate protobuf definitions runs `make proto`.

@@ -7,3 +7,5 @@ charts/*/*.tgz
 .settings
 
 *.class
+
+tmp

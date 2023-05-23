@@ -3,6 +3,8 @@ package com.nfehs.librarygames;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import com.nfehs.librarygames.games.BoardGame.GameMetadata;
+
 /**
  * This class holds data for players
  * Used by both client player and by server to hold data
@@ -17,12 +19,12 @@ public class Player {
   private InetAddress ipAddress;
   private int port;
 
-  private String[] finishedBoardGames;
-  private String[] yourTurnBoardGames;
-  private String[] opponentTurnBoardGames;
-  private String[] friends;
-  private String[] otherPlayers;
-  private String[] spectatorBoardGames;
+  private ArrayList<GameMetadata> finishedBoardGames;
+  private ArrayList<GameMetadata> yourTurnBoardGames;
+  private ArrayList<GameMetadata> opponentTurnBoardGames;
+  private ArrayList<GameMetadata> spectatorBoardGames;
+  private ArrayList<OtherPlayer> friends;
+  private ArrayList<OtherPlayer> otherPlayers;
 
   /**
    * For use by client
@@ -100,76 +102,65 @@ public class Player {
   /**
    * @return the yourTurnBoardGames
    */
-  public String[] getYourTurnBoardGames() {
+  public ArrayList<GameMetadata> getYourTurnBoardGames() {
     return yourTurnBoardGames;
   }
 
   /**
    * @param yourTurnBoardGames the yourTurnBoardGames to set
    */
-  public void setYourTurnBoardGames(ArrayList<String> yourTurn) {
-    String[] yourTurnBoardGames = new String[yourTurn.size()];
-    for (int i = 0; i < yourTurn.size(); i++)
-      yourTurnBoardGames[i] = yourTurn.get(i);
-    this.yourTurnBoardGames = yourTurnBoardGames;
+  public void setYourTurnBoardGames(ArrayList<GameMetadata> yourTurn) {
+    this.yourTurnBoardGames = yourTurn;
   }
 
   /**
    * @return the opponentTurnBoardGames
    */
-  public String[] getOpponentTurnBoardGames() {
+  public ArrayList<GameMetadata> getOpponentTurnBoardGames() {
     return opponentTurnBoardGames;
   }
 
   /**
    * @param opponentTurnBoardGames the opponentTurnBoardGames to set
    */
-  public void setOpponentTurnBoardGames(ArrayList<String> opponentTurn) {
-    String[] opponentTurnBoardGames = new String[opponentTurn.size()];
-    for (int i = 0; i < opponentTurnBoardGames.length; i++)
-      opponentTurnBoardGames[i] = opponentTurn.get(i);
-    this.opponentTurnBoardGames = opponentTurnBoardGames;
+  public void setOpponentTurnBoardGames(ArrayList<GameMetadata> opponentTurn) {
+    this.opponentTurnBoardGames = opponentTurn;
   }
 
-  public String[] getFriends() {
+  public ArrayList<OtherPlayer> getFriends() {
     return friends;
   }
 
-  public void setFriends(String friends) {
-    if (friends == null || friends.length() < 1) {
-      this.friends = new String[0];
+  public void setFriends(ArrayList<OtherPlayer> friends) {
+    if (friends == null) {
       return;
     }
-    this.friends = friends.split(",");
+    this.friends = friends;
   }
 
-  public String[] getOtherPlayers() {
+  public ArrayList<OtherPlayer> getOtherPlayers() {
     return otherPlayers;
   }
 
-  public void setOtherPlayers(String otherPlayers) {
-    if (otherPlayers == null || otherPlayers.length() < 1) {
-      this.otherPlayers = new String[0];
+  public void setOtherPlayers(ArrayList<OtherPlayer> otherPlayers) {
+    if (otherPlayers == null) {
       return;
     }
-    this.otherPlayers = otherPlayers.split(",");
+    this.otherPlayers = otherPlayers;
   }
 
   /**
    * @return the finishedBoardGames
    */
-  public String[] getFinishedBoardGames() {
+  public ArrayList<GameMetadata> getFinishedBoardGames() {
     return finishedBoardGames;
   }
 
   /**
    * @param finishedBoardGames the finishedBoardGames to set
    */
-  public void setFinishedBoardGames(ArrayList<String> finishedBoardGames) {
-    String[] finBoardGames = new String[finishedBoardGames.size()];
-    for (int i = 0; i < finBoardGames.length; i++)
-      finBoardGames[i] = finishedBoardGames.get(i);
-    this.finishedBoardGames = finBoardGames;
+  public void setFinishedBoardGames(ArrayList<GameMetadata> finishedBoardGames) {
+    this.finishedBoardGames = finishedBoardGames;
   }
 
   /**
@@ -186,14 +177,35 @@ public class Player {
     this.game_key = game_key;
   }
 
-  public String[] getSpectatorBoardGames() {
+  public ArrayList<GameMetadata> getSpectatorBoardGames() {
     return spectatorBoardGames;
   }
 
-  public void setSpectatorBoardGames(ArrayList<String> spectatorBoardGames) {
-    String[] specBoardGames = new String[spectatorBoardGames.size()];
-    for (int i = 0; i < specBoardGames.length; i++)
-      specBoardGames[i] = spectatorBoardGames.get(i);
-    this.spectatorBoardGames = specBoardGames;
+  public void setSpectatorBoardGames(ArrayList<GameMetadata> spectatorBoardGames) {
+    this.spectatorBoardGames = spectatorBoardGames;
+  }
+
+  public static class OtherPlayer {
+    private String username;
+    private boolean friend;
+    private boolean online;
+
+    public OtherPlayer(String username, boolean friend, boolean online) {
+      this.username = username;
+      this.friend = friend;
+      this.online = online;
+    }
+
+    public String getUsername() {
+      return username;
+    }
+
+    public boolean getFriend() {
+      return friend;
+    }
+
+    public boolean getOnline() {
+      return online;
+    }
   }
 }

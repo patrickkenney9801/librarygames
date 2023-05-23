@@ -28,7 +28,7 @@ func (s *GameGoServer) PlayGo(stream pbs.Go_PlayGoServer) error {
   }
   defer func() {
     if game != nil {
-      game.deregisterWatcher(username)
+      game.deregisterWatcher(stream.Context(), username)
     }
   }()
 
@@ -60,30 +60,12 @@ func (s *GameGoServer) PlayGo(stream pbs.Go_PlayGoServer) error {
         }
         done <- true
       }()
-
-      if err = game.makeMove(stream.Context(), username, message.MoveFrom, message.MoveTo); err != nil {
-        slog.Warn("go game move failed from %d to %d", message.MoveFrom, message.MoveTo, slog.String("error", err.Error()))
-        return err
-      }
     }
-  }
-  return nil
-}
 
-func (s *GameGoServer) SpectateGo(spectateGoRequest *pbs.SpectateGoRequest, stream pbs.Go_SpectateGoServer) error {
-  username, err := util.GetGRPCUsername(stream.Context())
-  if err != nil {
-    return status.Error(codes.Unauthenticated, err.Error())
-  }
-  game, err := s.gameManager.getGoGame(stream.Context(), spectateGoRequest.GameKey)
-  if err != nil {
-    return err
-  }
-  receiver := game.registerWatcher(stream.Context(), username)
-  defer game.deregisterWatcher(username)
-
-  for state := range receiver {
-    stream.Send(translateGoGameState(state))
+    if err = game.makeMove(stream.Context(), username, message.MoveFrom, message.MoveTo); err != nil {
+      slog.Warn("go game move failed from %d to %d", message.MoveFrom, message.MoveTo, slog.String("error", err.Error()))
+      return err
+    }
   }
   return nil
 }
