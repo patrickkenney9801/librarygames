@@ -12,7 +12,7 @@ import javax.swing.JTextField;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.BoardGame;
-import com.nfehs.librarygames.net.Security;
+import com.nfehs.librarygames.games.go.Go;
 
 /**
  * Handles the user creating an offline game,
@@ -94,18 +94,33 @@ public class CreateOfflineGameScreen extends Screen {
           player1Username = "Player 1";
           player2Username = "Player 2";
         }
-        player1Username = Security.encrypt(player1Username);
-        player2Username = Security.encrypt(player2Username);
 
         // if the no gameType is selected or there is some other error, exit and send message to screen
         int type = gameChoices.getSelectedIndex();
         if (type < 0)
           type = 0;
         BoardGame.GameType gameType = BoardGame.GameType.values()[type + 1];
+        int moves = 0;
+        int penultMove = -5;
+        int lastMove = -5;
+        int winner = 0;
+        boolean player1Online = true;
+        boolean player2Online = true;
+        String board = BoardGame.createNewBoard(gameType);
 
         // create an offline board game and open game screen
-        Game.setBoardGame(BoardGame.createGame("GameKey", gameType, player1Username, player2Username, 0, -5, -5, 0, true, true,
-            BoardGame.createNewBoard(gameType), BoardGame.createExtraGameInfo(gameType)));
+        switch (gameType) {
+          case GO9x9:
+          case GO13x13:
+          case GO19x19:
+                          Game.setBoardGame(new Go("GameKey", gameType, player1Username, player2Username,
+                                                    moves, penultMove, lastMove, winner, player1Online, player2Online, board,
+                                                    0, 0, 0, 0));
+                          break;
+          default:        // handle invalid game type
+                          System.out.println("ERROR INVALID GAME TYPE");
+                          return;
+        }
         Game.openGameScreen();
       }
     });

@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 
 import com.nfehs.librarygames.Game;
 import com.nfehs.librarygames.games.go.Go;
-import com.nfehs.librarygames.net.Security;
 
 /**
  * This is the parent class for board games
@@ -140,35 +139,6 @@ public abstract class BoardGame {
       setPlayer1Turn(true);
       setPlayerTurn(true);
       setPlayer1(true);
-    }
-  }
-
-  /**
-   * Creates a new board game given game info
-   * @param gameKey
-   * @param gameType
-   * @param player1
-   * @param player2
-   * @param moves
-   * @param penultMove
-   * @param lastMove
-   * @param winner
-   * @param player1OnGame
-   * @param player2OnGame
-   * @param board
-   * @param extraData
-   * @return
-   */
-  public static BoardGame createGame(String gameKey, GameType gameType, String player1, String player2, int moves,
-      int penultMove, int lastMove, int winner, boolean player1OnGame, boolean player2OnGame, String board, String extraData) {
-    // determine which game to make, then make it
-    switch (gameType) {
-      case GO9x9:
-      case GO13x13:
-      case GO19x19:   //return new Go(gameKey, gameType, player1, player2, moves, penultMove, lastMove, winner, player1OnGame, player2OnGame, board, extraData);
-      default:        // handle invalid game type
-                      System.out.println("ERROR INVALID GAME TYPE");
-                      return null;
     }
   }
 
@@ -457,52 +427,6 @@ public abstract class BoardGame {
                     return null;
     }
     return board;
-  }
-
-  /**
-   * Generates brand new extra game info
-   * @param gameType
-   * @return
-   */
-  public static String createExtraGameInfo(GameType gameType) {
-    String board = "";
-    switch (gameType) {
-      case GO9x9:
-      case GO13x13:
-      case GO19x19: // generates new extra game info for go games
-                    board = "0,0,0,0";
-                    break;
-      default:      // error no valid game type, return null
-                    return null;
-    }
-    return board;
-  }
-
-  /**
-   * Returns a String with 5 parts delimited by ~
-   * Part 1 is the game key, 2 is game title, 3 is bool for user goes first, 4 is gameType, 5 is bool for if user won the game
-   * @param gameInfo
-   * @return
-   */
-  public static String getGameInfo(String[] gameInfo) {
-    String gameInformation = gameInfo[0] + "~";
-    byte gameType = Byte.parseByte(gameInfo[1]);
-    gameInformation += lookupGameName(gameType) + ":        ";
-    gameInformation += Security.decrypt(gameInfo[2]) + "  vs.  ";
-    gameInformation += Security.decrypt(gameInfo[3]) + "~";
-    boolean player1Turn = Integer.parseInt(gameInfo[4]) % 2 == 0;
-
-    // determine whether it is the logged players turn or not
-    boolean playerTurn = false;
-    if ((Security.decrypt(gameInfo[2]).equals(Game.getPlayer().getUsername()) && player1Turn)
-        || (Security.decrypt(gameInfo[3]).equals(Game.getPlayer().getUsername()) && !player1Turn))
-      playerTurn = true;
-
-    gameInformation += playerTurn + "~";
-    gameInformation += gameType;
-    if (gameInfo.length > 5)
-      gameInformation += "~" + (Security.decrypt(gameInfo[3 - Integer.parseInt(gameInfo[5]) % 2]).equals(Game.getPlayer().getUsername()));
-    return gameInformation;
   }
 
   /**

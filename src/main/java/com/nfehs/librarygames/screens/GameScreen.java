@@ -522,8 +522,6 @@ public class GameScreen extends Screen {
 
     chatBox.repaint();
     chatInterface.repaint();
-
-    updatePlayersOnGame();
   }
 
   /**

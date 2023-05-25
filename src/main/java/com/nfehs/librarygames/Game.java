@@ -2,16 +2,12 @@ package com.nfehs.librarygames;
 
 import java.awt.Container;
 import java.awt.Dimension;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.net.GameClient;
-import com.nfehs.librarygames.net.Security;
-import com.nfehs.librarygames.net.packets.*;
 import com.nfehs.librarygames.screens.*;
 
 /**
@@ -32,8 +28,7 @@ public class Game {
   private static Player player;
   private static BoardGame boardGame;
 
-  public static final byte[] DEFAULT_SERVER_IP_ADDRESS = {127, 0, 0, 1};
-  public static final int DEFAULT_SERVER_PORT = 19602;
+  public static final String DEFAULT_SERVER_ADDRESS = "127.0.0.1:19602";
 
   public static final int LOGIN = 0;
   public static final int CREATE_ACCOUNT = 1;
@@ -48,9 +43,8 @@ public class Game {
   public static boolean gamePlaying = true;
   public static boolean online = false;
 
-  public Game() throws UnknownHostException {
-    client = new GameClient(getServerAddress(), getServerPort());
-    client.start();
+  public Game() {
+    client = new GameClient(getServerAddress());
   }
 
   /**
@@ -58,15 +52,15 @@ public class Game {
    * @param username
    * @param password
    */
-  public static void login(String user, char[] pass) {
+  public static void login(String username, char[] pass) {
     // verify that valid data is given
-    if (user == null || user.length() < 1) {
+    if (username == null || username.length() < 1) {
       setErrorLoginScreen("ERROR: NO USERNAME PROVIDED");
       return;
     } else if (pass == null || pass.length < 1) {
       setErrorLoginScreen("ERROR: NO PASSWORD PROVIDED");
       return;
-    } else if (user.length() > 20) {
+    } else if (username.length() > 20) {
       setErrorLoginScreen("ERROR: USERNAMES ARE 20 CHARACTERS OR LESS");
       return;
     } else if (pass.length > 20) {
@@ -74,17 +68,7 @@ public class Game {
       return;
     }
 
-    // encrypt username and password
-    String username = user;//Security.encrypt(user);
     String password = new String(pass);
-    //for (char c : pass)
-    //  password += (c + 15);
-    //password = Security.encrypt(password);
-
-    // send login packet to server
-    //Packet packet = new Packet00Login(username, password);
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[0] = packet.getUuidKey();
     client.login(username, password);
   }
 
@@ -95,15 +79,15 @@ public class Game {
    * @param password
    * @param password2
    */
-  public static void createAccount(String user, String email, char[] pass, char[] pass2) {
+  public static void createAccount(String username, String email, char[] pass, char[] pass2) {
     // verify that data given is valid
-    if (user == null || user.length() < 1) {
+    if (username == null || username.length() < 1) {
       setErrorCreateAccountScreen("ERROR: PLEASE PROVIDE A USERNAME");
       return;
     } else if (pass == null || pass.length < 1) {
       setErrorCreateAccountScreen("ERROR: PLEASE PROVIDE A PASSWORD");
       return;
-    } else if (user.length() > 20) {
+    } else if (username.length() > 20) {
       setErrorCreateAccountScreen("ERROR: USERNAMES CANNOT EXCEED 20 CHARACTERS");
       return;
     } else if (pass.length > 20) {
@@ -117,28 +101,19 @@ public class Game {
       return;
     }
     // if the user contains a ,: or ~ set error and exit
-    for (char c : user.toCharArray())
+    for (char c : username.toCharArray())
       if (c == '~' || c == ',' || c == ':') {
         setErrorCreateAccountScreen("ERROR: USERNAMES MAY NOT CONTAIN ,: or ~");
         return;
       }
 
-    // encrypt username and password
-    String username = user; //Security.encrypt(user);
-    String password = new String(pass);
     for (int i = 0; i < pass.length; i++) {
       if (pass[i] != pass2[i]) {
         setErrorCreateAccountScreen("ERROR: PASSWORDS DO NOT MATCH");
         return;
       }
-      //password += (pass[i] + 15);
     }
-    //password = Security.encrypt(password);
-
-    // send create account packet to server
-    //Packet packet = new Packet01CreateAcc(email, username, password);
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[1] = packet.getUuidKey();
+    String password = new String(pass);
     client.createAccount(username, password, email);
   }
 
@@ -146,10 +121,6 @@ public class Game {
    * This method attempts to log the user out of the server
    */
   public static void logout() {
-    // send logout packet to server
-    //Packet packet = new Packet03Logout(getPlayer() == null ? null : getPlayer().getUser_key());
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[3] = packet.getUuidKey();
     client.logout();
   }
 
@@ -157,10 +128,6 @@ public class Game {
    * This method attempts to retrieve friends and other players for CreateGameScreen
    */
   public static void getOtherPlayers() {
-    // send get players packet to server
-    //Packet packet = new Packet04GetPlayers(getPlayer().getUser_key());
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[4] = packet.getUuidKey();
     client.getUsers();
   }
 
@@ -169,10 +136,6 @@ public class Game {
    * @param friend
    */
   public static void addFriend(String friend) {
-    // send addFriend packet to server
-    //Packet packet = new Packet05AddFriend(getPlayer().getUser_key(), friend);
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[5] = packet.getUuidKey();
     client.addFriend(friend);
   }
 
@@ -183,11 +146,6 @@ public class Game {
    * @param gameType
    */
   public static void createGame(String otherUser, boolean creatorGoesFirst, BoardGame.GameType gameType) {
-    // send create game packet to server
-    //Packet packet = new Packet06CreateGame(getPlayer().getUser_key(), getPlayer().getUsername(), otherUser, creatorGoesFirst, gameType);
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[6] = packet.getUuidKey();
-
     client.createGame(otherUser, creatorGoesFirst, gameType);
   }
 
@@ -195,23 +153,7 @@ public class Game {
    * This method attempts to retrieve games for ActiveGamesScreen
    */
   public static void getActiveGames() {
-    // sends get games packet to server
-    //Packet packet = new Packet07GetGames(getPlayer().getUser_key(), getPlayer().getUsername());
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[7] = packet.getUuidKey();
     client.getGames();
-  }
-
-  /**
-   * This method attempts to retrieve a game from the server
-   * Ultimately leads to opening GameScreen
-   * @param gameKey
-   */
-  public static void getBoard(String gameKey, BoardGame.GameType gameType) {
-    // sends get board packet to server
-    //Packet packet = new Packet08GetBoard(getPlayer().getUser_key(), getPlayer().getUsername(), gameKey, gameType);
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[8] = packet.getUuidKey();
   }
 
   /**
@@ -261,59 +203,10 @@ public class Game {
                         System.out.println("ERROR INVALID GAME TYPE");
                         return;
       }
-      /*
-      // sends send move packet to server
-      final Packet packet = new Packet09SendMove(getPlayer().getUser_key(), getBoardGame().getGameKey(),
-                movingFrom, movingTo, getPlayer().getUsername(), getBoardGame().getGameType());
-      client.getLastPacketKeysSent()[9] = packet.getUuidKey();
-      // set last move received false
-      client.setLastMoveReceived(false);
-
-      // send move, expect a 09 packet response
-      // send up to 5 times, if no response received display disconnect error
-      new Thread(new Runnable() {
-        public void run() {
-          // send packet, wait 500ms before checking for response
-          if (sendMove(packet, 500))
-            return;
-          if (sendMove(packet, 500))
-            return;
-          if (sendMove(packet, 750))
-            return;
-          if (sendMove(packet, 1000))
-            return;
-          if (sendMove(packet, 5000))
-            return;
-          JOptionPane.showConfirmDialog(null, "Cannot contact the server, the game will quit", "Connection Error", JOptionPane.CANCEL_OPTION);
-          System.exit(0);
-        }
-      }).start();
-      */
     } else {
       getBoardGame().makeMoveOffline(movingFrom, movingTo);
       updateGameBoard();
     }
-  }
-
-  /**
-   * Sends the client's move to server, returns true if the client received a response from server
-   * @param packet
-   * @param waitTime
-   * @return
-   */
-  private static boolean sendMove(Packet packet, int waitTime) {
-    try {
-      // send packet and wait for waitTime
-      packet.writeData(client);
-      Thread.sleep(waitTime);
-
-      // check for receipt, if one, exit and remove packet, if none return false
-      if (client.isLastMoveReceived())
-        return true;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return false;
   }
 
   /**
@@ -322,32 +215,13 @@ public class Game {
    * @param text
    */
   public static void sendChat(boolean sendToSpectators, String text) {
-    // sends chat packet to server
-    //Packet packet = new Packet10SendChat(getPlayer().getUser_key(), getBoardGame().getGameKey(),
-    //    getBoardGame().getPlayer1(), getBoardGame().getPlayer2(), sendToSpectators, getPlayer().getUsername() + ": " + text);
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[10] = packet.getUuidKey();
     client.sendChat(getBoardGame().getGameKey(), text, sendToSpectators);
-  }
-
-  /**
-   * This method attempts to update the client's current GameScreen
-   */
-  public static void sendOnGameUpdate() {
-    // sends chat packet to server
-    Packet packet = new Packet11OnGame(getPlayer().getUser_key(), getBoardGame().getGameKey());
-    packet.writeData(client);
-    client.getLastPacketKeysSent()[11] = packet.getUuidKey();
   }
 
   /**
    * This method attempts to retrieve games for SpectatorGamesScreen
    */
   public static void getSpectatorGames() {
-    // sends get games packet to server
-    //Packet packet = new Packet12GetSpectates(getPlayer().getUser_key());
-    //packet.writeData(client);
-    //client.getLastPacketKeysSent()[12] = packet.getUuidKey();
     client.getSpectatorGames();
   }
 
@@ -437,19 +311,20 @@ public class Game {
       return;
 
     switch (gameState) {
-      case LOGIN:          openLoginScreen();
-                    break;
-      case CREATE_ACCOUNT:    openCreateAccountScreen();
-                    break;
-      case ACTIVE_GAMES:      openActiveGamesScreen();
-                    break;
-      case CREATE_GAME:      openCreateGameScreen();
-                    break;
-      case PLAYING_GAME:      openGameScreen();
-                    break;
-      case SPECTATOR_GAMES:    openSpectatorGamesScreen();
-                    break;
-      case CREATE_OFFLINE_GAME:  openCreateOfflineGameScreen();
+      case LOGIN:               openLoginScreen();
+                                break;
+      case CREATE_ACCOUNT:      openCreateAccountScreen();
+                                break;
+      case ACTIVE_GAMES:        openActiveGamesScreen();
+                                break;
+      case CREATE_GAME:         openCreateGameScreen();
+                                break;
+      case PLAYING_GAME:        openGameScreen();
+                                break;
+      case SPECTATOR_GAMES:     openSpectatorGamesScreen();
+                                break;
+      case CREATE_OFFLINE_GAME: openCreateOfflineGameScreen();
+                                break;
     }
   }
 
@@ -500,17 +375,6 @@ public class Game {
   }
 
   /**
-   * This method updates the color of the opponent on the GameScreen by whether they are on the game or not
-   */
-  public static void updatePlayersOnGame() {
-    if (!(screen instanceof GameScreen)) {
-      System.out.println("GAMESTATE ERROR update opponent on game called on wrong screen");
-      return;
-    }
-    ((GameScreen) screen).updatePlayersOnGame();
-  }
-
-  /**
    * This method updates the spectator games list on the SpectatorGamesScreen
    */
   public static void updateSpectatorGamesList() {
@@ -519,14 +383,6 @@ public class Game {
       return;
     }
     ((SpectatorGamesScreen) screen).loadSpectatorGames();
-  }
-
-  /**
-   * This method notifies the user if a change was made to one of their games
-   * @param boardGame
-   */
-  public static void notifyUser(BoardGame boardGame) {
-    screen.notifyUser(boardGame);
   }
 
   /**
@@ -599,19 +455,11 @@ public class Game {
     Game.online = online;
   }
 
-  private static byte[] getServerAddress() throws UnknownHostException {
+  private static String getServerAddress() {
     String serverAddress = System.getenv("LIBRARY_GAMES_SERVER_ADDRESS");
     if (serverAddress == null) {
-      return DEFAULT_SERVER_IP_ADDRESS;
+      return DEFAULT_SERVER_ADDRESS;
     }
-    return InetAddress.getByName(serverAddress).getAddress();
-  }
-
-  private static int getServerPort() {
-    String serverPort = System.getenv("LIBRARY_GAMES_SERVER_PORT");
-    if (serverPort == null) {
-      return DEFAULT_SERVER_PORT;
-    }
-    return Integer.parseInt(serverPort);
+    return serverAddress;
   }
 }
