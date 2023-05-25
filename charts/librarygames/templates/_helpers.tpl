@@ -132,8 +132,6 @@ Template environment variables to inject a containers metadata
 Template environment variables to inject into server
 */}}
 {{- define "librarygames.envVars" -}}
-- name: LIBRARY_GAMES_SERVER
-  value: "true"
 - name: MYSQL_SERVER_ADDRESS
   value: "{{ include "librarygames.mysqlAddress" . }}"
 - name: MYSQL_DATABASE_USERNAME
