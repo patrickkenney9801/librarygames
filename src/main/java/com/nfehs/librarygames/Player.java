@@ -1,6 +1,5 @@
 package com.nfehs.librarygames;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 
 import com.nfehs.librarygames.games.BoardGame.GameMetadata;
@@ -16,8 +15,6 @@ public class Player {
   private String username;
   private String user_key;
   private String game_key;
-  private InetAddress ipAddress;
-  private int port;
 
   private ArrayList<GameMetadata> finishedBoardGames;
   private ArrayList<GameMetadata> yourTurnBoardGames;
@@ -34,20 +31,6 @@ public class Player {
   public Player(String user, String key) {
     setUsername(user);
     setUser_key(key);
-  }
-
-  /**
-   * For use by server
-   * @param user
-   * @param key
-   * @param ip
-   * @param p
-   */
-  public Player(String user, String key, InetAddress ip, int p) {
-    setUsername(user);
-    setUser_key(key);
-    setIpAddress(ip);
-    setPort(p);
   }
 
   /**
@@ -73,30 +56,6 @@ public class Player {
    */
   public void setUser_key(String user_key) {
     this.user_key = user_key;
-  }
-  /**
-   * @return the ipAddress
-   */
-  public InetAddress getIpAddress() {
-    return ipAddress;
-  }
-  /**
-   * @param ipAddress the ipAddress to set
-   */
-  public void setIpAddress(InetAddress ipAddress) {
-    this.ipAddress = ipAddress;
-  }
-  /**
-   * @return the port
-   */
-  public int getPort() {
-    return port;
-  }
-  /**
-   * @param port the port to set
-   */
-  public void setPort(int port) {
-    this.port = port;
   }
 
   /**

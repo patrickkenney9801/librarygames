@@ -45,10 +45,10 @@ proto:
 	@protoc --proto_path=pbs pbs/*.proto --go_out=server/internal/pbs --go-grpc_out=server/internal/pbs
 
 run:
-	@docker run --rm --net=host -e LIBRARY_GAMES_SERVER_ADDRESS=$(call node_ip) -e LIBRARY_GAMES_SERVER_PORT=$(call node_port) ${IMAGE_NAME}:${VERSION}
+	@docker run --rm --net=host -e LIBRARY_GAMES_SERVER_ADDRESS=$(call node_ip):$(call node_port) ${IMAGE_NAME}:${VERSION}
 
 run-wsl:
-	@docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg --net=host -e LIBRARY_GAMES_SERVER_ADDRESS=$(call node_ip) -e LIBRARY_GAMES_SERVER_PORT=$(call node_port) ${IMAGE_NAME}:${VERSION}
+	@docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg --net=host -e LIBRARY_GAMES_SERVER_ADDRESS=$(call node_ip):$(call node_port) ${IMAGE_NAME}:${VERSION}
 
 run-offline:
 	@docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg --net=host ${IMAGE_NAME}:${VERSION}
