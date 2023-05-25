@@ -2,7 +2,7 @@
 FROM --platform=linux/amd64 openjdk:11-jdk-slim-buster AS mvn-build
 
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
+  apt-get install -y \
     maven \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -22,7 +22,7 @@ RUN mvn compile assembly:single install
 FROM --platform=linux/amd64 ubuntu:20.04 AS mvn-release
 
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
+  apt-get install -y \
     openjdk-11-jre \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 

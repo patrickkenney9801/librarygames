@@ -1,21 +1,18 @@
 package com.nfehs.librarygames;
 
-import java.awt.Container;
-import java.awt.Dimension;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
 import com.nfehs.librarygames.games.BoardGame;
 import com.nfehs.librarygames.net.GameClient;
 import com.nfehs.librarygames.screens.*;
+import java.awt.Container;
+import java.awt.Dimension;
+import javax.swing.JFrame;
 
 /**
  * This class hosts the game flow
+ *
  * @author Patrick Kenney, Syed Quadri
  * @date 6/13/2018
  */
-
 public class Game {
   public static GameFrame gameFrame;
   public static JFrame window;
@@ -49,6 +46,7 @@ public class Game {
 
   /**
    * This method logs in the user online
+   *
    * @param username
    * @param password
    */
@@ -74,6 +72,7 @@ public class Game {
 
   /**
    * This method attempts to create a new account
+   *
    * @param username
    * @param email
    * @param password
@@ -117,22 +116,19 @@ public class Game {
     client.createAccount(username, password, email);
   }
 
-  /**
-   * This method attempts to log the user out of the server
-   */
+  /** This method attempts to log the user out of the server */
   public static void logout() {
     client.logout();
   }
 
-  /**
-   * This method attempts to retrieve friends and other players for CreateGameScreen
-   */
+  /** This method attempts to retrieve friends and other players for CreateGameScreen */
   public static void getOtherPlayers() {
     client.getUsers();
   }
 
   /**
    * This method sends a friend request to server
+   *
    * @param friend
    */
   public static void addFriend(String friend) {
@@ -141,35 +137,36 @@ public class Game {
 
   /**
    * This method sends a create game request to server
+   *
    * @param otherUser
    * @param creatorGoesFirst
    * @param gameType
    */
-  public static void createGame(String otherUser, boolean creatorGoesFirst, BoardGame.GameType gameType) {
+  public static void createGame(
+      String otherUser, boolean creatorGoesFirst, BoardGame.GameType gameType) {
     client.createGame(otherUser, creatorGoesFirst, gameType);
   }
 
-  /**
-   * This method attempts to retrieve games for ActiveGamesScreen
-   */
+  /** This method attempts to retrieve games for ActiveGamesScreen */
   public static void getActiveGames() {
     client.getGames();
   }
 
   /**
-   * This method attempts to play a game
-   * Ultimately leads to opening GameScreen
+   * This method attempts to play a game Ultimately leads to opening GameScreen
+   *
    * @param gameKey
    */
   public static void startPlaying(BoardGame.GameMetadata gameMetadata) {
     switch (gameMetadata.gameType) {
       case GO9x9:
       case GO13x13:
-      case GO19x19:   client.startGo(gameMetadata);
-                      break;
-      default:        // handle invalid game type
-                      System.out.println("ERROR INVALID GAME TYPE");
-                      return;
+      case GO19x19:
+        client.startGo(gameMetadata);
+        break;
+      default: // handle invalid game type
+        System.out.println("ERROR INVALID GAME TYPE");
+        return;
     }
     client.chat(gameMetadata);
   }
@@ -179,15 +176,17 @@ public class Game {
     switch (getBoardGame().getGameType()) {
       case GO9x9:
       case GO13x13:
-      case GO19x19:   client.stopGoStream();
-                      break;
-      default:        // handle invalid game type
-                      return;
+      case GO19x19:
+        client.stopGoStream();
+        break;
+      default: // handle invalid game type
+        return;
     }
   }
 
   /**
    * This method attempts to send a move to the server
+   *
    * @param movingFrom
    * @param movingTo
    */
@@ -197,11 +196,12 @@ public class Game {
       switch (getBoardGame().getGameType()) {
         case GO9x9:
         case GO13x13:
-        case GO19x19:   client.sendGoMove(getBoardGame().getGameKey(), movingFrom, movingTo);
-                        break;
-        default:        // handle invalid game type
-                        System.out.println("ERROR INVALID GAME TYPE");
-                        return;
+        case GO19x19:
+          client.sendGoMove(getBoardGame().getGameKey(), movingFrom, movingTo);
+          break;
+        default: // handle invalid game type
+          System.out.println("ERROR INVALID GAME TYPE");
+          return;
       }
     } else {
       getBoardGame().makeMoveOffline(movingFrom, movingTo);
@@ -211,6 +211,7 @@ public class Game {
 
   /**
    * This method attempts to send a line of text to their opponent
+   *
    * @param sendToSpectators
    * @param text
    */
@@ -218,24 +219,17 @@ public class Game {
     client.sendChat(getBoardGame().getGameKey(), text, sendToSpectators);
   }
 
-  /**
-   * This method attempts to retrieve games for SpectatorGamesScreen
-   */
+  /** This method attempts to retrieve games for SpectatorGamesScreen */
   public static void getSpectatorGames() {
     client.getSpectatorGames();
   }
 
-  /**
-   * This method closes the screen for the user
-   */
+  /** This method closes the screen for the user */
   public static void exitCurrentScreen() {
-    if (screen != null)
-      screen.exit();
+    if (screen != null) screen.exit();
   }
 
-  /**
-   * This method opens up the login screen for the user
-   */
+  /** This method opens up the login screen for the user */
   public static void openLoginScreen() {
     exitCurrentScreen();
     screen = new LoginScreen();
@@ -243,9 +237,7 @@ public class Game {
     setOnline(true);
   }
 
-  /**
-   * This method opens up the create account screen for the user
-   */
+  /** This method opens up the create account screen for the user */
   public static void openCreateAccountScreen() {
     exitCurrentScreen();
     screen = new CreateAccountScreen();
@@ -253,9 +245,7 @@ public class Game {
     setOnline(true);
   }
 
-  /**
-   * This method opens up the active games screen for the user
-   */
+  /** This method opens up the active games screen for the user */
   public static void openActiveGamesScreen() {
     exitCurrentScreen();
     screen = new ActiveGamesScreen();
@@ -263,9 +253,7 @@ public class Game {
     getActiveGames();
   }
 
-  /**
-   * This method opens up the create game screen for the user
-   */
+  /** This method opens up the create game screen for the user */
   public static void openCreateGameScreen() {
     exitCurrentScreen();
     screen = new CreateGameScreen();
@@ -273,18 +261,14 @@ public class Game {
     getOtherPlayers();
   }
 
-  /**
-   * This method opens up the game screen for the user
-   */
+  /** This method opens up the game screen for the user */
   public static void openGameScreen() {
     exitCurrentScreen();
     screen = new GameScreen();
     gameState = PLAYING_GAME;
   }
 
-  /**
-   * This method opens up the spectator games screen for user
-   */
+  /** This method opens up the spectator games screen for user */
   public static void openSpectatorGamesScreen() {
     exitCurrentScreen();
     screen = new SpectatorGamesScreen();
@@ -292,9 +276,7 @@ public class Game {
     getSpectatorGames();
   }
 
-  /**
-   * This method opens up the create offline game screen for user
-   */
+  /** This method opens up the create offline game screen for user */
   public static void openCreateOfflineGameScreen() {
     exitCurrentScreen();
     screen = new CreateOfflineGameScreen();
@@ -302,35 +284,37 @@ public class Game {
     setOnline(false);
   }
 
-  /**
-   * This method refreshes the current screen, used when screen resized
-   */
+  /** This method refreshes the current screen, used when screen resized */
   public static void refresh() {
     // make sure screen is defined
-    if (screen == null)
-      return;
+    if (screen == null) return;
 
     switch (gameState) {
-      case LOGIN:               openLoginScreen();
-                                break;
-      case CREATE_ACCOUNT:      openCreateAccountScreen();
-                                break;
-      case ACTIVE_GAMES:        openActiveGamesScreen();
-                                break;
-      case CREATE_GAME:         openCreateGameScreen();
-                                break;
-      case PLAYING_GAME:        openGameScreen();
-                                break;
-      case SPECTATOR_GAMES:     openSpectatorGamesScreen();
-                                break;
-      case CREATE_OFFLINE_GAME: openCreateOfflineGameScreen();
-                                break;
+      case LOGIN:
+        openLoginScreen();
+        break;
+      case CREATE_ACCOUNT:
+        openCreateAccountScreen();
+        break;
+      case ACTIVE_GAMES:
+        openActiveGamesScreen();
+        break;
+      case CREATE_GAME:
+        openCreateGameScreen();
+        break;
+      case PLAYING_GAME:
+        openGameScreen();
+        break;
+      case SPECTATOR_GAMES:
+        openSpectatorGamesScreen();
+        break;
+      case CREATE_OFFLINE_GAME:
+        openCreateOfflineGameScreen();
+        break;
     }
   }
 
-  /**
-   * This method updates the active games list on the ActiveGamesScreen
-   */
+  /** This method updates the active games list on the ActiveGamesScreen */
   public static void updateActiveGamesList() {
     if (!(screen instanceof ActiveGamesScreen)) {
       System.out.println("GAMESTATE ERROR update active games list called on wrong screen");
@@ -339,9 +323,7 @@ public class Game {
     ((ActiveGamesScreen) screen).loadActiveGames();
   }
 
-  /**
-   * This method updates the players list on the CreateGameScreen
-   */
+  /** This method updates the players list on the CreateGameScreen */
   public static void updatePlayersList() {
     if (!(screen instanceof CreateGameScreen)) {
       System.out.println("GAMESTATE ERROR update players list called on wrong screen");
@@ -350,9 +332,7 @@ public class Game {
     ((CreateGameScreen) screen).loadPlayers();
   }
 
-  /**
-   * This method updates the game board on the GameScreen
-   */
+  /** This method updates the game board on the GameScreen */
   public static void updateGameBoard() {
     if (!(screen instanceof GameScreen)) {
       System.out.println("GAMESTATE ERROR update game board called on wrong screen");
@@ -363,6 +343,7 @@ public class Game {
 
   /**
    * This method updates the game chat on the GameScreen
+   *
    * @param sender
    * @param message
    */
@@ -374,9 +355,7 @@ public class Game {
     ((GameScreen) screen).updateChat(sender, message);
   }
 
-  /**
-   * This method updates the spectator games list on the SpectatorGamesScreen
-   */
+  /** This method updates the spectator games list on the SpectatorGamesScreen */
   public static void updateSpectatorGamesList() {
     if (!(screen instanceof SpectatorGamesScreen)) {
       System.out.println("GAMESTATE ERROR update spectator games list called on wrong screen");
@@ -386,38 +365,37 @@ public class Game {
   }
 
   /**
-   * Verifies that the client is on LoginScreen and then sets the error to errorMessage
-   * Called by Game and GameClient classes
+   * Verifies that the client is on LoginScreen and then sets the error to errorMessage Called by
+   * Game and GameClient classes
+   *
    * @param errorMessage
    */
   public static void setErrorLoginScreen(String errorMessage) {
-    if (!(screen instanceof LoginScreen))
-      return;
+    if (!(screen instanceof LoginScreen)) return;
     ((LoginScreen) screen).setError(errorMessage);
   }
 
   /**
    * Verifies that the client is on CreateAccountScreen and then sets the error to errorMessage
    * Called by Game and GameClient classes
+   *
    * @param errorMessage
    */
   public static void setErrorCreateAccountScreen(String errorMessage) {
-    if (!(screen instanceof CreateAccountScreen))
-      return;
+    if (!(screen instanceof CreateAccountScreen)) return;
     ((CreateAccountScreen) screen).setError(errorMessage);
   }
 
   /**
-   * Verifies that the client is on CreateGameScreen and then sets the error to errorMessage
-   * Called by Game and GameClient classes
+   * Verifies that the client is on CreateGameScreen and then sets the error to errorMessage Called
+   * by Game and GameClient classes
+   *
    * @param errorMessage
    */
   public static void setErrorCreateGameScreen(String errorMessage) {
-    if (!(screen instanceof CreateGameScreen))
-      return;
+    if (!(screen instanceof CreateGameScreen)) return;
     ((CreateGameScreen) screen).setError(errorMessage);
   }
-
 
   /**
    * @return the player

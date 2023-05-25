@@ -1,20 +1,19 @@
 package com.nfehs.librarygames.games.go.pieces;
 
+import com.nfehs.librarygames.games.Piece;
+import com.nfehs.librarygames.screens.GameScreen;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
-import com.nfehs.librarygames.games.Piece;
-import com.nfehs.librarygames.screens.GameScreen;
-
 /**
  * This is the parent class for go game pieces
+ *
  * @author Patrick Kenney and Syed Quadri
  * @date 8/15/2018
  */
-
 public abstract class GoPiece extends Piece {
   protected static final int[] ROWS = {9, 13, 19};
 
@@ -32,9 +31,8 @@ public abstract class GoPiece extends Piece {
   }
 
   /**
-   * Returns a 2D array of all capturable pieces
-   * 0,0 is white stone
-   * 0,1 is black stone
+   * Returns a 2D array of all capturable pieces 0,0 is white stone 0,1 is black stone
+   *
    * @return
    */
   public static BufferedImage[][] getCapturablePieces() {
@@ -46,6 +44,7 @@ public abstract class GoPiece extends Piece {
 
   /**
    * Returns a stone in proper size given
+   *
    * @param isBlackStone
    * @param size
    * @param border
@@ -59,20 +58,17 @@ public abstract class GoPiece extends Piece {
     g2d.setComposite(AlphaComposite.Src);
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     g2d.setColor(Color.CYAN);
-    if (border)
-      g2d.fillOval(0, 0, size, size);
+    if (border) g2d.fillOval(0, 0, size, size);
     g2d.setColor(isBlackStone ? Color.BLACK : Color.WHITE);
-    if (!border)
-      g2d.fillOval(0, 0, size, size);
-    else
-      g2d.fillOval(size / 20, size / 20, size - 2*(size / 20), size - 2*(size / 20));
+    if (!border) g2d.fillOval(0, 0, size, size);
+    else g2d.fillOval(size / 20, size / 20, size - 2 * (size / 20), size - 2 * (size / 20));
     g2d.dispose();
     return stoneImage;
   }
 
   /**
-   * Should only be called once from superclass Piece
-   * Loads all media for the GoPiece class and subclasses in proper size and rotation
+   * Should only be called once from superclass Piece Loads all media for the GoPiece class and
+   * subclasses in proper size and rotation
    */
   public static void loadImages() {
     Stone.loadImages();
@@ -120,31 +116,25 @@ public abstract class GoPiece extends Piece {
     GoPiece.player2Icon = player2Icon;
   }
 
-
   public static BufferedImage getPlayer1IconPlaying() {
     return player1IconPlaying;
   }
-
 
   public static void setPlayer1IconPlaying(BufferedImage player1IconPlaying) {
     GoPiece.player1IconPlaying = player1IconPlaying;
   }
 
-
   public static BufferedImage getPlayer2IconPlaying() {
     return player2IconPlaying;
   }
-
 
   public static void setPlayer2IconPlaying(BufferedImage player2IconPlaying) {
     GoPiece.player2IconPlaying = player2IconPlaying;
   }
 
-
   public byte getGameType() {
     return gameType;
   }
-
 
   public void setGameType(byte gameType) {
     this.gameType = gameType;
