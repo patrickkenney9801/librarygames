@@ -7,10 +7,10 @@
 package v1
 
 import (
-  context "context"
-  grpc "google.golang.org/grpc"
-  codes "google.golang.org/grpc/codes"
-  status "google.golang.org/grpc/status"
+	context "context"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,39 +19,39 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-  Login_Login_FullMethodName = "/Login/Login"
+	Login_Login_FullMethodName = "/Login/Login"
 )
 
 // LoginClient is the client API for Login service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LoginClient interface {
-  Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 }
 
 type loginClient struct {
-  cc grpc.ClientConnInterface
+	cc grpc.ClientConnInterface
 }
 
 func NewLoginClient(cc grpc.ClientConnInterface) LoginClient {
-  return &loginClient{cc}
+	return &loginClient{cc}
 }
 
 func (c *loginClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-  out := new(LoginResponse)
-  err := c.cc.Invoke(ctx, Login_Login_FullMethodName, in, out, opts...)
-  if err != nil {
-    return nil, err
-  }
-  return out, nil
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, Login_Login_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // LoginServer is the server API for Login service.
 // All implementations must embed UnimplementedLoginServer
 // for forward compatibility
 type LoginServer interface {
-  Login(context.Context, *LoginRequest) (*LoginResponse, error)
-  mustEmbedUnimplementedLoginServer()
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	mustEmbedUnimplementedLoginServer()
 }
 
 // UnimplementedLoginServer must be embedded to have forward compatible implementations.
@@ -59,7 +59,7 @@ type UnimplementedLoginServer struct {
 }
 
 func (UnimplementedLoginServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-  return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedLoginServer) mustEmbedUnimplementedLoginServer() {}
 
@@ -67,81 +67,81 @@ func (UnimplementedLoginServer) mustEmbedUnimplementedLoginServer() {}
 // Use of this interface is not recommended, as added methods to LoginServer will
 // result in compilation errors.
 type UnsafeLoginServer interface {
-  mustEmbedUnimplementedLoginServer()
+	mustEmbedUnimplementedLoginServer()
 }
 
 func RegisterLoginServer(s grpc.ServiceRegistrar, srv LoginServer) {
-  s.RegisterService(&Login_ServiceDesc, srv)
+	s.RegisterService(&Login_ServiceDesc, srv)
 }
 
 func _Login_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(LoginRequest)
-  if err := dec(in); err != nil {
-    return nil, err
-  }
-  if interceptor == nil {
-    return srv.(LoginServer).Login(ctx, in)
-  }
-  info := &grpc.UnaryServerInfo{
-    Server:     srv,
-    FullMethod: Login_Login_FullMethodName,
-  }
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(LoginServer).Login(ctx, req.(*LoginRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Login_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Login_ServiceDesc is the grpc.ServiceDesc for Login service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Login_ServiceDesc = grpc.ServiceDesc{
-  ServiceName: "Login",
-  HandlerType: (*LoginServer)(nil),
-  Methods: []grpc.MethodDesc{
-    {
-      MethodName: "Login",
-      Handler:    _Login_Login_Handler,
-    },
-  },
-  Streams:  []grpc.StreamDesc{},
-  Metadata: "account.proto",
+	ServiceName: "Login",
+	HandlerType: (*LoginServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Login",
+			Handler:    _Login_Login_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "account.proto",
 }
 
 const (
-  CreateAccount_CreateAccount_FullMethodName = "/CreateAccount/CreateAccount"
+	CreateAccount_CreateAccount_FullMethodName = "/CreateAccount/CreateAccount"
 )
 
 // CreateAccountClient is the client API for CreateAccount service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CreateAccountClient interface {
-  CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
+	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
 }
 
 type createAccountClient struct {
-  cc grpc.ClientConnInterface
+	cc grpc.ClientConnInterface
 }
 
 func NewCreateAccountClient(cc grpc.ClientConnInterface) CreateAccountClient {
-  return &createAccountClient{cc}
+	return &createAccountClient{cc}
 }
 
 func (c *createAccountClient) CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error) {
-  out := new(CreateAccountResponse)
-  err := c.cc.Invoke(ctx, CreateAccount_CreateAccount_FullMethodName, in, out, opts...)
-  if err != nil {
-    return nil, err
-  }
-  return out, nil
+	out := new(CreateAccountResponse)
+	err := c.cc.Invoke(ctx, CreateAccount_CreateAccount_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // CreateAccountServer is the server API for CreateAccount service.
 // All implementations must embed UnimplementedCreateAccountServer
 // for forward compatibility
 type CreateAccountServer interface {
-  CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
-  mustEmbedUnimplementedCreateAccountServer()
+	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
+	mustEmbedUnimplementedCreateAccountServer()
 }
 
 // UnimplementedCreateAccountServer must be embedded to have forward compatible implementations.
@@ -149,7 +149,7 @@ type UnimplementedCreateAccountServer struct {
 }
 
 func (UnimplementedCreateAccountServer) CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error) {
-  return nil, status.Errorf(codes.Unimplemented, "method CreateAccount not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAccount not implemented")
 }
 func (UnimplementedCreateAccountServer) mustEmbedUnimplementedCreateAccountServer() {}
 
@@ -157,81 +157,81 @@ func (UnimplementedCreateAccountServer) mustEmbedUnimplementedCreateAccountServe
 // Use of this interface is not recommended, as added methods to CreateAccountServer will
 // result in compilation errors.
 type UnsafeCreateAccountServer interface {
-  mustEmbedUnimplementedCreateAccountServer()
+	mustEmbedUnimplementedCreateAccountServer()
 }
 
 func RegisterCreateAccountServer(s grpc.ServiceRegistrar, srv CreateAccountServer) {
-  s.RegisterService(&CreateAccount_ServiceDesc, srv)
+	s.RegisterService(&CreateAccount_ServiceDesc, srv)
 }
 
 func _CreateAccount_CreateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(CreateAccountRequest)
-  if err := dec(in); err != nil {
-    return nil, err
-  }
-  if interceptor == nil {
-    return srv.(CreateAccountServer).CreateAccount(ctx, in)
-  }
-  info := &grpc.UnaryServerInfo{
-    Server:     srv,
-    FullMethod: CreateAccount_CreateAccount_FullMethodName,
-  }
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(CreateAccountServer).CreateAccount(ctx, req.(*CreateAccountRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(CreateAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CreateAccountServer).CreateAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CreateAccount_CreateAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CreateAccountServer).CreateAccount(ctx, req.(*CreateAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // CreateAccount_ServiceDesc is the grpc.ServiceDesc for CreateAccount service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CreateAccount_ServiceDesc = grpc.ServiceDesc{
-  ServiceName: "CreateAccount",
-  HandlerType: (*CreateAccountServer)(nil),
-  Methods: []grpc.MethodDesc{
-    {
-      MethodName: "CreateAccount",
-      Handler:    _CreateAccount_CreateAccount_Handler,
-    },
-  },
-  Streams:  []grpc.StreamDesc{},
-  Metadata: "account.proto",
+	ServiceName: "CreateAccount",
+	HandlerType: (*CreateAccountServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateAccount",
+			Handler:    _CreateAccount_CreateAccount_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "account.proto",
 }
 
 const (
-  Logout_Logout_FullMethodName = "/Logout/Logout"
+	Logout_Logout_FullMethodName = "/Logout/Logout"
 )
 
 // LogoutClient is the client API for Logout service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LogoutClient interface {
-  Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 }
 
 type logoutClient struct {
-  cc grpc.ClientConnInterface
+	cc grpc.ClientConnInterface
 }
 
 func NewLogoutClient(cc grpc.ClientConnInterface) LogoutClient {
-  return &logoutClient{cc}
+	return &logoutClient{cc}
 }
 
 func (c *logoutClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
-  out := new(LogoutResponse)
-  err := c.cc.Invoke(ctx, Logout_Logout_FullMethodName, in, out, opts...)
-  if err != nil {
-    return nil, err
-  }
-  return out, nil
+	out := new(LogoutResponse)
+	err := c.cc.Invoke(ctx, Logout_Logout_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // LogoutServer is the server API for Logout service.
 // All implementations must embed UnimplementedLogoutServer
 // for forward compatibility
 type LogoutServer interface {
-  Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
-  mustEmbedUnimplementedLogoutServer()
+	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	mustEmbedUnimplementedLogoutServer()
 }
 
 // UnimplementedLogoutServer must be embedded to have forward compatible implementations.
@@ -239,7 +239,7 @@ type UnimplementedLogoutServer struct {
 }
 
 func (UnimplementedLogoutServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
-  return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedLogoutServer) mustEmbedUnimplementedLogoutServer() {}
 
@@ -247,81 +247,81 @@ func (UnimplementedLogoutServer) mustEmbedUnimplementedLogoutServer() {}
 // Use of this interface is not recommended, as added methods to LogoutServer will
 // result in compilation errors.
 type UnsafeLogoutServer interface {
-  mustEmbedUnimplementedLogoutServer()
+	mustEmbedUnimplementedLogoutServer()
 }
 
 func RegisterLogoutServer(s grpc.ServiceRegistrar, srv LogoutServer) {
-  s.RegisterService(&Logout_ServiceDesc, srv)
+	s.RegisterService(&Logout_ServiceDesc, srv)
 }
 
 func _Logout_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(LogoutRequest)
-  if err := dec(in); err != nil {
-    return nil, err
-  }
-  if interceptor == nil {
-    return srv.(LogoutServer).Logout(ctx, in)
-  }
-  info := &grpc.UnaryServerInfo{
-    Server:     srv,
-    FullMethod: Logout_Logout_FullMethodName,
-  }
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(LogoutServer).Logout(ctx, req.(*LogoutRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(LogoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogoutServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Logout_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogoutServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Logout_ServiceDesc is the grpc.ServiceDesc for Logout service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Logout_ServiceDesc = grpc.ServiceDesc{
-  ServiceName: "Logout",
-  HandlerType: (*LogoutServer)(nil),
-  Methods: []grpc.MethodDesc{
-    {
-      MethodName: "Logout",
-      Handler:    _Logout_Logout_Handler,
-    },
-  },
-  Streams:  []grpc.StreamDesc{},
-  Metadata: "account.proto",
+	ServiceName: "Logout",
+	HandlerType: (*LogoutServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Logout",
+			Handler:    _Logout_Logout_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "account.proto",
 }
 
 const (
-  GetUsers_GetUsers_FullMethodName = "/GetUsers/GetUsers"
+	GetUsers_GetUsers_FullMethodName = "/GetUsers/GetUsers"
 )
 
 // GetUsersClient is the client API for GetUsers service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GetUsersClient interface {
-  GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
+	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
 }
 
 type getUsersClient struct {
-  cc grpc.ClientConnInterface
+	cc grpc.ClientConnInterface
 }
 
 func NewGetUsersClient(cc grpc.ClientConnInterface) GetUsersClient {
-  return &getUsersClient{cc}
+	return &getUsersClient{cc}
 }
 
 func (c *getUsersClient) GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error) {
-  out := new(GetUsersResponse)
-  err := c.cc.Invoke(ctx, GetUsers_GetUsers_FullMethodName, in, out, opts...)
-  if err != nil {
-    return nil, err
-  }
-  return out, nil
+	out := new(GetUsersResponse)
+	err := c.cc.Invoke(ctx, GetUsers_GetUsers_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // GetUsersServer is the server API for GetUsers service.
 // All implementations must embed UnimplementedGetUsersServer
 // for forward compatibility
 type GetUsersServer interface {
-  GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
-  mustEmbedUnimplementedGetUsersServer()
+	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
+	mustEmbedUnimplementedGetUsersServer()
 }
 
 // UnimplementedGetUsersServer must be embedded to have forward compatible implementations.
@@ -329,7 +329,7 @@ type UnimplementedGetUsersServer struct {
 }
 
 func (UnimplementedGetUsersServer) GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error) {
-  return nil, status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
 }
 func (UnimplementedGetUsersServer) mustEmbedUnimplementedGetUsersServer() {}
 
@@ -337,81 +337,81 @@ func (UnimplementedGetUsersServer) mustEmbedUnimplementedGetUsersServer() {}
 // Use of this interface is not recommended, as added methods to GetUsersServer will
 // result in compilation errors.
 type UnsafeGetUsersServer interface {
-  mustEmbedUnimplementedGetUsersServer()
+	mustEmbedUnimplementedGetUsersServer()
 }
 
 func RegisterGetUsersServer(s grpc.ServiceRegistrar, srv GetUsersServer) {
-  s.RegisterService(&GetUsers_ServiceDesc, srv)
+	s.RegisterService(&GetUsers_ServiceDesc, srv)
 }
 
 func _GetUsers_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(GetUsersRequest)
-  if err := dec(in); err != nil {
-    return nil, err
-  }
-  if interceptor == nil {
-    return srv.(GetUsersServer).GetUsers(ctx, in)
-  }
-  info := &grpc.UnaryServerInfo{
-    Server:     srv,
-    FullMethod: GetUsers_GetUsers_FullMethodName,
-  }
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(GetUsersServer).GetUsers(ctx, req.(*GetUsersRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(GetUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GetUsersServer).GetUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GetUsers_GetUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GetUsersServer).GetUsers(ctx, req.(*GetUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // GetUsers_ServiceDesc is the grpc.ServiceDesc for GetUsers service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GetUsers_ServiceDesc = grpc.ServiceDesc{
-  ServiceName: "GetUsers",
-  HandlerType: (*GetUsersServer)(nil),
-  Methods: []grpc.MethodDesc{
-    {
-      MethodName: "GetUsers",
-      Handler:    _GetUsers_GetUsers_Handler,
-    },
-  },
-  Streams:  []grpc.StreamDesc{},
-  Metadata: "account.proto",
+	ServiceName: "GetUsers",
+	HandlerType: (*GetUsersServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUsers",
+			Handler:    _GetUsers_GetUsers_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "account.proto",
 }
 
 const (
-  AddFriend_AddFriend_FullMethodName = "/AddFriend/AddFriend"
+	AddFriend_AddFriend_FullMethodName = "/AddFriend/AddFriend"
 )
 
 // AddFriendClient is the client API for AddFriend service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AddFriendClient interface {
-  AddFriend(ctx context.Context, in *AddFriendRequest, opts ...grpc.CallOption) (*AddFriendResponse, error)
+	AddFriend(ctx context.Context, in *AddFriendRequest, opts ...grpc.CallOption) (*AddFriendResponse, error)
 }
 
 type addFriendClient struct {
-  cc grpc.ClientConnInterface
+	cc grpc.ClientConnInterface
 }
 
 func NewAddFriendClient(cc grpc.ClientConnInterface) AddFriendClient {
-  return &addFriendClient{cc}
+	return &addFriendClient{cc}
 }
 
 func (c *addFriendClient) AddFriend(ctx context.Context, in *AddFriendRequest, opts ...grpc.CallOption) (*AddFriendResponse, error) {
-  out := new(AddFriendResponse)
-  err := c.cc.Invoke(ctx, AddFriend_AddFriend_FullMethodName, in, out, opts...)
-  if err != nil {
-    return nil, err
-  }
-  return out, nil
+	out := new(AddFriendResponse)
+	err := c.cc.Invoke(ctx, AddFriend_AddFriend_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // AddFriendServer is the server API for AddFriend service.
 // All implementations must embed UnimplementedAddFriendServer
 // for forward compatibility
 type AddFriendServer interface {
-  AddFriend(context.Context, *AddFriendRequest) (*AddFriendResponse, error)
-  mustEmbedUnimplementedAddFriendServer()
+	AddFriend(context.Context, *AddFriendRequest) (*AddFriendResponse, error)
+	mustEmbedUnimplementedAddFriendServer()
 }
 
 // UnimplementedAddFriendServer must be embedded to have forward compatible implementations.
@@ -419,7 +419,7 @@ type UnimplementedAddFriendServer struct {
 }
 
 func (UnimplementedAddFriendServer) AddFriend(context.Context, *AddFriendRequest) (*AddFriendResponse, error) {
-  return nil, status.Errorf(codes.Unimplemented, "method AddFriend not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method AddFriend not implemented")
 }
 func (UnimplementedAddFriendServer) mustEmbedUnimplementedAddFriendServer() {}
 
@@ -427,43 +427,43 @@ func (UnimplementedAddFriendServer) mustEmbedUnimplementedAddFriendServer() {}
 // Use of this interface is not recommended, as added methods to AddFriendServer will
 // result in compilation errors.
 type UnsafeAddFriendServer interface {
-  mustEmbedUnimplementedAddFriendServer()
+	mustEmbedUnimplementedAddFriendServer()
 }
 
 func RegisterAddFriendServer(s grpc.ServiceRegistrar, srv AddFriendServer) {
-  s.RegisterService(&AddFriend_ServiceDesc, srv)
+	s.RegisterService(&AddFriend_ServiceDesc, srv)
 }
 
 func _AddFriend_AddFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-  in := new(AddFriendRequest)
-  if err := dec(in); err != nil {
-    return nil, err
-  }
-  if interceptor == nil {
-    return srv.(AddFriendServer).AddFriend(ctx, in)
-  }
-  info := &grpc.UnaryServerInfo{
-    Server:     srv,
-    FullMethod: AddFriend_AddFriend_FullMethodName,
-  }
-  handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-    return srv.(AddFriendServer).AddFriend(ctx, req.(*AddFriendRequest))
-  }
-  return interceptor(ctx, in, info, handler)
+	in := new(AddFriendRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AddFriendServer).AddFriend(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AddFriend_AddFriend_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AddFriendServer).AddFriend(ctx, req.(*AddFriendRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // AddFriend_ServiceDesc is the grpc.ServiceDesc for AddFriend service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AddFriend_ServiceDesc = grpc.ServiceDesc{
-  ServiceName: "AddFriend",
-  HandlerType: (*AddFriendServer)(nil),
-  Methods: []grpc.MethodDesc{
-    {
-      MethodName: "AddFriend",
-      Handler:    _AddFriend_AddFriend_Handler,
-    },
-  },
-  Streams:  []grpc.StreamDesc{},
-  Metadata: "account.proto",
+	ServiceName: "AddFriend",
+	HandlerType: (*AddFriendServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddFriend",
+			Handler:    _AddFriend_AddFriend_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "account.proto",
 }

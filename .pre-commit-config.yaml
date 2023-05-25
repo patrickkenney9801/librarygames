@@ -10,8 +10,10 @@ repos:
     rev: v1.2.0
     hooks:
       - id: forbid-tabs
+        exclude: server|Makefile
       - id: remove-tabs
         args: [--whitespaces-count, '2']
+        exclude: server|Makefile
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.31.1
     hooks:
@@ -37,3 +39,13 @@ repos:
           - --chart-search-root=charts/librarygames
           # A base filename makes it relative to each chart directory found
           - --template-files=README.md.gotmpl
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.0
+    hooks:
+      - id: go-fmt
+        exclude: server/internal/pbs
+      - id: go-imports
+        exclude: server/internal/pbs
+      - id: golangci-lint
+        language: system
+        entry: bash -c "cd server && golangci-lint run"

@@ -1,0 +1,38 @@
+---
+
+run:
+  timeout: 5m
+  tests: true
+  issues-exit-code: 1
+  skip-dirs:
+    - internal/pbs
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+issues:
+  exclude:
+    - should have a package comment
+    - G104
+  exclude-use-default: false
+  max-per-linter: 0
+
+linters-settings:
+  depguard:
+    list-type: blacklist
+    include-go-root: true
+    packages:
+      - gopkg.in/yaml.v2
+      - errors
+      - log
+  misspell:
+    locale: US
+
+linters:
+  enable:
+    - depguard
+    - misspell
+    - goimports
+    - gofmt
