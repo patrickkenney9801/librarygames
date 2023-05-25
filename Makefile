@@ -102,7 +102,7 @@ deploy:
 uninstall:
 	@helm --kube-context ${PROFILE} -n ${NAMESPACE} delete ${RELEASE_NAME}
 
-dependencies: dependencies-asdf dependencies-helm dependencies-java
+dependencies: dependencies-asdf dependencies-helm
 
 dependencies-asdf:
 	@echo "Updating asdf plugins..."
@@ -125,9 +125,6 @@ dependencies-helm:
 	@cd charts/librarygames; \
 	helm dependencies update; \
 	helm dependencies build; \
-
-dependencies-java:
-	@mvn dependency:resolve
 
 hooks:
 	@pre-commit install --hook-type pre-commit
