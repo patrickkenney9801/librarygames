@@ -1,16 +1,14 @@
 package com.nfehs.librarygames;
 
+import com.nfehs.librarygames.games.BoardGame.GameMetadata;
 import java.util.ArrayList;
 
-import com.nfehs.librarygames.games.BoardGame.GameMetadata;
-
 /**
- * This class holds data for players
- * Used by both client player and by server to hold data
+ * This class holds data for players Used by both client player and by server to hold data
+ *
  * @author Patrick Kenney and Syed Quadri
  * @date 8/10/2018
  */
-
 public class Player {
   private String username;
   private String user_key;
@@ -25,6 +23,7 @@ public class Player {
 
   /**
    * For use by client
+   *
    * @param user
    * @param key
    */
@@ -39,18 +38,21 @@ public class Player {
   public String getUsername() {
     return username;
   }
+
   /**
    * @param username the username to set
    */
   public void setUsername(String username) {
     this.username = username;
   }
+
   /**
    * @return the user_key
    */
   public String getUser_key() {
     return user_key;
   }
+
   /**
    * @param user_key the user_key to set
    */

@@ -1,26 +1,24 @@
 package com.nfehs.librarygames;
 
+import com.nfehs.librarygames.games.Piece;
+import com.nfehs.librarygames.games.Tile;
+import com.nfehs.librarygames.screens.GameScreen;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
-import com.nfehs.librarygames.games.Piece;
-import com.nfehs.librarygames.games.Tile;
-import com.nfehs.librarygames.screens.GameScreen;
-
 /**
  * This handles the setup and maintenance of the game window
+ *
  * @author Patrick Kenney, Syed Quadri
  * @date 6/13/2018
  */
-
 public class GameFrame extends JFrame {
   private static final long serialVersionUID = 1L;
   public static final Color background = new Color(25, 25, 25);
@@ -28,7 +26,8 @@ public class GameFrame extends JFrame {
 
   public GameFrame() {
     Game.screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Game.screenSize.setSize((int) Game.screenSize.getWidth() - 125, (int) Game.screenSize.getHeight() - 100);
+    Game.screenSize.setSize(
+        (int) Game.screenSize.getWidth() - 125, (int) Game.screenSize.getHeight() - 100);
 
     Game.window = new JFrame("Library Games");
     Game.window.setVisible(true);
@@ -41,25 +40,27 @@ public class GameFrame extends JFrame {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    Game.window.addWindowListener(new WindowAdapter() {
-      @Override
-      public void windowClosing(WindowEvent e) {
-        System.out.println("Closing window");
-        Game.logout();
-      }
-    });
-    Game.window.addComponentListener(new ComponentAdapter() {
-      @Override
-      public void componentResized(ComponentEvent e) {
-        Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
-        GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
-        GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
-        Tile.loadImages();
-        Piece.loadImages();
+    Game.window.addWindowListener(
+        new WindowAdapter() {
+          @Override
+          public void windowClosing(WindowEvent e) {
+            System.out.println("Closing window");
+            Game.logout();
+          }
+        });
+    Game.window.addComponentListener(
+        new ComponentAdapter() {
+          @Override
+          public void componentResized(ComponentEvent e) {
+            Game.screenSize.setSize(Game.window.getWidth(), Game.window.getHeight());
+            GameScreen.setBoardSize((Game.screenSize.getHeight() * 4 / 5));
+            GameScreen.setInfoTextSize((int) (GameScreen.getBoardSize() / 16));
+            Tile.loadImages();
+            Piece.loadImages();
 
-        Game.refresh();
-      }
-    });
+            Game.refresh();
+          }
+        });
 
     Game.mainWindow = Game.window.getContentPane();
     Game.mainWindow.setLayout(null);

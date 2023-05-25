@@ -1,18 +1,16 @@
 package com.nfehs.librarygames.games.go.tiles;
 
-import java.awt.image.BufferedImage;
-
-import javax.imageio.ImageIO;
-
 import com.nfehs.librarygames.games.BoardGame.GameType;
 import com.nfehs.librarygames.games.Tile;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 /**
  * This class handles the tiles of a go board
+ *
  * @author Patrick Kenney and Syed Quadri
  * @date 8/16/2018
  */
-
 public class GoTile extends Tile {
   private static final int[] ROWS = {9, 13, 19};
 
@@ -25,7 +23,8 @@ public class GoTile extends Tile {
 
   /**
    * Sets the image for the tile
-   * @param tileType  0 for center, 1 for edge, 2 for corner
+   *
+   * @param tileType 0 for center, 1 for edge, 2 for corner
    * @param gameType
    * @param rotation
    */
@@ -37,6 +36,7 @@ public class GoTile extends Tile {
 
   /**
    * Returns the image of a specified go tile
+   *
    * @param tileType
    * @param gameType
    * @param rotation
@@ -44,16 +44,18 @@ public class GoTile extends Tile {
    */
   public BufferedImage getTile() {
     switch (getTileType()) {
-      case 0:            return centerTiles[getGameType().getType() - 1];
-      case 1:            return edgeTiles[getGameType().getType() - 1][getRotations()];
-      case 2:            return cornerTiles[getGameType().getType() - 1][getRotations()];
-      default:          return null;
+      case 0:
+        return centerTiles[getGameType().getType() - 1];
+      case 1:
+        return edgeTiles[getGameType().getType() - 1][getRotations()];
+      case 2:
+        return cornerTiles[getGameType().getType() - 1][getRotations()];
+      default:
+        return null;
     }
   }
 
-  /**
-   * Called on startup from Tile, initializes images values
-   */
+  /** Called on startup from Tile, initializes images values */
   public static void loadImages() {
     // initialize media variables
     centerTiles = new BufferedImage[3];

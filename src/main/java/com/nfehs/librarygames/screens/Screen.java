@@ -1,9 +1,10 @@
 package com.nfehs.librarygames.screens;
 
+import com.nfehs.librarygames.Game;
+import com.nfehs.librarygames.games.BoardGame;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
@@ -12,15 +13,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
-import com.nfehs.librarygames.Game;
-import com.nfehs.librarygames.games.BoardGame;
-
 /**
  * This is the parent class for all screens
+ *
  * @author Patrick Kenney and Syed Quadri
  * @date 8/11/2018
  */
-
 public abstract class Screen {
   public JLabel loggedUser;
   public JButton logout;
@@ -36,55 +34,60 @@ public abstract class Screen {
       logout = new JButton("Logout");
       Game.mainWindow.add(logout);
       logout.setBounds((int) Game.screenSize.getWidth() - 125, 5, 100, 30);
-      logout.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          System.out.println("Logout clicked");
-          Game.logout();
-          Game.openLoginScreen();
-        }
-      });
+      logout.addActionListener(
+          new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              System.out.println("Logout clicked");
+              Game.logout();
+              Game.openLoginScreen();
+            }
+          });
 
       notification = new JButton();
       notification.setBounds(200, 5, (int) Game.screenSize.getWidth() - 400, 30);
-      notification.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          Game.setBoardGame(getLatestBoardGameUpdate());
-          Game.openGameScreen();
-        }
-      });
+      notification.addActionListener(
+          new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Game.setBoardGame(getLatestBoardGameUpdate());
+              Game.openGameScreen();
+            }
+          });
     }
   }
 
   /**
    * Creates a link to the latest game that was just updated
+   *
    * @param latestBoardGame
    */
   public void notifyUser(BoardGame latestBoardGame) {
-    if (Game.screen instanceof GameScreen)
-      Game.mainWindow.remove(((GameScreen) Game.screen).title);
+    if (Game.screen instanceof GameScreen) Game.mainWindow.remove(((GameScreen) Game.screen).title);
     Game.mainWindow.remove(notification);
     setLatestBoardGameUpdate(latestBoardGame);
     notification.setText("Action made: " + getLatestBoardGameUpdate().getGameTitle());
     Game.mainWindow.add(notification);
 
-    new Thread (new Runnable () {
-      public void run() {
-        try {
-          Thread.sleep(5000);
-          Game.mainWindow.remove(notification);
-          if (Game.screen instanceof GameScreen)
-            Game.mainWindow.add(((GameScreen) Game.screen).title);
-          Game.mainWindow.repaint();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }).start();
+    new Thread(
+            new Runnable() {
+              public void run() {
+                try {
+                  Thread.sleep(5000);
+                  Game.mainWindow.remove(notification);
+                  if (Game.screen instanceof GameScreen)
+                    Game.mainWindow.add(((GameScreen) Game.screen).title);
+                  Game.mainWindow.repaint();
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
+              }
+            })
+        .start();
     Game.mainWindow.repaint();
   }
 
   /**
    * Appends a message in a certain color to a JTextPane
+   *
    * @param tp
    * @param msg
    * @param c
@@ -105,6 +108,7 @@ public abstract class Screen {
   }
 
   public abstract void exit();
+
   protected void exitParentGUI() {
     Game.mainWindow.remove(loggedUser);
     Game.mainWindow.remove(logout);
