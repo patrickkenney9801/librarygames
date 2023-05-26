@@ -21,7 +21,6 @@ func (s *ChatServer) Chat(stream pbs.Chat_ChatServer) error {
 	var receiver chan ChatMessage
 
 	chat = nil
-	receiver = nil
 	username, err := util.GetGRPCUsername(stream.Context())
 	if err != nil {
 		return status.Error(codes.Unauthenticated, err.Error())
@@ -54,31 +53,31 @@ func (s *ChatServer) Chat(stream pbs.Chat_ChatServer) error {
 				return err
 			}
 			receiver = chat.registerChatter(username)
-			go func() {
-				for msg := range receiver {
-					if err = stream.Send(&pbs.ChatResponse{
-						Sender:  msg.sender,
-						Message: msg.message,
-					}); err != nil {
-						slog.Warn("sending chat message failed", slog.String("err", err.Error()))
-						break
-					}
-				}
-				done <- true
-			}()
+			go streamMessages(stream, receiver, done)
 		}
 
-		if len(message.Message) > 0 {
-			chat.sendMessage(
-				ChatMessage{
-					sender:  username,
-					message: message.Message,
-				},
-				message.Public,
-			)
-		}
+		chat.sendMessage(
+			ChatMessage{
+				sender:  username,
+				message: message.Message,
+			},
+			message.Public,
+		)
 	}
 	return nil
+}
+
+func streamMessages(stream pbs.Chat_ChatServer, receiver chan ChatMessage, done chan bool) {
+	for msg := range receiver {
+		if err := stream.Send(&pbs.ChatResponse{
+			Sender:  msg.sender,
+			Message: msg.message,
+		}); err != nil {
+			slog.Warn("sending chat message failed", slog.String("err", err.Error()))
+			break
+		}
+	}
+	done <- true
 }
 
 func NewChatServer(chatManager *ChatManager) *ChatServer {

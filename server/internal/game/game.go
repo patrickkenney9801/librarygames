@@ -13,10 +13,11 @@ const (
 	MoveResignation = -2
 	MoveLoadGame    = -3
 
-	WinPlayer1              = 1
-	WinPlayer2              = 2
-	WinPlayer1ByResignation = 3
-	WinPlayer2ByResignation = 4
+	WinUnfinished           = int32(0)
+	WinPlayer1              = int32(1)
+	WinPlayer2              = int32(2)
+	WinPlayer1ByResignation = int32(3)
+	WinPlayer2ByResignation = int32(4)
 )
 
 var (
@@ -116,4 +117,14 @@ func (m *GameManager) getSpectatorGames(ctx context.Context, username string) ([
 		return nil, err
 	}
 	return m.database.GetSpectatorGames(ctx, userKeyMap, userKey)
+}
+
+func handleResignation(username string, player1 string, player2 string) int32 {
+	if username == player1 {
+		return WinPlayer2ByResignation
+	}
+	if username == player2 {
+		return WinPlayer1ByResignation
+	}
+	return WinUnfinished
 }

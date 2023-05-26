@@ -96,6 +96,9 @@ func (c *Chat) sendMessage(message ChatMessage, public bool) {
 	if c.closed {
 		return
 	}
+	if len(message.message) == 0 {
+		return
+	}
 
 	if c.player1Messages != nil {
 		c.forwardMessage(c.player1Messages, message)
