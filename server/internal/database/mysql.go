@@ -9,6 +9,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	"github.com/patrickkenney9801/librarygames/internal/config"
+	"github.com/patrickkenney9801/librarygames/internal/util"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/exp/slog"
 )
@@ -17,7 +18,9 @@ type MysqlBackend struct {
 	db *sql.DB
 }
 
-func (b *MysqlBackend) Login(ctx context.Context, username string, password string) (string, error) {
+func (b *MysqlBackend) Login(ctx context.Context, username string, password string) (userKey string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql login")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -27,7 +30,6 @@ func (b *MysqlBackend) Login(ctx context.Context, username string, password stri
 	}
 	defer checkStatementClose(stmt)
 
-	var userKey string
 	var storedPassword string
 	if err := stmt.QueryRowContext(ctx, username).Scan(&userKey, &storedPassword); err != nil {
 		return "", ErrInvalidCredentials
@@ -38,7 +40,9 @@ func (b *MysqlBackend) Login(ctx context.Context, username string, password stri
 	return userKey, nil
 }
 
-func (b *MysqlBackend) CreateAccount(ctx context.Context, username string, password string, email string) (bool, error) {
+func (b *MysqlBackend) CreateAccount(ctx context.Context, username string, password string, email string) (success bool, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql create account")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -60,8 +64,10 @@ func (b *MysqlBackend) CreateAccount(ctx context.Context, username string, passw
 	return verifyRowsInserted(res)
 }
 
-func (b *MysqlBackend) GetFriends(ctx context.Context, userKey string) (map[string]bool, error) {
-	friends := make(map[string]bool)
+func (b *MysqlBackend) GetFriends(ctx context.Context, userKey string) (friends map[string]bool, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get friends")
+	defer util.EndSpan(span, &err)
+	friends = make(map[string]bool)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -90,8 +96,9 @@ func (b *MysqlBackend) GetFriends(ctx context.Context, userKey string) (map[stri
 	return friends, nil
 }
 
-func (b *MysqlBackend) GetUsers(ctx context.Context) ([]string, error) {
-	var users []string
+func (b *MysqlBackend) GetUsers(ctx context.Context) (users []string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get users")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -120,8 +127,10 @@ func (b *MysqlBackend) GetUsers(ctx context.Context) ([]string, error) {
 	return users, nil
 }
 
-func (b *MysqlBackend) GetUserKeyMap(ctx context.Context) (map[string]string, error) {
-	userKeyMap := make(map[string]string)
+func (b *MysqlBackend) GetUserKeyMap(ctx context.Context) (userKeyMap map[string]string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get user key map")
+	defer util.EndSpan(span, &err)
+	userKeyMap = make(map[string]string)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -151,7 +160,9 @@ func (b *MysqlBackend) GetUserKeyMap(ctx context.Context) (map[string]string, er
 	return userKeyMap, nil
 }
 
-func (b *MysqlBackend) UsernameExists(ctx context.Context, username string) (bool, error) {
+func (b *MysqlBackend) UsernameExists(ctx context.Context, username string) (exists bool, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql username exists")
+	defer util.EndSpan(span, &err)
 	var users int
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
@@ -168,7 +179,9 @@ func (b *MysqlBackend) UsernameExists(ctx context.Context, username string) (boo
 	return users != 0, nil
 }
 
-func (b *MysqlBackend) GetUserKey(ctx context.Context, username string) (string, error) {
+func (b *MysqlBackend) GetUserKey(ctx context.Context, username string) (userKey string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get user key")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -178,14 +191,15 @@ func (b *MysqlBackend) GetUserKey(ctx context.Context, username string) (string,
 	}
 	defer checkStatementClose(stmt)
 
-	var userKey string
 	if err := stmt.QueryRowContext(ctx, username).Scan(&userKey); err != nil {
 		return "", err
 	}
 	return userKey, nil
 }
 
-func (b *MysqlBackend) GetUsername(ctx context.Context, userKey string) (string, error) {
+func (b *MysqlBackend) GetUsername(ctx context.Context, userKey string) (username string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get username")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -195,14 +209,15 @@ func (b *MysqlBackend) GetUsername(ctx context.Context, userKey string) (string,
 	}
 	defer checkStatementClose(stmt)
 
-	var username string
 	if err := stmt.QueryRowContext(ctx, userKey).Scan(&username); err != nil {
 		return "", err
 	}
 	return username, nil
 }
 
-func (b *MysqlBackend) AddFriend(ctx context.Context, userKey string, friendKey string) (bool, error) {
+func (b *MysqlBackend) AddFriend(ctx context.Context, userKey string, friendKey string) (success bool, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql add friend")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -219,9 +234,9 @@ func (b *MysqlBackend) AddFriend(ctx context.Context, userKey string, friendKey 
 	return verifyRowsInserted(res)
 }
 
-func (b *MysqlBackend) GetGamePlayerKeys(ctx context.Context, gameKey string) (string, string, error) {
-	var userKey1 string
-	var userKey2 string
+func (b *MysqlBackend) GetGamePlayerKeys(ctx context.Context, gameKey string) (userKey1 string, userKey2 string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get game player keys")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -237,8 +252,10 @@ func (b *MysqlBackend) GetGamePlayerKeys(ctx context.Context, gameKey string) (s
 	return userKey1, userKey2, nil
 }
 
-func (b *MysqlBackend) CreateGame(ctx context.Context, gameType int32, user1Key string, user2Key string, board string) (string, error) {
-	gameKey := uuid.NewString()
+func (b *MysqlBackend) CreateGame(ctx context.Context, gameType int32, user1Key string, user2Key string, board string) (gameKey string, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql create game")
+	defer util.EndSpan(span, &err)
+	gameKey = uuid.NewString()
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -257,13 +274,15 @@ func (b *MysqlBackend) CreateGame(ctx context.Context, gameType int32, user1Key 
 		return "", err
 	}
 	if !ok {
-		return "", fmt.Errorf("game could not be created in MySQL database")
+		err = fmt.Errorf("game could not be created in MySQL database")
+		return "", err
 	}
 	return gameKey, nil
 }
 
-func (b *MysqlBackend) GetGames(ctx context.Context, userKeyMap map[string]string, userKey string) ([]GameMetadata, error) {
-	var games []GameMetadata
+func (b *MysqlBackend) GetGames(ctx context.Context, userKeyMap map[string]string, userKey string) (games []GameMetadata, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get games")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -272,71 +291,28 @@ func (b *MysqlBackend) GetGames(ctx context.Context, userKeyMap map[string]strin
 		return nil, err
 	}
 	defer checkStatementClose(stmt)
-
-	rows, err := stmt.QueryContext(ctx, userKey, userKey)
-	if err != nil {
-		return nil, err
-	}
-	defer checkRowsClose(rows)
-
-	for rows.Next() {
-		game := GameMetadata{}
-		if err := rows.Scan(&game.GameType, &game.GameKey, &game.User1, &game.User2, &game.Moves, &game.Winner); err != nil {
-			return nil, err
-		}
-		user1, user1Ok := userKeyMap[game.User1]
-		user2, user2Ok := userKeyMap[game.User2]
-		if user1Ok && user2Ok {
-			game.User1 = user1
-			game.User2 = user2
-			games = append(games, game)
-		}
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return games, nil
+	games, err = extractGames(ctx, stmt, userKeyMap, userKey)
+	return games, err
 }
 
-func (b *MysqlBackend) GetSpectatorGames(ctx context.Context, userKeyMap map[string]string, userKey string) ([]GameMetadata, error) {
-	var games []GameMetadata
+func (b *MysqlBackend) GetSpectatorGames(ctx context.Context, userKeyMap map[string]string, userKey string) (games []GameMetadata, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get spectator games")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	stmt, err := b.db.PrepareContext(ctx, "SELECT game_type, game_key, player1_key, player2_key, moves FROM games WHERE player1_key != ? AND player2_key != ? AND winner = 0 ORDER BY games.last_action_date DESC")
+	stmt, err := b.db.PrepareContext(ctx, "SELECT game_type, game_key, player1_key, player2_key, moves, winner FROM games WHERE player1_key != ? AND player2_key != ? AND winner = 0 ORDER BY games.last_action_date DESC")
 	if err != nil {
 		return nil, err
 	}
 	defer checkStatementClose(stmt)
-
-	rows, err := stmt.QueryContext(ctx, userKey, userKey)
-	if err != nil {
-		return nil, err
-	}
-	defer checkRowsClose(rows)
-
-	for rows.Next() {
-		game := GameMetadata{
-			Winner: 0,
-		}
-		if err := rows.Scan(&game.GameType, &game.GameKey, &game.User1, &game.User2, &game.Moves); err != nil {
-			return nil, err
-		}
-		user1, user1Ok := userKeyMap[game.User1]
-		user2, user2Ok := userKeyMap[game.User2]
-		if user1Ok && user2Ok {
-			game.User1 = user1
-			game.User2 = user2
-			games = append(games, game)
-		}
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return games, nil
+	games, err = extractGames(ctx, stmt, userKeyMap, userKey)
+	return games, err
 }
 
-func (b *MysqlBackend) CreateGoGame(ctx context.Context, gameKey string) (bool, error) {
+func (b *MysqlBackend) CreateGoGame(ctx context.Context, gameKey string) (success bool, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql create go game")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -360,7 +336,9 @@ func (b *MysqlBackend) CreateGoGame(ctx context.Context, gameKey string) (bool, 
 	return true, nil
 }
 
-func (b *MysqlBackend) GetGoGameState(ctx context.Context, gameKey string) (*GoGameState, error) {
+func (b *MysqlBackend) GetGoGameState(ctx context.Context, gameKey string) (game *GoGameState, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql get go game state")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -370,7 +348,7 @@ func (b *MysqlBackend) GetGoGameState(ctx context.Context, gameKey string) (*GoG
 	}
 	defer checkStatementClose(stmt)
 
-	game := &GoGameState{}
+	game = &GoGameState{}
 	if err := stmt.QueryRowContext(ctx, gameKey).Scan(
 		&game.GeneralState.GameType,
 		&game.GeneralState.GameKey,
@@ -391,7 +369,9 @@ func (b *MysqlBackend) GetGoGameState(ctx context.Context, gameKey string) (*GoG
 	return game, nil
 }
 
-func (b *MysqlBackend) UpdateGoGame(ctx context.Context, gameState *GoGameState) (bool, error) {
+func (b *MysqlBackend) UpdateGoGame(ctx context.Context, gameState *GoGameState) (success bool, err error) {
+	ctx, span := util.GetTracer().Start(ctx, "mysql update go game")
+	defer util.EndSpan(span, &err)
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
@@ -413,7 +393,7 @@ func (b *MysqlBackend) UpdateGoGame(ctx context.Context, gameState *GoGameState)
 	if err != nil {
 		return false, err
 	}
-	success, err := verifyRowsInserted(res)
+	success, err = verifyRowsInserted(res)
 	if err != nil {
 		return false, err
 	}
@@ -440,6 +420,32 @@ func (b *MysqlBackend) UpdateGoGame(ctx context.Context, gameState *GoGameState)
 		return false, err
 	}
 	return success, nil
+}
+
+func extractGames(ctx context.Context, stmt *sql.Stmt, userKeyMap map[string]string, userKey string) (games []GameMetadata, err error) {
+	rows, err := stmt.QueryContext(ctx, userKey, userKey)
+	if err != nil {
+		return nil, err
+	}
+	defer checkRowsClose(rows)
+
+	for rows.Next() {
+		game := GameMetadata{}
+		if err := rows.Scan(&game.GameType, &game.GameKey, &game.User1, &game.User2, &game.Moves, &game.Winner); err != nil {
+			return nil, err
+		}
+		user1, user1Ok := userKeyMap[game.User1]
+		user2, user2Ok := userKeyMap[game.User2]
+		if user1Ok && user2Ok {
+			game.User1 = user1
+			game.User2 = user2
+			games = append(games, game)
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return games, nil
 }
 
 func verifyRowsInserted(res sql.Result) (bool, error) {
