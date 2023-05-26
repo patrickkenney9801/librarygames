@@ -33,8 +33,6 @@ type PeerUser struct {
 	friend   bool
 }
 
-func (u *User) logout() {}
-
 type UserManager struct {
 	mu sync.RWMutex
 
@@ -113,10 +111,7 @@ func (m *UserManager) logout(username string) error {
 
 	name := Username(username)
 
-	if staleUser, ok := m.users[name]; ok {
-		staleUser.logout()
-		delete(m.users, name)
-	}
+	delete(m.users, name)
 	return nil
 }
 

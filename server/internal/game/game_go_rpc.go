@@ -21,7 +21,6 @@ func (s *GameGoServer) PlayGo(stream pbs.Go_PlayGoServer) error {
 	var receiver chan *GoGameState
 
 	game = nil
-	receiver = nil
 	username, err := util.GetGRPCUsername(stream.Context())
 	if err != nil {
 		return status.Error(codes.Unauthenticated, err.Error())
@@ -54,15 +53,7 @@ func (s *GameGoServer) PlayGo(stream pbs.Go_PlayGoServer) error {
 				return err
 			}
 			receiver = game.registerWatcher(stream.Context(), username)
-			go func() {
-				for state := range receiver {
-					if err = stream.Send(translateGoGameState(state)); err != nil {
-						slog.Warn("sending go game state failed", slog.String("err", err.Error()))
-						break
-					}
-				}
-				done <- true
-			}()
+			go streamGameStates(stream, receiver, done)
 		}
 
 		if err = game.makeMove(stream.Context(), username, message.MoveFrom, message.MoveTo); err != nil {
@@ -71,6 +62,16 @@ func (s *GameGoServer) PlayGo(stream pbs.Go_PlayGoServer) error {
 		}
 	}
 	return nil
+}
+
+func streamGameStates(stream pbs.Go_PlayGoServer, receiver chan *GoGameState, done chan bool) {
+	for state := range receiver {
+		if err := stream.Send(translateGoGameState(state)); err != nil {
+			slog.Warn("sending go game state failed", slog.String("err", err.Error()))
+			break
+		}
+	}
+	done <- true
 }
 
 func NewGameGoServer(gameManager *GameManager) *GameGoServer {
