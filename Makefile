@@ -24,6 +24,14 @@ define grafana_port
 $(shell kubectl --context ${PROFILE} get --namespace grafana -o jsonpath="{.spec.ports[0].nodePort}" services grafana)
 endef
 
+define sonar_ip
+$(shell kubectl --context ${PROFILE} get nodes --namespace sonarqube -o jsonpath="{.items[0].status.addresses[0].address}")
+endef
+
+define sonar_port
+$(shell kubectl --context ${PROFILE} get --namespace sonarqube -o jsonpath="{.spec.ports[0].nodePort}" services sonarqube-sonarqube)
+endef
+
 image-client:
 	@docker build --build-arg VERSION=${VERSION} -t ${IMAGE_NAME}:${VERSION} --file client.Dockerfile .
 
@@ -31,8 +39,8 @@ image-server:
 	@docker build --build-arg VERSION=${VERSION} -t ${SERVER_IMAGE_NAME}:${VERSION} --file server.Dockerfile .
 
 image-test-server:
-	@docker build --build-arg VERSION=${VERSION} -t ${SERVER_IMAGE_NAME}-test:${VERSION} --file server.Dockerfile --target go-test .
-	@docker run --rm ${SERVER_IMAGE_NAME}-test:${VERSION}
+	@docker build --build-arg VERSION=${VERSION} --build-arg SONAR_ADDRESS=http://$(call sonar_ip):$(call sonar_port) -t ${SERVER_IMAGE_NAME}-test:${VERSION} --file server.Dockerfile --target go-test .
+	@docker run --rm --net=host ${SERVER_IMAGE_NAME}-test:${VERSION}
 
 image-client-debug:
 	@docker build --build-arg VERSION=${VERSION} -t ${IMAGE_NAME}-debug:${VERSION} --file client.Dockerfile --target mvn-build .
@@ -70,7 +78,8 @@ observability-minikube:
 	@helm --kube-context ${PROFILE} -n fluent install --create-namespace fluent-bit fluent/fluent-bit --version=0.29.0 -f observability/fluentbit_values.yaml --wait || true
 	@helm --kube-context ${PROFILE} -n tempo install --create-namespace tempo grafana/tempo --version=1.0.0 -f observability/tempo_values.yaml --wait || true
 	@helm --kube-context ${PROFILE} -n monitoring install --create-namespace kube-prometheus-stack prometheus/kube-prometheus-stack --version=45.23.0 -f observability/prometheus_values.yaml --wait || true
-	@helm --kube-context ${PROFILE} -n grafana install --create-namespace grafana grafana/grafana --version=6.50.7 -f observability/grafana_values.yaml --wait
+	@helm --kube-context ${PROFILE} -n grafana install --create-namespace grafana grafana/grafana --version=6.50.7 -f observability/grafana_values.yaml --wait || true
+	@helm --kube-context ${PROFILE} -n sonarqube install --create-namespace sonarqube sonarqube/sonarqube --version=10.0.0 -f observability/sonarqube_values.yaml --wait || true
 
 clean-observability-minikube:
 	@helm --kube-context ${PROFILE} -n elasticsearch delete elasticsearch --wait
@@ -85,9 +94,16 @@ clean-fluent:
 clean-grafana:
 	@helm --kube-context ${PROFILE} -n grafana delete grafana --wait
 
+clean-sonar:
+	@helm --kube-context ${PROFILE} -n sonarqube delete sonarqube --wait
+
 grafana:
 	@echo http://$(call grafana_ip):$(call grafana_port)
 	@python -mwebbrowser http://$(call grafana_ip):$(call grafana_port)
+
+sonar:
+	@echo http://$(call sonar_ip):$(call sonar_port)
+	@python -mwebbrowser http://$(call sonar_ip):$(call sonar_port)
 
 load:
 	@minikube -p ${PROFILE} image load ${SERVER_IMAGE_NAME}:${VERSION}
@@ -122,6 +138,7 @@ dependencies-helm:
 	@helm repo add fluent https://fluent.github.io/helm-charts
 	@helm repo add grafana https://grafana.github.io/helm-charts
 	@helm repo add prometheus https://prometheus-community.github.io/helm-charts
+	@helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
 	@cd charts/librarygames; \
 	helm dependencies update; \
 	helm dependencies build; \

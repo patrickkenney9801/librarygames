@@ -46,6 +46,9 @@ repos:
         exclude: server/internal/pbs
       - id: go-imports
         exclude: server/internal/pbs
+      - id: go-vet
+        language: system
+        entry: bash -c "cd server && go vet ./..."
       - id: golangci-lint
         language: system
         entry: bash -c "cd server && golangci-lint run"
