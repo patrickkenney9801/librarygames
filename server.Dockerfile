@@ -13,8 +13,8 @@ ARG VERSION
 ENV VERSION=${VERSION}
 RUN go build -mod=readonly -ldflags "-X main.version=$VERSION" -race -o /tmp/librarygames-server ./main
 
-# Test image
-FROM go-build AS go-test
+# Sonar image
+FROM --platform=linux/amd64 golang:1.20.3 AS sonar
 
 RUN apt-get update && \
   apt-get install -y \
@@ -27,6 +27,12 @@ RUN mkdir -p /tmp/sonar \
   && unzip -o /tmp/sonar/scanner.zip -d /usr/local/ \
   && rm -rf /tmp/sonar
 RUN for exe in /usr/local/sonar-scanner-${SONAR_SCANNER_VERSION}-linux/bin/*; do ln -s ${exe} /usr/local/bin/$(basename "${exe}"); done
+
+# Test image
+FROM go-build AS go-test
+
+COPY --from=sonar /usr/local/sonar-scanner-*-linux /usr/local/sonar-scanner-linux
+RUN for exe in /usr/local/sonar-scanner-linux/bin/*; do ln -s ${exe} /usr/local/bin/$(basename "${exe}"); done
 
 COPY sonar-project.properties /tmp/librarygames/sonar-project.properties
 
