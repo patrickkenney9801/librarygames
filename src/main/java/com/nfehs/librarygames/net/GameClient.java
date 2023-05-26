@@ -79,7 +79,6 @@ public class GameClient {
                 if (t == null) {
                   return;
                 }
-                System.out.println("Res: " + t);
 
                 // verify that user is still on the login screen, if not exit
                 if (Game.gameState != Game.LOGIN) return;
@@ -105,6 +104,9 @@ public class GameClient {
       resp = loginStub.login(req);
     } catch (StatusRuntimeException e) {
       System.out.println("login RPC failed: " + e.getStatus());
+      if (Game.gameState == Game.LOGIN) {
+        Game.setErrorLoginScreen(e.getStatus().getDescription());
+      }
       return null;
     }
     return resp.getUserToken();
@@ -125,6 +127,9 @@ public class GameClient {
                   resp = createAccountStub.createAccount(req);
                 } catch (StatusRuntimeException e) {
                   System.out.println("create account RPC failed: " + e.getStatus());
+                  if (Game.gameState == Game.CREATE_ACCOUNT) {
+                    Game.setErrorCreateAccountScreen(e.getStatus().getDescription());
+                  }
                   return;
                 }
 
